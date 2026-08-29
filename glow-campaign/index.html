@@ -1,0 +1,2497 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="description"
+    content="A personal 10-day behavioral consistency tracker."
+  >
+
+  <title>Ten Day Run</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/mobile-first.css">
+</head>
+
+
+<body>
+
+  <div class="app-shell">
+
+    <!-- =========================================================
+      APP HEADER
+    ========================================================== -->
+
+    <header class="app-header">
+
+      <a href="#" class="app-brand" data-view-link="today">
+        <span class="app-brand__mark" aria-hidden="true">✦</span>
+
+        <span class="app-brand__text">
+          <strong>Ten Day Run</strong>
+          <small>10-day operation</small>
+        </span>
+      </a>
+
+
+      <button
+        class="mobile-menu-button"
+        type="button"
+        aria-label="Open navigation"
+        aria-expanded="false"
+        aria-controls="main-navigation"
+        id="mobile-menu-button"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+
+      <nav
+        class="main-navigation"
+        id="main-navigation"
+        aria-label="Main navigation"
+      >
+
+        <button
+          class="nav-link is-active"
+          type="button"
+          data-view-link="today"
+          aria-current="page"
+        >
+          Today
+        </button>
+
+        <button
+          class="nav-link"
+          type="button"
+          data-view-link="campaign"
+        >
+          Progress
+        </button>
+
+        <button
+          class="nav-link"
+          type="button"
+          data-view-link="schedule"
+        >
+          Schedule
+        </button>
+
+        <button
+          class="nav-link"
+          type="button"
+          data-view-link="settings"
+        >
+          Settings
+        </button>
+
+      </nav>
+
+    </header>
+
+
+    <!-- =========================================================
+      MAIN APP
+    ========================================================== -->
+
+    <main class="app-main">
+
+      <!-- =======================================================
+        TODAY VIEW
+      ======================================================== -->
+
+      <section
+        class="app-view is-active"
+        id="view-today"
+        data-view="today"
+        aria-labelledby="today-title"
+      >
+
+        <!-- Day Hero -->
+
+        <header class="day-hero">
+
+          <div class="day-hero__topline">
+
+            <div>
+              <p class="eyebrow">Current mission</p>
+
+              <h1 id="today-title">
+                Day <span id="current-day-number">1</span>
+                <span class="muted">/ 10</span>
+              </h1>
+            </div>
+
+
+            <div class="day-selector" aria-label="10-day run day navigation">
+
+              <button
+                type="button"
+                class="icon-button"
+                id="previous-day-button"
+                aria-label="Previous day"
+              >
+                ←
+              </button>
+
+              <button
+                type="button"
+                class="icon-button"
+                id="next-day-button"
+                aria-label="Next day"
+              >
+                →
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="day-score">
+
+            <div class="day-score__numbers">
+              <strong id="day-score-earned">0</strong>
+              <span>/</span>
+              <span id="day-score-possible">14</span>
+              <small>points</small>
+            </div>
+
+
+            <div class="day-score__percentage">
+              <strong id="day-score-percentage">0%</strong>
+              <span>complete</span>
+            </div>
+
+          </div>
+
+
+          <div
+            class="progress-bar"
+            role="progressbar"
+            aria-label="Daily completion"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            id="day-progress"
+          >
+            <span
+              class="progress-bar__fill"
+              id="day-progress-fill"
+            ></span>
+          </div>
+
+
+          <p class="day-status" id="day-status-message">
+            Mission active.
+          </p>
+
+        </header>
+
+
+
+        <!-- Glow Day Badge -->
+
+        <section
+          class="glow-day-banner"
+          id="glow-day-banner"
+          hidden
+        >
+
+          <span class="glow-day-banner__icon" aria-hidden="true">✦</span>
+
+          <div>
+            <p class="eyebrow">Optional side quest</p>
+            <h2>Glow Day</h2>
+            <p id="glow-day-description">
+              Do something unnecessarily fabulous for yourself.
+            </p>
+          </div>
+
+        </section>
+
+
+
+        <!-- Daily Modules -->
+
+        <div class="dashboard-grid">
+
+
+          <!-- =================================================
+            FOOD RHYTHM
+          ================================================== -->
+
+          <section
+            class="dashboard-card"
+            id="food-card"
+            aria-labelledby="food-title"
+          >
+
+            <header class="card-header">
+
+              <div>
+                <p class="eyebrow">01</p>
+                <h2 id="food-title">Food Rhythm</h2>
+              </div>
+
+              <div class="card-score">
+                <strong id="food-score">0</strong>
+                <span>/ 4</span>
+              </div>
+
+            </header>
+
+
+            <div class="habit-list meal-log-list">
+
+              <section class="meal-log" data-meal-log="breakfast">
+                <label class="check-row">
+                  <input
+                    type="checkbox"
+                    data-food-meal="breakfast"
+                  >
+
+                  <span class="custom-checkbox"></span>
+                  <span>Breakfast</span>
+                </label>
+
+                <div
+                  class="meal-food-items"
+                  data-meal-items="breakfast"
+                  hidden
+                ></div>
+
+                <button
+                  class="meal-add-food"
+                  type="button"
+                  data-add-food="breakfast"
+                >
+                  <span aria-hidden="true">＋</span> Add food
+                </button>
+              </section>
+
+
+              <section class="meal-log" data-meal-log="lunch">
+                <label class="check-row">
+                  <input
+                    type="checkbox"
+                    data-food-meal="lunch"
+                  >
+
+                  <span class="custom-checkbox"></span>
+                  <span>Lunch</span>
+                </label>
+
+                <div
+                  class="meal-food-items"
+                  data-meal-items="lunch"
+                  hidden
+                ></div>
+
+                <button
+                  class="meal-add-food"
+                  type="button"
+                  data-add-food="lunch"
+                >
+                  <span aria-hidden="true">＋</span> Add food
+                </button>
+              </section>
+
+
+              <section class="meal-log" data-meal-log="snack">
+                <label class="check-row">
+                  <input
+                    type="checkbox"
+                    data-food-meal="snack"
+                  >
+
+                  <span class="custom-checkbox"></span>
+                  <span>Snack / treat</span>
+                </label>
+
+                <div
+                  class="meal-food-items"
+                  data-meal-items="snack"
+                  hidden
+                ></div>
+
+                <button
+                  class="meal-add-food"
+                  type="button"
+                  data-add-food="snack"
+                >
+                  <span aria-hidden="true">＋</span> Add food
+                </button>
+              </section>
+
+
+              <section class="meal-log" data-meal-log="dinner">
+                <label class="check-row">
+                  <input
+                    type="checkbox"
+                    data-food-meal="dinner"
+                  >
+
+                  <span class="custom-checkbox"></span>
+                  <span>Dinner</span>
+                </label>
+
+                <div
+                  class="meal-food-items"
+                  data-meal-items="dinner"
+                  hidden
+                ></div>
+
+                <button
+                  class="meal-add-food"
+                  type="button"
+                  data-add-food="dinner"
+                >
+                  <span aria-hidden="true">＋</span> Add food
+                </button>
+              </section>
+
+            </div>
+
+
+            <div class="card-divider"></div>
+
+
+            <label class="toggle-row toggle-row--warning">
+
+              <span>
+                <strong>Continuous grazing today</strong>
+                <small>
+                  Overrides Food Rhythm score to 0 / 4.
+                </small>
+              </span>
+
+              <span class="toggle">
+                <input
+                  type="checkbox"
+                  id="continuous-grazing"
+                >
+                <span class="toggle__track"></span>
+              </span>
+
+            </label>
+
+
+            <p
+              class="card-alert"
+              id="grazing-alert"
+              hidden
+            >
+              Grazing marked. Meal data is preserved, but Food Rhythm scores 0 / 4.
+            </p>
+
+          </section>
+
+
+
+          <!-- =================================================
+            NUTRITION
+          ================================================== -->
+
+          <section
+            class="dashboard-card"
+            id="nutrition-card"
+            aria-labelledby="nutrition-title"
+          >
+
+            <header class="card-header">
+
+              <div>
+                <p class="eyebrow">02</p>
+                <h2 id="nutrition-title">Nutrition</h2>
+              </div>
+
+              <div class="card-score">
+                <strong id="nutrition-score">0</strong>
+                <span>/ 3</span>
+              </div>
+
+            </header>
+
+
+            <p
+              class="nutrition-source-note"
+              id="nutrition-source-note"
+            >
+              Enter totals manually, or add foods above to calculate them automatically.
+            </p>
+
+
+            <div class="nutrition-fields">
+
+
+              <!-- Calories -->
+
+              <div class="metric-field">
+
+                <div class="metric-field__header">
+                  <label for="calories-input">
+                    Calories
+                  </label>
+
+                  <span
+                    class="metric-status"
+                    id="calories-status"
+                  >
+                    Not logged
+                  </span>
+                </div>
+
+
+                <div class="number-input">
+                  <input
+                    type="number"
+                    id="calories-input"
+                    inputmode="numeric"
+                    min="0"
+                    step="1"
+                    placeholder="—"
+                  >
+
+                  <span>kcal</span>
+                </div>
+
+
+                <div class="target-bar">
+                  <span
+                    class="target-bar__fill"
+                    id="calories-target-fill"
+                  ></span>
+                </div>
+
+
+                <small
+                  class="target-copy"
+                  id="calories-target-copy"
+                >
+                  Target 1200–1500 kcal
+                </small>
+
+              </div>
+
+
+
+              <!-- Protein -->
+
+              <div class="metric-field">
+
+                <div class="metric-field__header">
+                  <label for="protein-input">
+                    Protein
+                  </label>
+
+                  <span
+                    class="metric-status"
+                    id="protein-status"
+                  >
+                    Not logged
+                  </span>
+                </div>
+
+
+                <div class="number-input">
+                  <input
+                    type="number"
+                    id="protein-input"
+                    inputmode="decimal"
+                    min="0"
+                    step="0.1"
+                    placeholder="—"
+                  >
+
+                  <span>g</span>
+                </div>
+
+
+                <div class="target-bar">
+                  <span
+                    class="target-bar__fill"
+                    id="protein-target-fill"
+                  ></span>
+                </div>
+
+
+                <small
+                  class="target-copy"
+                  id="protein-target-copy"
+                >
+                  Target 90g+
+                </small>
+
+              </div>
+
+
+
+              <!-- Fibre -->
+
+              <div class="metric-field">
+
+                <div class="metric-field__header">
+                  <label for="fibre-input">
+                    Fibre
+                  </label>
+
+                  <span
+                    class="metric-status"
+                    id="fibre-status"
+                  >
+                    Not logged
+                  </span>
+                </div>
+
+
+                <div class="number-input">
+                  <input
+                    type="number"
+                    id="fibre-input"
+                    inputmode="decimal"
+                    min="0"
+                    step="0.1"
+                    placeholder="—"
+                  >
+
+                  <span>g</span>
+                </div>
+
+
+                <div class="target-bar">
+                  <span
+                    class="target-bar__fill"
+                    id="fibre-target-fill"
+                  ></span>
+                </div>
+
+
+                <small
+                  class="target-copy"
+                  id="fibre-target-copy"
+                >
+                  Target 25g+
+                </small>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+
+          <!-- =================================================
+            WATER
+          ================================================== -->
+
+          <section
+            class="dashboard-card"
+            id="water-card"
+            aria-labelledby="water-title"
+          >
+
+            <header class="card-header">
+
+              <div>
+                <p class="eyebrow">03</p>
+                <h2 id="water-title">Water</h2>
+              </div>
+
+              <div class="card-score">
+                <strong id="water-score">0</strong>
+                <span>/ 1</span>
+              </div>
+
+            </header>
+
+
+            <p class="card-intro">
+              Six actual glasses. Finish the mission before ~16:00.
+            </p>
+
+
+            <div
+              class="water-glasses"
+              id="water-glasses"
+              aria-label="Daily water glasses"
+            >
+
+              <button
+                class="water-glass"
+                type="button"
+                data-water-index="0"
+                aria-pressed="false"
+              >
+                <span class="water-glass__vessel">
+                  <span class="water-glass__fill"></span>
+                </span>
+
+                <span class="water-glass__label">
+                  Waking
+                </span>
+              </button>
+
+
+              <button
+                class="water-glass"
+                type="button"
+                data-water-index="1"
+                aria-pressed="false"
+              >
+                <span class="water-glass__vessel">
+                  <span class="water-glass__fill"></span>
+                </span>
+
+                <span class="water-glass__label">
+                  Breakfast
+                </span>
+              </button>
+
+
+              <button
+                class="water-glass"
+                type="button"
+                data-water-index="2"
+                aria-pressed="false"
+              >
+                <span class="water-glass__vessel">
+                  <span class="water-glass__fill"></span>
+                </span>
+
+                <span class="water-glass__label">
+                  Mid-morning
+                </span>
+              </button>
+
+
+              <button
+                class="water-glass"
+                type="button"
+                data-water-index="3"
+                aria-pressed="false"
+              >
+                <span class="water-glass__vessel">
+                  <span class="water-glass__fill"></span>
+                </span>
+
+                <span class="water-glass__label">
+                  Pre-lunch
+                </span>
+              </button>
+
+
+              <button
+                class="water-glass"
+                type="button"
+                data-water-index="4"
+                aria-pressed="false"
+              >
+                <span class="water-glass__vessel">
+                  <span class="water-glass__fill"></span>
+                </span>
+
+                <span class="water-glass__label">
+                  Lunch
+                </span>
+              </button>
+
+
+              <button
+                class="water-glass"
+                type="button"
+                data-water-index="5"
+                aria-pressed="false"
+              >
+                <span class="water-glass__vessel">
+                  <span class="water-glass__fill"></span>
+                </span>
+
+                <span class="water-glass__label">
+                  Before 16:00
+                </span>
+              </button>
+
+            </div>
+
+
+            <p class="water-counter">
+              <strong id="water-count">0</strong>
+              / 6 glasses
+            </p>
+
+          </section>
+
+
+
+          <!-- =================================================
+            MOVEMENT
+          ================================================== -->
+
+          <section
+            class="dashboard-card dashboard-card--wide"
+            id="movement-card"
+            aria-labelledby="movement-title"
+          >
+
+            <header class="card-header">
+
+              <div>
+                <p class="eyebrow">04</p>
+                <h2 id="movement-title">Movement</h2>
+              </div>
+
+              <div class="card-score">
+                <strong id="movement-score">0</strong>
+                <span>
+                  /
+                  <span id="movement-possible">3</span>
+                </span>
+              </div>
+
+            </header>
+
+
+            <p class="card-intro">
+              Today's assigned missions. Completion counts. Heroics are optional.
+            </p>
+
+
+            <div
+              class="movement-list"
+              id="movement-list"
+            >
+
+              <!--
+                JavaScript will render today's scheduled
+                movement activities here.
+
+                Static examples are included so the shell
+                already has visible content.
+              -->
+
+              <label class="movement-row">
+                <input
+                  type="checkbox"
+                  data-movement-id="example-jog"
+                >
+
+                <span class="custom-checkbox"></span>
+
+                <span class="movement-row__content">
+                  <strong>Jog</strong>
+                  <small>Morning</small>
+                </span>
+              </label>
+
+
+              <label class="movement-row">
+                <input
+                  type="checkbox"
+                  data-movement-id="example-glute-strength"
+                >
+
+                <span class="custom-checkbox"></span>
+
+                <span class="movement-row__content">
+                  <strong>Glute strength</strong>
+                  <small>Morning</small>
+                </span>
+              </label>
+
+
+              <label class="movement-row">
+                <input
+                  type="checkbox"
+                  data-movement-id="example-abs"
+                >
+
+                <span class="custom-checkbox"></span>
+
+                <span class="movement-row__content">
+                  <strong>Abs</strong>
+                  <small>Afternoon</small>
+                </span>
+              </label>
+
+            </div>
+
+          </section>
+
+
+
+          <!-- =================================================
+            GLOW
+          ================================================== -->
+
+          <section
+            class="dashboard-card"
+            id="glow-card"
+            aria-labelledby="glow-title"
+          >
+
+            <header class="card-header">
+
+              <div>
+                <p class="eyebrow">05</p>
+                <h2 id="glow-title">Evening self care</h2>
+              </div>
+
+              <div class="card-score">
+                <strong id="glow-score">0</strong>
+                <span>/ 2</span>
+              </div>
+
+            </header>
+
+
+            <div class="habit-list">
+
+              <label class="check-row">
+                <input
+                  type="checkbox"
+                  id="somatoline-checkbox"
+                >
+
+                <span class="custom-checkbox"></span>
+
+                <span>Somatoline</span>
+              </label>
+
+
+              <label class="check-row">
+                <input
+                  type="checkbox"
+                  id="skincare-checkbox"
+                >
+
+                <span class="custom-checkbox"></span>
+
+                <span id="skincare-goal-label">
+                  PM skincare
+                </span>
+              </label>
+
+            </div>
+
+          </section>
+
+
+
+          <!-- =================================================
+            EVENING DOG WALK
+          ================================================== -->
+
+          <section
+            class="dashboard-card dashboard-card--dog"
+            id="dog-walk-card"
+            aria-labelledby="dog-walk-title"
+          >
+
+            <header class="card-header">
+
+              <div>
+                <p class="eyebrow">06</p>
+                <h2 id="dog-walk-title">Evening Walk</h2>
+              </div>
+
+              <div class="card-score">
+                <strong id="dog-walk-score">0</strong>
+                <span>/ 1</span>
+              </div>
+
+            </header>
+
+
+            <label class="big-check-row">
+
+              <input
+                type="checkbox"
+                id="dog-walk-checkbox"
+              >
+
+              <span class="custom-checkbox"></span>
+
+              <span>
+                <strong>Evening dog walk</strong>
+                <small>
+                  Nervous-system maintenance mission.
+                </small>
+              </span>
+
+            </label>
+
+          </section>
+
+        </div>
+
+
+
+        <!-- =====================================================
+          TODAY'S SCHEDULE
+        ====================================================== -->
+
+        <section
+          class="schedule-preview"
+          aria-labelledby="today-schedule-title"
+        >
+
+          <header class="section-header">
+
+            <div>
+              <p class="eyebrow">Today's timeline</p>
+              <h2 id="today-schedule-title">
+                Operation schedule
+              </h2>
+            </div>
+
+
+            <button
+              class="text-button"
+              type="button"
+              data-view-link="schedule"
+            >
+              Edit schedule →
+            </button>
+
+          </header>
+
+
+          <div
+            class="timeline"
+            id="today-timeline"
+          >
+
+
+            <!-- Morning -->
+
+            <section class="timeline-block">
+
+              <header>
+                <span class="timeline-block__marker"></span>
+                <h3>Morning</h3>
+              </header>
+
+              <ul>
+                <li>Jog</li>
+                <li>Glute strength</li>
+                <li>Breakfast</li>
+              </ul>
+
+            </section>
+
+
+
+            <!-- Midday -->
+
+            <section class="timeline-block">
+
+              <header>
+                <span class="timeline-block__marker"></span>
+                <h3>Midday</h3>
+              </header>
+
+              <ul>
+                <li>Lunch</li>
+              </ul>
+
+            </section>
+
+
+
+            <!-- Afternoon -->
+
+            <section class="timeline-block">
+
+              <header>
+                <span class="timeline-block__marker"></span>
+                <h3>Afternoon</h3>
+              </header>
+
+              <ul>
+                <li>Snack / treat</li>
+                <li>Abs</li>
+              </ul>
+
+            </section>
+
+
+
+            <!-- Evening -->
+
+            <section class="timeline-block">
+
+              <header>
+                <span class="timeline-block__marker"></span>
+                <h3>Evening</h3>
+              </header>
+
+              <ul>
+                <li>Dog walk</li>
+                <li>Dinner</li>
+                <li>PM skincare</li>
+              </ul>
+
+            </section>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- =====================================================
+          RECOVERY
+        ====================================================== -->
+
+        <section
+          class="recovery-panel"
+          aria-labelledby="recovery-title"
+        >
+
+          <header class="section-header">
+
+            <div>
+              <p class="eyebrow">Telemetry — not scored</p>
+              <h2 id="recovery-title">
+                Recovery check
+              </h2>
+            </div>
+
+          </header>
+
+
+          <p class="section-intro">
+            Information only. Recovery changes the plan, never your score.
+          </p>
+
+
+          <div class="recovery-grid">
+
+
+            <!-- Sleep -->
+
+            <div class="recovery-control">
+
+              <div class="recovery-control__header">
+                <label for="sleep-rating">
+                  Sleep quality
+                </label>
+
+                <output
+                  for="sleep-rating"
+                  id="sleep-rating-output"
+                >
+                  3
+                </output>
+              </div>
+
+              <input
+                type="range"
+                id="sleep-rating"
+                min="1"
+                max="5"
+                step="1"
+                value="3"
+              >
+
+              <div class="range-labels">
+                <span>Rough</span>
+                <span>Excellent</span>
+              </div>
+
+            </div>
+
+
+
+            <!-- Hunger -->
+
+            <div class="recovery-control">
+
+              <div class="recovery-control__header">
+                <label for="hunger-rating">
+                  Hunger
+                </label>
+
+                <output
+                  for="hunger-rating"
+                  id="hunger-rating-output"
+                >
+                  3
+                </output>
+              </div>
+
+              <input
+                type="range"
+                id="hunger-rating"
+                min="1"
+                max="5"
+                step="1"
+                value="3"
+              >
+
+              <div class="range-labels">
+                <span>Low</span>
+                <span>High</span>
+              </div>
+
+            </div>
+
+
+
+            <!-- Soreness -->
+
+            <div class="recovery-control">
+
+              <div class="recovery-control__header">
+                <label for="soreness-rating">
+                  Soreness
+                </label>
+
+                <output
+                  for="soreness-rating"
+                  id="soreness-rating-output"
+                >
+                  0
+                </output>
+              </div>
+
+              <input
+                type="range"
+                id="soreness-rating"
+                min="0"
+                max="3"
+                step="1"
+                value="0"
+              >
+
+              <div class="range-labels">
+                <span>None</span>
+                <span>High</span>
+              </div>
+
+            </div>
+
+
+
+            <!-- Mood -->
+
+            <div class="recovery-control">
+
+              <div class="recovery-control__header">
+                <label for="mood-rating">
+                  Mood / energy
+                </label>
+
+                <output
+                  for="mood-rating"
+                  id="mood-rating-output"
+                >
+                  3
+                </output>
+              </div>
+
+              <input
+                type="range"
+                id="mood-rating"
+                min="1"
+                max="5"
+                step="1"
+                value="3"
+              >
+
+              <div class="range-labels">
+                <span>Flat</span>
+                <span>Excellent</span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- =====================================================
+          DAY 10 MEASUREMENTS
+        ====================================================== -->
+
+        <section
+          class="measurements-panel"
+          id="day-10-measurements"
+          aria-labelledby="measurements-title"
+          hidden
+        >
+
+          <header class="section-header">
+
+            <div>
+              <p class="eyebrow">Day 10 — information only</p>
+              <h2 id="measurements-title">
+                Final tracking
+              </h2>
+            </div>
+
+
+            <span class="unscored-badge">
+              Never scored
+            </span>
+
+          </header>
+
+
+          <p class="section-intro">
+            Measurements are tracking data, not success criteria.
+          </p>
+
+
+          <div class="measurement-grid">
+
+            <label class="field">
+              <span>Weight</span>
+
+              <div class="number-input">
+                <input
+                  type="number"
+                  id="measurement-weight"
+                  min="0"
+                  step="0.1"
+                >
+                <span>kg</span>
+              </div>
+            </label>
+
+
+            <label class="field">
+              <span>Waist</span>
+
+              <div class="number-input">
+                <input
+                  type="number"
+                  id="measurement-waist"
+                  min="0"
+                  step="0.1"
+                >
+                <span>cm</span>
+              </div>
+            </label>
+
+
+            <label class="field">
+              <span>Hips</span>
+
+              <div class="number-input">
+                <input
+                  type="number"
+                  id="measurement-hips"
+                  min="0"
+                  step="0.1"
+                >
+                <span>cm</span>
+              </div>
+            </label>
+
+
+            <label class="field">
+              <span>Bust</span>
+
+              <div class="number-input">
+                <input
+                  type="number"
+                  id="measurement-bust"
+                  min="0"
+                  step="0.1"
+                >
+                <span>cm</span>
+              </div>
+            </label>
+
+          </div>
+
+
+          <label class="field field--full">
+            <span>Notes</span>
+
+            <textarea
+              id="measurement-notes"
+              rows="5"
+              placeholder="Anything worth remembering from this run..."
+            ></textarea>
+          </label>
+
+
+          <label class="check-row check-row--unscored">
+
+            <input
+              type="checkbox"
+              id="progress-photo-reminder"
+            >
+
+            <span class="custom-checkbox"></span>
+
+            <span>
+              Optional progress photo reminder
+            </span>
+
+          </label>
+
+        </section>
+
+      </section>
+
+
+
+      <!-- =======================================================
+        CAMPAIGN OVERVIEW VIEW
+      ======================================================== -->
+
+      <section
+        class="app-view"
+        id="view-campaign"
+        data-view="campaign"
+        aria-labelledby="campaign-title"
+        hidden
+      >
+
+        <header class="view-header">
+
+          <div>
+            <p class="eyebrow">Mission control</p>
+            <h1 id="campaign-title">
+              Progress
+            </h1>
+          </div>
+
+
+          <div class="campaign-score-summary">
+
+            <strong id="campaign-percentage">
+              0%
+            </strong>
+
+            <span
+              class="campaign-score-points"
+              id="campaign-points"
+            >
+              0 / 0 pts
+            </span>
+
+            <span>
+              overall completion
+            </span>
+
+          </div>
+
+        </header>
+
+
+        <div
+          class="progress-bar progress-bar--campaign"
+          role="progressbar"
+          aria-label="Overall completion"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+          id="campaign-progress"
+        >
+          <span
+            class="progress-bar__fill"
+            id="campaign-progress-fill"
+          ></span>
+        </div>
+
+
+
+        <!-- Campaign board -->
+
+        <section
+          class="campaign-board-section"
+          aria-labelledby="campaign-board-title"
+        >
+
+          <header class="section-header">
+
+            <div>
+              <p class="eyebrow">Behavior board</p>
+              <h2 id="campaign-board-title">
+                10-day map
+              </h2>
+            </div>
+
+          </header>
+
+
+          <div class="campaign-board-wrapper">
+
+            <table
+              class="campaign-board"
+              id="campaign-board"
+            >
+
+              <thead>
+
+                <tr>
+
+                  <th scope="col">
+                    Mission
+                  </th>
+
+                  <th scope="col">
+                    <button type="button" data-day-select="1">
+                      D1
+                    </button>
+                  </th>
+
+                  <th scope="col">
+                    <button type="button" data-day-select="2">
+                      D2
+                    </button>
+                  </th>
+
+                  <th scope="col">
+                    <button type="button" data-day-select="3">
+                      D3
+                    </button>
+                  </th>
+
+                  <th scope="col">
+                    <button type="button" data-day-select="4">
+                      D4
+                    </button>
+                  </th>
+
+                  <th scope="col">
+                    <button type="button" data-day-select="5">
+                      D5
+                    </button>
+                  </th>
+
+                  <th scope="col">
+                    <button type="button" data-day-select="6">
+                      D6
+                    </button>
+                  </th>
+
+                  <th scope="col">
+                    <button type="button" data-day-select="7">
+                      D7
+                    </button>
+                  </th>
+
+                  <th scope="col">
+                    <button type="button" data-day-select="8">
+                      D8
+                    </button>
+                  </th>
+
+                  <th scope="col">
+                    <button type="button" data-day-select="9">
+                      D9
+                    </button>
+                  </th>
+
+                  <th scope="col">
+                    <button type="button" data-day-select="10">
+                      D10
+                    </button>
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody id="campaign-board-body">
+
+                <!-- Generated later with JavaScript -->
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- Reward status -->
+
+        <section
+          class="reward-panel"
+          aria-labelledby="reward-title"
+        >
+
+          <p class="eyebrow">
+            Current reward tier
+          </p>
+
+          <h2 id="reward-title">
+            Run in progress
+          </h2>
+
+          <p id="reward-description">
+            Keep completing the behaviors. Rewards are based only on behavioral completion.
+          </p>
+
+        </section>
+
+
+
+        <!-- Recovery trend placeholders -->
+
+        <section
+          class="recovery-trends"
+          aria-labelledby="recovery-trends-title"
+        >
+
+          <header class="section-header">
+
+            <div>
+              <p class="eyebrow">
+                Unscored telemetry
+              </p>
+
+              <h2 id="recovery-trends-title">
+                Recovery trends
+              </h2>
+            </div>
+
+          </header>
+
+
+          <div
+            class="trend-grid"
+            id="recovery-trend-grid"
+          >
+
+            <div class="trend-card">
+              <span>Sleep quality</span>
+              <div class="trend-placeholder"></div>
+            </div>
+
+            <div class="trend-card">
+              <span>Hunger</span>
+              <div class="trend-placeholder"></div>
+            </div>
+
+            <div class="trend-card">
+              <span>Soreness</span>
+              <div class="trend-placeholder"></div>
+            </div>
+
+            <div class="trend-card">
+              <span>Mood / energy</span>
+              <div class="trend-placeholder"></div>
+            </div>
+
+          </div>
+
+        </section>
+
+      </section>
+
+
+
+      <!-- =======================================================
+        SCHEDULE VIEW
+      ======================================================== -->
+
+      <section
+        class="app-view"
+        id="view-schedule"
+        data-view="schedule"
+        aria-labelledby="schedule-title"
+        hidden
+      >
+
+        <header class="view-header">
+
+          <div>
+            <p class="eyebrow">
+              Run planner
+            </p>
+
+            <h1 id="schedule-title">
+              Schedule
+            </h1>
+
+            <p class="view-description">
+              Change workout placement and daily timing without touching the code.
+            </p>
+          </div>
+
+        </header>
+
+
+        <!-- Day tabs -->
+
+        <div
+          class="day-tabs"
+          id="schedule-day-tabs"
+          role="tablist"
+          aria-label="Schedule days"
+        >
+
+          <button type="button" role="tab" data-schedule-day="1">
+            D1
+          </button>
+
+          <button type="button" role="tab" data-schedule-day="2">
+            D2
+          </button>
+
+          <button type="button" role="tab" data-schedule-day="3">
+            D3
+          </button>
+
+          <button type="button" role="tab" data-schedule-day="4">
+            D4
+          </button>
+
+          <button type="button" role="tab" data-schedule-day="5">
+            D5
+          </button>
+
+          <button type="button" role="tab" data-schedule-day="6">
+            D6
+          </button>
+
+          <button type="button" role="tab" data-schedule-day="7">
+            D7
+          </button>
+
+          <button type="button" role="tab" data-schedule-day="8">
+            D8
+          </button>
+
+          <button type="button" role="tab" data-schedule-day="9">
+            D9
+          </button>
+
+          <button type="button" role="tab" data-schedule-day="10">
+            D10
+          </button>
+
+        </div>
+
+
+        <section
+          class="schedule-editor"
+          id="schedule-editor"
+        >
+
+          <header class="schedule-editor__header">
+
+            <div>
+              <p class="eyebrow">
+                Editing
+              </p>
+
+              <h2>
+                Day
+                <span id="schedule-editor-day-number">
+                  1
+                </span>
+              </h2>
+            </div>
+
+
+            <button
+              class="primary-button"
+              type="button"
+              id="add-schedule-item-button"
+            >
+              + Add item
+            </button>
+
+          </header>
+
+
+          <div
+            class="schedule-editor__blocks"
+            id="schedule-editor-blocks"
+          >
+
+            <!-- Rendered by schedule-view.js -->
+
+          </div>
+
+        </section>
+
+      </section>
+
+
+
+      <!-- =======================================================
+        SETTINGS VIEW
+      ======================================================== -->
+
+      <section
+        class="app-view"
+        id="view-settings"
+        data-view="settings"
+        aria-labelledby="settings-title"
+        hidden
+      >
+
+        <header class="view-header">
+
+          <div>
+            <p class="eyebrow">
+              System configuration
+            </p>
+
+            <h1 id="settings-title">
+              Settings
+            </h1>
+
+            <p class="view-description">
+              Change the run rules without editing JavaScript.
+            </p>
+          </div>
+
+        </header>
+
+
+
+        <!-- Nutrition settings -->
+
+        <section
+          class="settings-panel"
+          aria-labelledby="nutrition-settings-title"
+        >
+
+          <header>
+            <p class="eyebrow">Nutrition</p>
+            <h2 id="nutrition-settings-title">
+              Targets
+            </h2>
+          </header>
+
+
+          <div class="settings-grid">
+
+            <label class="field">
+              <span>Minimum calories</span>
+              <input
+                type="number"
+                id="setting-calories-min"
+                value="1200"
+                min="0"
+              >
+            </label>
+
+
+            <label class="field">
+              <span>Maximum calories</span>
+              <input
+                type="number"
+                id="setting-calories-max"
+                value="1500"
+                min="0"
+              >
+            </label>
+
+
+            <label class="field">
+              <span>Minimum protein</span>
+
+              <div class="number-input">
+                <input
+                  type="number"
+                  id="setting-protein-min"
+                  value="90"
+                  min="0"
+                >
+                <span>g</span>
+              </div>
+            </label>
+
+
+            <label class="field">
+              <span>Minimum fibre</span>
+
+              <div class="number-input">
+                <input
+                  type="number"
+                  id="setting-fibre-min"
+                  value="25"
+                  min="0"
+                >
+                <span>g</span>
+              </div>
+            </label>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- Water settings -->
+
+        <section
+          class="settings-panel"
+          aria-labelledby="water-settings-title"
+        >
+
+          <header>
+            <p class="eyebrow">Water</p>
+            <h2 id="water-settings-title">
+              Daily goal
+            </h2>
+          </header>
+
+
+          <label class="field">
+            <span>Glasses per day</span>
+
+            <input
+              type="number"
+              id="setting-water-target"
+              value="6"
+              min="1"
+              max="20"
+            >
+          </label>
+
+        </section>
+
+
+
+        <!-- Glow settings -->
+
+        <section
+          class="settings-panel"
+          aria-labelledby="glow-settings-title"
+        >
+
+          <header>
+            <p class="eyebrow">Evening self care</p>
+            <h2 id="glow-settings-title">
+              Habit labels
+            </h2>
+          </header>
+
+
+          <label class="field field--full">
+            <span>Evening skincare label</span>
+
+            <input
+              type="text"
+              id="setting-skincare-label"
+              value="PM skincare"
+            >
+          </label>
+
+        </section>
+
+
+
+        <!-- Reward tiers -->
+
+        <section
+          class="settings-panel"
+          aria-labelledby="reward-settings-title"
+        >
+
+          <header>
+            <p class="eyebrow">Rewards</p>
+            <h2 id="reward-settings-title">
+              Reward tiers
+            </h2>
+          </header>
+
+
+          <div
+            class="reward-settings-list"
+            id="reward-settings-list"
+          >
+
+
+            <!-- Legendary -->
+
+            <article class="reward-setting">
+
+              <div class="reward-setting__heading">
+                <strong>Legendary</strong>
+                <span>95–100%</span>
+              </div>
+
+
+              <label class="field field--full">
+                <span>Reward</span>
+
+                <input
+                  type="text"
+                  id="setting-reward-legendary"
+                  value="Buy an outfit or piece of clothing I really want"
+                >
+              </label>
+
+            </article>
+
+
+
+            <!-- Mission accomplished -->
+
+            <article class="reward-setting">
+
+              <div class="reward-setting__heading">
+                <strong>Mission accomplished</strong>
+                <span>80–94%</span>
+              </div>
+
+
+              <label class="field field--full">
+                <span>Reward</span>
+
+                <input
+                  type="text"
+                  id="setting-reward-accomplished"
+                  value="Massage / salon / beauty treatment"
+                >
+              </label>
+
+            </article>
+
+
+
+            <!-- Review -->
+
+            <article class="reward-setting">
+
+              <div class="reward-setting__heading">
+                <strong>Review & redesign</strong>
+                <span>Below 80%</span>
+              </div>
+
+
+              <label class="field field--full">
+                <span>Message</span>
+
+                <input
+                  type="text"
+                  id="setting-reward-review"
+                  value="Review where the system failed and redesign."
+                >
+              </label>
+
+            </article>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- Data -->
+
+        <section
+          class="settings-panel"
+          aria-labelledby="data-settings-title"
+        >
+
+          <header>
+            <p class="eyebrow">
+              Data
+            </p>
+
+            <h2 id="data-settings-title">
+              Run management
+            </h2>
+          </header>
+
+
+          <div class="settings-actions">
+
+            <button
+              class="secondary-button"
+              type="button"
+              id="export-data-button"
+            >
+              Export JSON
+            </button>
+
+
+            <label
+              class="secondary-button file-button"
+              for="import-data-input"
+            >
+              Import JSON
+
+              <input
+                type="file"
+                id="import-data-input"
+                accept="application/json,.json"
+                hidden
+              >
+            </label>
+
+
+            <button
+              class="secondary-button"
+              type="button"
+              id="new-campaign-button"
+            >
+              Create new run
+            </button>
+
+
+            <button
+              class="danger-button"
+              type="button"
+              id="reset-campaign-button"
+            >
+              Reset current run
+            </button>
+
+          </div>
+
+        </section>
+
+      </section>
+
+    </main>
+
+
+
+    <!-- =========================================================
+      APP FOOTER
+    ========================================================== -->
+
+    <footer class="app-footer">
+
+      <span>
+        TEN DAY RUN // LOCAL BUILD
+      </span>
+
+      <span>
+        Behavior &gt; perfection
+      </span>
+
+    </footer>
+
+  </div>
+
+
+
+
+
+  <!-- ===========================================================
+    ADD FOOD SHEET
+  ============================================================ -->
+
+  <dialog
+    class="food-log-dialog"
+    id="food-log-dialog"
+  >
+
+    <div class="food-sheet">
+
+      <header class="food-sheet__header">
+
+        <button
+          class="food-sheet__back"
+          type="button"
+          id="food-sheet-back"
+          aria-label="Back"
+          hidden
+        >
+          ←
+        </button>
+
+        <div>
+          <p class="eyebrow">Add to <span id="food-log-meal-label">meal</span></p>
+          <h2>Food log</h2>
+        </div>
+
+        <button
+          class="food-sheet__close"
+          type="button"
+          id="food-log-close"
+          aria-label="Close food log"
+        >
+          ×
+        </button>
+
+      </header>
+
+
+      <!-- Start -->
+
+      <section id="food-entry-home">
+
+        <form
+          class="food-search-form"
+          id="food-search-form"
+        >
+          <label for="food-search-input">
+            Search or describe food
+          </label>
+
+          <div class="food-search-form__row">
+            <input
+              type="search"
+              id="food-search-input"
+              placeholder="e.g. salmon 180g"
+              autocomplete="off"
+            >
+
+            <button
+              class="primary-button"
+              type="submit"
+            >
+              Search
+            </button>
+          </div>
+
+          <small>
+            Search checks foods saved on this device first, then Open Food Facts.
+          </small>
+        </form>
+
+
+        <div class="food-entry-actions">
+          <button
+            class="food-entry-action food-entry-action--scan"
+            type="button"
+            id="food-scan-button"
+          >
+            <span class="food-entry-action__icon" aria-hidden="true">▦</span>
+            <span>
+              <strong>Scan barcode</strong>
+              <small>Use the phone camera</small>
+            </span>
+          </button>
+
+          <button
+            class="food-entry-action food-entry-action--manual"
+            type="button"
+            id="food-manual-button"
+          >
+            <span class="food-entry-action__icon" aria-hidden="true">＋</span>
+            <span>
+              <strong>Add manually</strong>
+              <small>Fallback for anything not found</small>
+            </span>
+          </button>
+        </div>
+
+
+        <section class="food-recents">
+          <div class="food-sheet__section-heading">
+            <p class="eyebrow">On this device</p>
+            <h3>Recent foods</h3>
+          </div>
+
+          <div
+            class="food-result-list"
+            id="food-recent-list"
+          ></div>
+        </section>
+
+      </section>
+
+
+      <!-- Search results -->
+
+      <section
+        id="food-search-panel"
+        hidden
+      >
+        <p
+          class="food-sheet__status"
+          id="food-search-status"
+          role="status"
+          aria-live="polite"
+        ></p>
+
+        <div
+          class="food-result-list"
+          id="food-search-results"
+        ></div>
+      </section>
+
+
+      <!-- Barcode -->
+
+      <section
+        id="food-barcode-panel"
+        hidden
+      >
+
+        <p
+          class="food-sheet__status"
+          id="food-barcode-status"
+          role="status"
+          aria-live="polite"
+        >
+          Starting camera…
+        </p>
+
+        <div
+          class="food-barcode-reader"
+          id="food-barcode-reader"
+          aria-label="Barcode camera preview"
+        ></div>
+
+        <div class="food-barcode-divider">
+          <span>or type it</span>
+        </div>
+
+        <form
+          class="food-barcode-form"
+          id="food-barcode-form"
+        >
+          <label for="food-barcode-input">Barcode number</label>
+
+          <div class="food-search-form__row">
+            <input
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              id="food-barcode-input"
+              placeholder="e.g. 3017624010701"
+              autocomplete="off"
+            >
+
+            <button
+              class="primary-button"
+              type="submit"
+            >
+              Look up
+            </button>
+          </div>
+        </form>
+
+      </section>
+
+
+      <!-- Confirm food -->
+
+      <section
+        id="food-confirm-panel"
+        hidden
+      >
+
+        <p
+          class="food-confirm-source"
+          id="food-confirm-source"
+        ></p>
+
+        <form id="food-confirm-form">
+
+          <div class="food-confirm-grid">
+
+            <label class="field field--full">
+              <span>Food</span>
+              <input
+                type="text"
+                id="food-confirm-name"
+                autocomplete="off"
+              >
+            </label>
+
+            <label class="field field--full">
+              <span>Brand <small>(optional)</small></span>
+              <input
+                type="text"
+                id="food-confirm-brand"
+                autocomplete="off"
+              >
+            </label>
+
+            <label class="field field--full food-confirm-amount">
+              <span>Amount eaten</span>
+              <div class="number-input">
+                <input
+                  type="number"
+                  id="food-confirm-amount"
+                  inputmode="decimal"
+                  min="0.1"
+                  step="0.1"
+                  value="100"
+                >
+                <span>g</span>
+              </div>
+            </label>
+
+          </div>
+
+
+          <div class="food-confirm-per100">
+            <p>Nutrition per 100g</p>
+
+            <div class="food-confirm-per100__grid">
+              <label>
+                <span>Calories</span>
+                <input
+                  type="number"
+                  id="food-confirm-calories"
+                  inputmode="decimal"
+                  min="0"
+                  step="0.1"
+                >
+                <small>kcal</small>
+              </label>
+
+              <label>
+                <span>Protein</span>
+                <input
+                  type="number"
+                  id="food-confirm-protein"
+                  inputmode="decimal"
+                  min="0"
+                  step="0.1"
+                >
+                <small>g</small>
+              </label>
+
+              <label>
+                <span>Fibre</span>
+                <input
+                  type="number"
+                  id="food-confirm-fibre"
+                  inputmode="decimal"
+                  min="0"
+                  step="0.1"
+                >
+                <small>g</small>
+              </label>
+            </div>
+          </div>
+
+
+          <div
+            class="food-confirm-preview"
+            id="food-confirm-preview"
+            aria-live="polite"
+          ></div>
+
+          <p
+            class="food-confirm-error"
+            id="food-confirm-error"
+            hidden
+          ></p>
+
+          <button
+            class="primary-button food-confirm-submit"
+            type="submit"
+          >
+            Add to meal
+          </button>
+
+        </form>
+
+      </section>
+
+    </div>
+
+  </dialog>
+
+
+  <!-- ===========================================================
+    MODAL
+  ============================================================ -->
+
+  <dialog
+    class="app-dialog"
+    id="app-dialog"
+  >
+
+    <div class="app-dialog__content">
+
+      <p class="eyebrow" id="dialog-eyebrow">
+        Confirm action
+      </p>
+
+      <h2 id="dialog-title">
+        Are you sure?
+      </h2>
+
+      <p id="dialog-message">
+        This action cannot be undone.
+      </p>
+
+
+      <div class="app-dialog__actions">
+
+        <button
+          class="secondary-button"
+          type="button"
+          id="dialog-cancel-button"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-button"
+          type="button"
+          id="dialog-confirm-button"
+        >
+          Confirm
+        </button>
+
+      </div>
+
+    </div>
+
+  </dialog>
+
+
+
+  <!-- ===========================================================
+    TOAST / FEEDBACK
+  ============================================================ -->
+
+  <div
+    class="toast"
+    id="app-toast"
+    role="status"
+    aria-live="polite"
+    hidden
+  >
+    Saved.
+  </div>
+
+
+
+  <!-- ===========================================================
+    JAVASCRIPT
+
+    Deliberately using classic scripts rather than ES modules so
+    the app can be opened directly from the local filesystem.
+  ============================================================ -->
+
+  <script src="js/defaults.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/food-library.js"></script>
+  <script src="js/food-log.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/day-view.js"></script>
+  <script src="js/overview-view.js"></script>
+  <script src="js/schedule-view.js"></script>
+  <script src="js/settings-view.js"></script>
+  <script src="js/recovery.js"></script>
+  <script src="js/import-export.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+
+</html>

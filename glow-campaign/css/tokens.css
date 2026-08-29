@@ -1,0 +1,349 @@
+/* =========================================================
+   TEN DAY RUN — COLOR / MATERIAL SYSTEM 2026
+
+   Direction:
+   bright editorial product UI × soft color fields × crisp type
+
+   Principles:
+   - white / cool neutral foundation
+   - multiple accent families instead of one dominant brand color
+   - color belongs to modules and states
+   - tinted shadows create depth without glassmorphism
+   - generous, controlled rounding
+========================================================= */
+
+:root {
+
+  /* =======================================================
+     FOUNDATION
+  ======================================================== */
+
+  --bg: #ffffff;
+  --bg-deep: #f1f3f6;
+
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-dark: #17181b;
+  --surface-muted: #f0f2f5;
+
+  --ink: #17181b;
+  --ink-soft: #45484f;
+  --ink-muted: #7d8189;
+  --ink-faint: #aeb2b9;
+  --ink-inverse: #ffffff;
+
+  /* =======================================================
+     COLOR FAMILIES
+  ======================================================== */
+
+  --peach: #ffad7f;
+  --peach-strong: #ff986b;
+  --peach-soft: #fff0e7;
+  --peach-faint: #fff8f3;
+
+  --coral: #ff8f7a;
+  --coral-strong: #f67663;
+  --coral-soft: #ffe3dc;
+  --coral-faint: #fff3ef;
+
+  --sky: #82d9f1;
+  --sky-strong: #55c6e8;
+  --sky-soft: #ddf5fc;
+  --sky-faint: #f0fbfe;
+
+  --cyan: #78e2e7;
+  --cyan-strong: #4fd1d8;
+  --cyan-soft: #ddf8f8;
+  --cyan-faint: #f0fcfc;
+
+  --lilac: #c7b5ff;
+  --lilac-strong: #ac95f7;
+  --lilac-soft: #eee9ff;
+  --lilac-faint: #f8f5ff;
+
+  --butter: #ffd589;
+  --butter-strong: #ffc55f;
+  --butter-soft: #fff0cd;
+  --butter-faint: #fff9ea;
+
+  --lime: #d7f76f;
+  --lime-strong: #bddf50;
+  --lime-soft: #eff9c9;
+  --lime-faint: #f8fce9;
+
+  --mint: #a9e3cf;
+  --mint-strong: #80cfb4;
+  --mint-soft: #e3f5ef;
+  --mint-faint: #f3fbf8;
+
+  /* Generic action accent. Category components override this. */
+  --accent: var(--peach-strong);
+  --accent-hover: #ef8559;
+  --accent-soft: var(--peach-soft);
+  --accent-faint: var(--peach-faint);
+
+  /* Existing aliases kept for compatibility. */
+  --signal: var(--lime);
+  --signal-dark: var(--ink);
+
+  --success: #62b98f;
+  --success-soft: #e2f5ec;
+
+  --warning: #c48a2d;
+  --warning-soft: #fff0cf;
+
+  --danger: #e25955;
+  --danger-hover: #cb4945;
+  --danger-soft: #fde8e6;
+
+  --recovery: #7c70ca;
+  --recovery-soft: var(--lilac-soft);
+
+  --water: var(--cyan-strong);
+  --water-soft: var(--cyan-soft);
+
+  --focus: #4e63e8;
+
+
+  /* =======================================================
+     BORDER
+  ======================================================== */
+
+  --border: #e2e4e9;
+  --border-strong: #c8ccd4;
+  --border-dark: #292b30;
+
+  --border-width: 1px;
+  --border-width-strong: 1.5px;
+
+
+  /* =======================================================
+     TYPOGRAPHY
+  ======================================================== */
+
+  --font-sans:
+    "SF Pro Text",
+    "SF Pro Display",
+    "Segoe UI Variable Text",
+    "Segoe UI",
+    Inter,
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  --font-display:
+    "SF Pro Display",
+    "Segoe UI Variable Display",
+    Inter,
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  --font-mono:
+    ui-monospace,
+    "SFMono-Regular",
+    "Cascadia Mono",
+    "Roboto Mono",
+    Consolas,
+    "Liberation Mono",
+    Menlo,
+    monospace;
+
+  --text-xs: 0.69rem;
+  --text-sm: 0.84rem;
+  --text-base: 1rem;
+  --text-md: 1.12rem;
+  --text-lg: 1.32rem;
+  --text-xl: 1.65rem;
+  --text-2xl: 2.25rem;
+  --text-3xl: 3.25rem;
+  --text-4xl: clamp(3.8rem, 8vw, 6.8rem);
+
+  --line-tight: 0.9;
+  --line-heading: 1.02;
+  --line-body: 1.46;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 620;
+  --weight-bold: 700;
+  --weight-black: 780;
+
+  --tracking-tight: -0.055em;
+  --tracking-heading: -0.035em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.065em;
+  --tracking-wider: 0.105em;
+
+
+  /* =======================================================
+     SPACING
+  ======================================================== */
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 2rem;
+  --space-8: 2.5rem;
+  --space-9: 3rem;
+  --space-10: 4rem;
+  --space-11: 5rem;
+  --space-12: 7rem;
+
+
+  /* =======================================================
+     SHAPE
+  ======================================================== */
+
+  --radius-xs: 7px;
+  --radius-sm: 11px;
+  --radius-md: 15px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+  --radius-pill: 999px;
+
+
+  /* =======================================================
+     SHADOW / MATERIAL
+  ======================================================== */
+
+  --shadow-xs: 0 2px 8px rgba(31, 34, 41, 0.045);
+  --shadow-sm: 0 10px 28px rgba(31, 34, 41, 0.07);
+  --shadow-md: 0 20px 50px rgba(31, 34, 41, 0.09);
+
+  --shadow-peach: 0 16px 38px rgba(255, 152, 107, 0.17);
+  --shadow-sky: 0 16px 38px rgba(85, 198, 232, 0.17);
+  --shadow-cyan: 0 16px 38px rgba(79, 209, 216, 0.15);
+  --shadow-lilac: 0 16px 38px rgba(172, 149, 247, 0.16);
+  --shadow-butter: 0 16px 38px rgba(255, 197, 95, 0.16);
+  --shadow-lime: 0 16px 38px rgba(189, 223, 80, 0.15);
+  --shadow-mint: 0 16px 38px rgba(128, 207, 180, 0.15);
+
+  --shadow-hard: 3px 3px 0 var(--ink);
+
+
+  /* =======================================================
+     LAYOUT
+  ======================================================== */
+
+  --page-width: 1440px;
+  --content-width: 1180px;
+
+  --page-gutter: clamp(1rem, 4vw, 4rem);
+  --header-height: 72px;
+
+  --card-padding: clamp(1.2rem, 2vw, 1.8rem);
+  --section-gap: clamp(3rem, 6vw, 6rem);
+
+
+  /* =======================================================
+     COMPONENT SIZES
+  ======================================================== */
+
+  --checkbox-size: 24px;
+  --control-height: 46px;
+  --button-height: 46px;
+  --progress-height: 10px;
+
+
+  /* =======================================================
+     TRANSITIONS
+  ======================================================== */
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  --duration-fast: 110ms;
+  --duration-normal: 190ms;
+  --duration-slow: 360ms;
+}
+
+
+/* =========================================================
+   GLOBAL FOUNDATION
+========================================================= */
+
+html {
+  background: var(--bg);
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--line-body);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* =========================================================
+   GLOBAL TYPE
+========================================================= */
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-heading);
+  line-height: var(--line-heading);
+}
+
+h1 {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-black);
+}
+
+h2 {
+  font-size: var(--text-xl);
+}
+
+h3 {
+  font-size: var(--text-md);
+}
+
+p {
+  color: var(--ink-soft);
+}
+
+small {
+  font-size: var(--text-sm);
+  line-height: 1.35;
+}
+
+
+/* =========================================================
+   COMMON UTILITY TOKENS
+========================================================= */
+
+.muted {
+  color: var(--ink-muted);
+}
+
+.eyebrow {
+  color: var(--ink-muted);
+
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+
+  line-height: 1.2;
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+}
