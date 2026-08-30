@@ -575,7 +575,7 @@ resetActiveCampaign() {
          Food log
 
          Clear foods from this run, but keep the global
-         IndexedDB food library for fast reuse next time.
+         local food library for fast reuse next time.
       ---------------------------------------------- */
 
       day.foodLog = {

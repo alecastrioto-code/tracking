@@ -2769,3 +2769,56 @@ body,
   width: 100%;
   margin-top: 0.85rem;
 }
+
+/* =========================================================
+   FUNCTIONAL ROBUSTNESS PASS
+========================================================= */
+
+/* ZXing camera preview */
+.food-barcode-reader {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.food-barcode-video {
+  display: block;
+  width: 100%;
+  min-height: 210px;
+  max-height: 360px;
+  object-fit: cover;
+  background: var(--ink);
+}
+
+.food-barcode-guide {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.food-barcode-guide::before {
+  content: "";
+  width: min(78%, 300px);
+  aspect-ratio: 2.2 / 1;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 999px rgba(0, 0, 0, 0.20),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.16);
+}
+
+.food-barcode-guide span {
+  position: absolute;
+  width: min(68%, 260px);
+  height: 2px;
+  background: var(--peach-strong, #ff9f7d);
+  border-radius: 999px;
+  box-shadow: 0 0 12px rgba(255, 159, 125, 0.55);
+}
+
+/* Yellow/lime schedule badges need dark text for contrast. */
+.schedule-item--movement .schedule-item__badge {
+  color: var(--ink);
+}

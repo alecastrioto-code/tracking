@@ -129,7 +129,9 @@ GlowApp.App = {
 
       GlowApp.Recovery,
 
-      GlowApp.ImportExport
+      GlowApp.ImportExport,
+
+      GlowApp.PWA
 
     ];
 

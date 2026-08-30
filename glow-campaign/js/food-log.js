@@ -4,13 +4,13 @@
    Phase 2A / 2B:
    - meal-level food records
    - automatic nutrition totals
-   - recent foods from local IndexedDB
+   - recent foods from reliable localStorage food memory
    - barcode lookup through Open Food Facts
    - text search through Open Food Facts full-text endpoint
    - manual fallback
 
-   Camera scanning is loaded only when requested. It requires
-   HTTPS (or another secure browser context) once published.
+   Camera scanning uses ZXing Browser and is loaded only when
+   requested. It requires HTTPS (or another secure context).
 ========================================================= */
 
 window.GlowApp = window.GlowApp || {};
@@ -43,8 +43,11 @@ GlowApp.FoodLog = {
   searchResults: [],
   recentFoods: [],
   scanner: null,
+  scannerControls: null,
   scannerLibraryPromise: null,
   scannerRunning: false,
+  scannerLocked: false,
+  barcodeSessionId: 0,
   describedAmountG: null,
 
 
@@ -693,6 +696,7 @@ GlowApp.FoodLog = {
     );
 
 
+    this.barcodeSessionId += 1;
     this.stopScanner();
 
 
@@ -741,6 +745,7 @@ GlowApp.FoodLog = {
 
   showHome() {
 
+    this.barcodeSessionId += 1;
     this.stopScanner();
     this.showPanel("food-entry-home");
 
@@ -1122,6 +1127,8 @@ GlowApp.FoodLog = {
 
     this.showPanel("food-barcode-panel");
 
+    const sessionId = ++this.barcodeSessionId;
+
 
     const input = document.getElementById(
       "food-barcode-input"
@@ -1139,7 +1146,7 @@ GlowApp.FoodLog = {
     ) {
 
       this.setBarcodeStatus(
-        "Camera scanning activates once the app is hosted over HTTPS. You can type the barcode below right now."
+        "Camera access needs HTTPS and a supported browser. You can type the barcode below."
       );
 
       return;
@@ -1147,13 +1154,20 @@ GlowApp.FoodLog = {
 
 
     this.setBarcodeStatus(
-      "Starting camera…"
+      "Preparing camera…"
     );
 
 
     try {
 
       await this.ensureScannerLibrary();
+
+
+      if (sessionId !== this.barcodeSessionId) {
+        return;
+      }
+
+
       await this.startScanner();
 
     } catch (error) {
@@ -1164,17 +1178,33 @@ GlowApp.FoodLog = {
       );
 
 
-      this.setBarcodeStatus(
-        "Camera could not start. You can still type the barcode below."
-      );
+      if (sessionId !== this.barcodeSessionId) {
+        return;
+      }
+
+
+      const message =
+        error?.name === "NotAllowedError" ||
+        error?.name === "SecurityError"
+          ? "Camera permission is blocked. Allow camera access for this site, then try Scan barcode again."
+          : error?.name === "NotFoundError"
+            ? "No camera was found on this device. You can type the barcode below."
+            : error?.name === "NotReadableError"
+              ? "The camera is busy in another app. Close it there and try again."
+              : "Camera could not start. You can still type the barcode below.";
+
+
+      this.setBarcodeStatus(message);
     }
   },
 
 
   ensureScannerLibrary() {
 
-    if (window.Html5Qrcode) {
-      return Promise.resolve(window.Html5Qrcode);
+    if (
+      window.ZXingBrowser?.BrowserMultiFormatReader
+    ) {
+      return Promise.resolve(window.ZXingBrowser);
     }
 
 
@@ -1183,54 +1213,89 @@ GlowApp.FoodLog = {
     }
 
 
-    this.scannerLibraryPromise = new Promise((resolve, reject) => {
-
-      const script = document.createElement("script");
-
-      script.src =
-        "https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js";
-
-      script.async = true;
+    const sources = [
+      "https://cdn.jsdelivr.net/npm/@zxing/browser@0.2.1/umd/zxing-browser.min.js",
+      "https://unpkg.com/@zxing/browser@0.2.1/umd/zxing-browser.min.js"
+    ];
 
 
-      script.addEventListener(
-        "load",
-        () => {
-
-          if (window.Html5Qrcode) {
-            resolve(window.Html5Qrcode);
-          } else {
-            reject(
-              new Error("Barcode scanner library did not initialise.")
-            );
-          }
-
-        },
-        {
-          once: true
-        }
-      );
-
-
-      script.addEventListener(
-        "error",
-        () => {
-          reject(
-            new Error("Barcode scanner library could not be downloaded.")
-          );
-        },
-        {
-          once: true
-        }
-      );
-
-
-      document.head.appendChild(script);
-
-    });
+    this.scannerLibraryPromise = this.loadExternalScript(
+      sources,
+      () => Boolean(
+        window.ZXingBrowser?.BrowserMultiFormatReader
+      )
+    ).then(() => window.ZXingBrowser);
 
 
     return this.scannerLibraryPromise;
+  },
+
+
+  loadExternalScript(sources, readyCheck) {
+
+    return new Promise((resolve, reject) => {
+
+      let sourceIndex = 0;
+
+
+      const tryNext = () => {
+
+        if (readyCheck()) {
+          resolve();
+          return;
+        }
+
+
+        if (sourceIndex >= sources.length) {
+          reject(
+            new Error("Barcode scanner library could not be downloaded.")
+          );
+          return;
+        }
+
+
+        const source = sources[sourceIndex];
+        sourceIndex += 1;
+
+        const script = document.createElement("script");
+
+        script.src = source;
+        script.async = true;
+        script.crossOrigin = "anonymous";
+
+
+        script.addEventListener(
+          "load",
+          () => {
+
+            if (readyCheck()) {
+              resolve();
+            } else {
+              script.remove();
+              tryNext();
+            }
+
+          },
+          { once: true }
+        );
+
+
+        script.addEventListener(
+          "error",
+          () => {
+            script.remove();
+            tryNext();
+          },
+          { once: true }
+        );
+
+
+        document.head.appendChild(script);
+      };
+
+
+      tryNext();
+    });
   },
 
 
@@ -1244,33 +1309,80 @@ GlowApp.FoodLog = {
     );
 
 
-    if (!reader || !window.Html5Qrcode) {
+    if (
+      !reader ||
+      !window.ZXingBrowser?.BrowserMultiFormatReader
+    ) {
       throw new Error("Barcode reader is unavailable.");
     }
 
 
-    reader.innerHTML = "";
+    reader.innerHTML = `
+      <video
+        class="food-barcode-video"
+        id="food-barcode-video"
+        playsinline
+        muted
+        autoplay
+        aria-label="Live camera preview for barcode scanning"
+      ></video>
+
+      <div class="food-barcode-guide" aria-hidden="true">
+        <span></span>
+      </div>
+    `;
 
 
-    this.scanner = new window.Html5Qrcode(
-      "food-barcode-reader"
+    const video = document.getElementById(
+      "food-barcode-video"
     );
 
 
-    await this.scanner.start(
-      {
-        facingMode: "environment"
-      },
-      {
-        fps: 10,
-        qrbox: {
-          width: 260,
-          height: 150
-        }
-      },
-      async (decodedText) => {
+    if (!video) {
+      throw new Error("Camera preview could not be created.");
+    }
 
-        const barcode = String(decodedText || "")
+
+    this.scanner = new window.ZXingBrowser.BrowserMultiFormatReader(
+      undefined,
+      {
+        delayBetweenScanAttempts: 80,
+        delayBetweenScanSuccess: 500
+      }
+    );
+
+    this.scannerLocked = false;
+
+
+    const constraints = {
+      audio: false,
+      video: {
+        facingMode: { ideal: "environment" },
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    };
+
+
+    this.scannerControls = await this.scanner.decodeFromConstraints(
+      constraints,
+      video,
+      async (result) => {
+
+        if (
+          !result ||
+          this.scannerLocked
+        ) {
+          return;
+        }
+
+
+        const rawText =
+          typeof result.getText === "function"
+            ? result.getText()
+            : result.text || String(result || "");
+
+        const barcode = String(rawText || "")
           .replace(/\D/g, "");
 
 
@@ -1282,12 +1394,16 @@ GlowApp.FoodLog = {
         }
 
 
+        this.scannerLocked = true;
+
+        this.setBarcodeStatus(
+          `Barcode ${barcode} detected. Looking up product…`
+        );
+
+
         await this.stopScanner();
         await this.lookupBarcode(barcode);
 
-      },
-      () => {
-        /* Scan misses are expected frame-by-frame. */
       }
     );
 
@@ -1296,34 +1412,53 @@ GlowApp.FoodLog = {
 
 
     this.setBarcodeStatus(
-      "Point the camera at the product barcode."
+      "Camera ready. Hold the barcode inside the frame."
     );
   },
 
 
   async stopScanner() {
 
-    if (!this.scanner) {
-      this.scannerRunning = false;
-      return;
+    const controls = this.scannerControls;
+
+
+    this.scannerControls = null;
+    this.scannerRunning = false;
+    this.scannerLocked = false;
+
+
+    try {
+      controls?.stop?.();
+    } catch (error) {
+      /* The stream may already be stopped. */
     }
+
+
+    const video = document.getElementById(
+      "food-barcode-video"
+    );
 
 
     try {
 
-      if (this.scannerRunning) {
-        await this.scanner.stop();
+      const stream = video?.srcObject;
+
+
+      if (stream?.getTracks) {
+        stream.getTracks().forEach(track => track.stop());
       }
 
-      await this.scanner.clear();
+
+      if (video) {
+        video.srcObject = null;
+      }
 
     } catch (error) {
-      /* Nothing to do if the camera was already stopped. */
+      /* No action needed. */
     }
 
 
     this.scanner = null;
-    this.scannerRunning = false;
   },
 
 

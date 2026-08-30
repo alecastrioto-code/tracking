@@ -197,7 +197,7 @@ GlowApp.ImportExport = {
 
           /*
             Version 2 backups wrap app state together with the
-            IndexedDB food library. Older state-only backups remain
+            local food library. Older state-only backups remain
             valid and import exactly as before.
           */
           const importedState =
