@@ -5,7 +5,7 @@
    lookup and barcode product data continue to use live requests.
 ========================================================= */
 
-const CACHE_NAME = "ten-day-run-shell-v2";
+const CACHE_NAME = "ten-day-run-shell-v3";
 const INDEX_URL = new URL("./index.html", self.registration.scope).href;
 
 const APP_SHELL = [

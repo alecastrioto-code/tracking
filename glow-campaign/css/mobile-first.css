@@ -2274,3 +2274,76 @@
     padding-top: 0.1rem;
   }
 }
+
+/* =========================================================
+   TEN DAY RUN — POLISH BATCH 02 / MOBILE
+========================================================= */
+
+@media (max-width: 820px) {
+  .meal-log__strip {
+    gap: 0.55rem;
+    padding: 0.42rem 0.44rem 0.42rem 0.58rem;
+    border-radius: 14px;
+  }
+
+  .meal-log__identity {
+    gap: 0.45rem;
+  }
+
+  .meal-log__strip .check-row {
+    min-height: 46px;
+  }
+
+  .meal-log__strip .meal-add-food {
+    width: 42px;
+    height: 42px;
+    min-height: 42px;
+  }
+
+  .meal-food-items {
+    margin-top: 0.48rem;
+  }
+
+  .meal-food-swipe,
+  .schedule-swipe-row {
+    --swipe-action-width: 86px;
+  }
+
+  .schedule-item__edit-grid {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
+  .schedule-item__edit-actions {
+    display: grid;
+    grid-template-columns: 0.8fr 1fr;
+  }
+
+  .schedule-edit-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  #view-campaign .view-header.view-header--campaign {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  #view-campaign .view-header--campaign > div:first-child {
+    align-self: end;
+    text-align: left;
+  }
+
+  #view-campaign .view-header--campaign .campaign-score-summary {
+    justify-self: end;
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  #view-campaign .view-header--campaign h1 {
+    margin-top: 0.25rem;
+  }
+}

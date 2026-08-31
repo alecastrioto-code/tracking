@@ -682,11 +682,6 @@ GlowApp.DayView = {
     );
 
 
-    if (GlowApp.FoodLog) {
-      GlowApp.FoodLog.renderNutritionSource(day);
-    }
-
-
     this.renderNutritionStatus(
       day,
       settings

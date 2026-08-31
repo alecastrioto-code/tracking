@@ -50,6 +50,7 @@ GlowApp.FoodLog = {
   scannerLocked: false,
   barcodeSessionId: 0,
   describedAmountG: null,
+  swipeState: null,
 
 
   init() {
@@ -326,41 +327,49 @@ GlowApp.FoodLog = {
 
 
           return `
-            <article class="meal-food-item">
+            <div
+              class="swipe-row meal-food-swipe"
+              data-swipe-row
+            >
+              <article class="meal-food-item swipe-row__content">
 
-              <div class="meal-food-item__main">
-                <strong>${this.escapeHTML(item.name)}</strong>
+                <div class="meal-food-item__main">
+                  <strong>${this.escapeHTML(item.name)}</strong>
 
-                <small>
-                  ${brand}
-                  <span>${this.formatAmount(item.amountG)}</span>
-                  <span>${this.formatNumber(item.calories, 0)} kcal</span>
-                  <span>${this.formatNumber(item.protein, 1)}g protein</span>
-                </small>
-              </div>
+                  <small>
+                    ${brand}
+                    <span>${this.formatAmount(item.amountG)}</span>
+                    <span>${this.formatNumber(item.calories, 0)} kcal</span>
+                    <span>${this.formatNumber(item.protein, 1)}g protein</span>
+                  </small>
+                </div>
 
-              <button
-                class="meal-food-item__remove"
-                type="button"
-                data-remove-food-item="${this.escapeAttribute(item.id)}"
-                data-remove-food-meal="${meal.id}"
-                aria-label="Remove ${this.escapeAttribute(item.name)} from ${meal.label}"
-                title="Remove"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                  focusable="false"
+              </article>
+
+              <div class="swipe-row__action">
+                <button
+                  class="swipe-delete-button meal-food-item__remove"
+                  type="button"
+                  data-remove-food-item="${this.escapeAttribute(item.id)}"
+                  data-remove-food-meal="${meal.id}"
+                  aria-label="Remove ${this.escapeAttribute(item.name)} from ${meal.label}"
+                  title="Remove"
                 >
-                  <path d="M4 7h16"></path>
-                  <path d="M9 7V4h6v3"></path>
-                  <path d="M7 7l1 13h8l1-13"></path>
-                  <path d="M10 11v5"></path>
-                  <path d="M14 11v5"></path>
-                </svg>
-              </button>
-
-            </article>
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path d="M4 7h16"></path>
+                    <path d="M9 7V4h6v3"></path>
+                    <path d="M7 7l1 13h8l1-13"></path>
+                    <path d="M10 11v5"></path>
+                    <path d="M14 11v5"></path>
+                  </svg>
+                  <span>Remove</span>
+                </button>
+              </div>
+            </div>
           `;
 
         })
@@ -383,9 +392,19 @@ GlowApp.FoodLog = {
     }
 
 
+    this.bindSwipeReveal(card);
+
+
     card.addEventListener(
       "click",
       (event) => {
+
+        if (event.target.closest(
+          '[data-swipe-row][data-swipe-handled="true"]'
+        )) {
+          event.preventDefault();
+          return;
+        }
 
         const addButton = event.target.closest(
           "[data-add-food]"
@@ -394,6 +413,7 @@ GlowApp.FoodLog = {
 
         if (addButton) {
 
+          this.closeSwipeRows(card);
           this.openDialog(
             addButton.dataset.addFood
           );
@@ -413,10 +433,180 @@ GlowApp.FoodLog = {
             removeButton.dataset.removeFoodMeal,
             removeButton.dataset.removeFoodItem
           );
+
+          return;
+        }
+
+
+        const revealed = event.target.closest(
+          "[data-swipe-row].is-revealed"
+        );
+
+        if (!revealed) {
+          this.closeSwipeRows(card);
         }
 
       }
     );
+  },
+
+
+  bindSwipeReveal(container) {
+
+    container.addEventListener(
+      "pointerdown",
+      (event) => {
+
+
+        if (event.target.closest(
+          ".swipe-delete-button"
+        )) {
+          return;
+        }
+
+        const row = event.target.closest(
+          "[data-swipe-row]"
+        );
+
+        if (!row) {
+          return;
+        }
+
+        this.closeSwipeRows(container, row);
+        row.classList.remove("is-revealed");
+        row.classList.add("is-swiping");
+
+        this.swipeState = {
+          row,
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          deltaX: 0,
+          horizontal: false
+        };
+
+        row.setPointerCapture?.(event.pointerId);
+      }
+    );
+
+
+    container.addEventListener(
+      "pointermove",
+      (event) => {
+
+        const state = this.swipeState;
+
+        if (
+          !state ||
+          state.pointerId !== event.pointerId
+        ) {
+          return;
+        }
+
+        const deltaX = event.clientX - state.startX;
+        const deltaY = event.clientY - state.startY;
+
+        if (
+          !state.horizontal &&
+          Math.abs(deltaY) > Math.abs(deltaX)
+        ) {
+          return;
+        }
+
+        if (Math.abs(deltaX) > 8) {
+          state.horizontal = true;
+        }
+
+        if (!state.horizontal) {
+          return;
+        }
+
+        state.deltaX = Math.max(-92, Math.min(0, deltaX));
+        state.row.style.setProperty(
+          "--swipe-offset",
+          `${state.deltaX}px`
+        );
+
+        event.preventDefault();
+      }
+    );
+
+
+    const finishSwipe = (event) => {
+
+      const state = this.swipeState;
+
+      if (
+        !state ||
+        state.pointerId !== event.pointerId
+      ) {
+        return;
+      }
+
+      const reveal =
+        state.horizontal &&
+        state.deltaX <= -42;
+
+      state.row.classList.toggle(
+        "is-revealed",
+        reveal
+      );
+
+      if (state.horizontal) {
+        state.row.dataset.swipeHandled =
+          "true";
+
+        setTimeout(
+          () => {
+            delete state.row.dataset.swipeHandled;
+          },
+          0
+        );
+      }
+
+      state.row.classList.remove(
+        "is-swiping"
+      );
+
+      state.row.style.removeProperty(
+        "--swipe-offset"
+      );
+
+      state.row.releasePointerCapture?.(
+        event.pointerId
+      );
+
+      this.swipeState = null;
+    };
+
+
+    container.addEventListener(
+      "pointerup",
+      finishSwipe
+    );
+
+    container.addEventListener(
+      "pointercancel",
+      finishSwipe
+    );
+  },
+
+
+  closeSwipeRows(container, except = null) {
+
+    container
+      .querySelectorAll(
+        "[data-swipe-row].is-revealed"
+      )
+      .forEach((row) => {
+
+        if (row !== except) {
+          row.classList.remove(
+            "is-revealed"
+          );
+        }
+
+      });
   },
 
 

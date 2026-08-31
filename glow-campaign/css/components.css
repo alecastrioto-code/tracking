@@ -3032,3 +3032,275 @@ body,
 .schedule-item--fixed:hover {
   transform: none;
 }
+
+/* =========================================================
+   TEN DAY RUN — POLISH BATCH 02
+   Meal strips, swipe actions, schedule edit state, Progress hero.
+========================================================= */
+
+/* Food rhythm: meal name, calories and add action are one visual unit. */
+.meal-log__strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 0.45rem 0.5rem 0.45rem 0.62rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 13px;
+}
+
+.meal-log__identity {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.meal-log__strip .check-row {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+}
+
+.meal-log__strip .meal-calories {
+  flex: 0 0 auto;
+  margin-left: 0.05rem;
+}
+
+.meal-log__strip .meal-add-food {
+  flex: 0 0 auto;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.52);
+  border-color: rgba(180, 93, 61, 0.10);
+}
+
+/* Reusable swipe-to-reveal interaction. Delete never fires on swipe alone. */
+.swipe-row {
+  --swipe-action-width: 92px;
+  --swipe-offset: 0px;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  border-radius: 14px;
+  touch-action: pan-y;
+}
+
+.swipe-row__content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  transform: translateX(var(--swipe-offset));
+  transition: transform 180ms cubic-bezier(0.2, 0.72, 0.2, 1);
+  will-change: transform;
+}
+
+.swipe-row.is-revealed .swipe-row__content {
+  transform: translateX(calc(var(--swipe-action-width) * -1));
+}
+
+.swipe-row__action {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: 1;
+  display: flex;
+  width: var(--swipe-action-width);
+  background: var(--danger, #d84d4d);
+}
+
+.swipe-delete-button,
+.meal-food-item__remove.swipe-delete-button,
+.schedule-delete-button.swipe-delete-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  padding: 0.35rem;
+  background: transparent;
+  color: #ffffff;
+  border: 0;
+  border-radius: 0;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.swipe-delete-button svg,
+.meal-food-item__remove.swipe-delete-button svg,
+.schedule-delete-button.swipe-delete-button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.meal-food-swipe {
+  background: var(--danger, #d84d4d);
+}
+
+.meal-food-swipe .meal-food-item {
+  margin: 0;
+}
+
+/* Schedule: default state is readable, editing is deliberate. */
+.schedule-block__items {
+  gap: 0.48rem;
+}
+
+.schedule-swipe-row {
+  background: var(--danger, #d84d4d);
+  border-radius: var(--radius-md);
+}
+
+.schedule-swipe-row .schedule-item {
+  margin-inline: 0;
+  padding: 0.82rem 0.9rem;
+  border: 0;
+  border-radius: var(--radius-md);
+}
+
+.schedule-item__display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.schedule-item__display-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 0.22rem;
+}
+
+.schedule-item__display-copy strong {
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: var(--weight-semibold);
+  line-height: 1.2;
+}
+
+.schedule-item__display-copy span {
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+.schedule-edit-button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.58);
+  color: var(--ink-muted);
+  border: 1px solid rgba(23, 24, 27, 0.06);
+  border-radius: 11px;
+}
+
+.schedule-edit-button svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.schedule-item--editing {
+  margin-inline: 0;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.schedule-item__edit-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(120px, 0.8fr);
+  gap: var(--space-3);
+}
+
+.schedule-item__edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.schedule-item__edit-field > span {
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.schedule-item__edit-field input,
+.schedule-item__edit-field select {
+  width: 100%;
+  min-height: 42px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.schedule-item__edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.schedule-item__edit-actions button {
+  min-height: 40px;
+}
+
+/* Progress has its own hero grid so generic responsive header rules cannot skew it. */
+.view-header--campaign {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: clamp(1rem, 4vw, 3rem);
+  width: 100%;
+}
+
+.view-header--campaign > div:first-child {
+  min-width: 0;
+  text-align: left;
+}
+
+.view-header--campaign .campaign-score-summary {
+  justify-self: end;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.swipe-row.is-swiping .swipe-row__content {
+  transition: none;
+}
+
+.swipe-row:has(.swipe-delete-button:focus-visible) .swipe-row__content {
+  transform: translateX(calc(var(--swipe-action-width) * -1));
+}
+
+/* Preserve the original state hierarchy: only completed meals get the peach strip. */
+.meal-log__strip:has(input:checked) {
+  background: rgba(255, 173, 127, 0.16);
+  border-color: rgba(180, 93, 61, 0.055);
+}

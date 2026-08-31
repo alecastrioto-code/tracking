@@ -20,6 +20,8 @@ window.GlowApp = window.GlowApp || {};
 GlowApp.ScheduleView = {
 
   initialized: false,
+  editingItemId: null,
+  swipeState: null,
 
   periods: [
     { id: "morning", label: "Morning" },
@@ -574,13 +576,19 @@ GlowApp.ScheduleView = {
     }
 
 
-    /* -----------------------------------------------------
-       Text / select changes
-    ------------------------------------------------------ */
+    this.bindSwipeReveal(editor);
+
 
     editor.addEventListener(
-      "change",
+      "click",
       event => {
+
+        if (event.target.closest(
+          '[data-swipe-row][data-swipe-handled="true"]'
+        )) {
+          event.preventDefault();
+          return;
+        }
 
         const control =
           event.target.closest(
@@ -589,6 +597,13 @@ GlowApp.ScheduleView = {
 
 
         if (!control) {
+
+          if (!event.target.closest(
+            "[data-swipe-row].is-revealed"
+          )) {
+            this.closeSwipeRows(editor);
+          }
+
           return;
         }
 
@@ -605,89 +620,345 @@ GlowApp.ScheduleView = {
         }
 
 
-        if (
-          action === "label"
-        ) {
+        if (action === "edit") {
 
-          this.updateLabel(
-            scheduleId,
-            control.value
-          );
+          this.editingItemId =
+            scheduleId;
 
-        }
-
-
-        if (
-          action === "period"
-        ) {
-
-          this.updatePeriod(
-            scheduleId,
-            control.value
-          );
-
-        }
-
-
-      }
-    );
-
-
-    /*
-      Label editing feels nicer live rather than only on blur.
-    */
-
-    editor.addEventListener(
-      "input",
-      event => {
-
-        const control =
-          event.target.closest(
-            '[data-schedule-action="label"]'
-          );
-
-
-        if (!control) {
+          this.closeSwipeRows(editor);
+          this.render();
           return;
         }
 
 
-        this.updateLabel(
-          control.dataset.scheduleId,
-          control.value,
-          false
-        );
+        if (action === "cancel") {
 
-      }
-    );
-
-
-    /* -----------------------------------------------------
-       Delete
-    ------------------------------------------------------ */
-
-    editor.addEventListener(
-      "click",
-      event => {
-
-        const deleteButton =
-          event.target.closest(
-            '[data-schedule-action="delete"]'
-          );
-
-
-        if (!deleteButton) {
+          this.editingItemId = null;
+          this.render();
           return;
         }
 
 
-        this.deleteItem(
-          deleteButton.dataset.scheduleId
+        if (action === "save") {
+
+          const editRow =
+            control.closest(
+              "[data-schedule-editor-item]"
+            );
+
+          const labelInput =
+            editRow?.querySelector(
+              "[data-schedule-edit-label]"
+            );
+
+          const periodSelect =
+            editRow?.querySelector(
+              "[data-schedule-edit-period]"
+            );
+
+
+          this.saveItem(
+            scheduleId,
+            labelInput?.value || "",
+            periodSelect?.value || ""
+          );
+
+          return;
+        }
+
+
+        if (action === "delete") {
+
+          this.deleteItem(
+            scheduleId
+          );
+        }
+
+      }
+    );
+  },
+
+
+  bindSwipeReveal(container) {
+
+    container.addEventListener(
+      "pointerdown",
+      event => {
+
+
+        if (event.target.closest(
+          ".swipe-delete-button"
+        )) {
+          return;
+        }
+
+        const row = event.target.closest(
+          "[data-swipe-row]"
         );
+
+        if (!row) {
+          return;
+        }
+
+        this.closeSwipeRows(container, row);
+        row.classList.remove("is-revealed");
+        row.classList.add("is-swiping");
+
+        this.swipeState = {
+          row,
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          deltaX: 0,
+          horizontal: false
+        };
+
+        row.setPointerCapture?.(
+          event.pointerId
+        );
+      }
+    );
+
+
+    container.addEventListener(
+      "pointermove",
+      event => {
+
+        const state =
+          this.swipeState;
+
+        if (
+          !state ||
+          state.pointerId !== event.pointerId
+        ) {
+          return;
+        }
+
+        const deltaX =
+          event.clientX - state.startX;
+
+        const deltaY =
+          event.clientY - state.startY;
+
+
+        if (
+          !state.horizontal &&
+          Math.abs(deltaY) > Math.abs(deltaX)
+        ) {
+          return;
+        }
+
+
+        if (Math.abs(deltaX) > 8) {
+          state.horizontal = true;
+        }
+
+
+        if (!state.horizontal) {
+          return;
+        }
+
+
+        state.deltaX =
+          Math.max(
+            -92,
+            Math.min(0, deltaX)
+          );
+
+        state.row.style.setProperty(
+          "--swipe-offset",
+          `${state.deltaX}px`
+        );
+
+        event.preventDefault();
+      }
+    );
+
+
+    const finishSwipe = event => {
+
+      const state =
+        this.swipeState;
+
+      if (
+        !state ||
+        state.pointerId !== event.pointerId
+      ) {
+        return;
+      }
+
+
+      const reveal =
+        state.horizontal &&
+        state.deltaX <= -42;
+
+      state.row.classList.toggle(
+        "is-revealed",
+        reveal
+      );
+
+      if (state.horizontal) {
+        state.row.dataset.swipeHandled =
+          "true";
+
+        setTimeout(
+          () => {
+            delete state.row.dataset.swipeHandled;
+          },
+          0
+        );
+      }
+
+      state.row.classList.remove(
+        "is-swiping"
+      );
+
+      state.row.style.removeProperty(
+        "--swipe-offset"
+      );
+
+      state.row.releasePointerCapture?.(
+        event.pointerId
+      );
+
+      this.swipeState = null;
+    };
+
+
+    container.addEventListener(
+      "pointerup",
+      finishSwipe
+    );
+
+    container.addEventListener(
+      "pointercancel",
+      finishSwipe
+    );
+  },
+
+
+  closeSwipeRows(container, except = null) {
+
+    container
+      .querySelectorAll(
+        "[data-swipe-row].is-revealed"
+      )
+      .forEach(row => {
+
+        if (row !== except) {
+          row.classList.remove(
+            "is-revealed"
+          );
+        }
+
+      });
+  },
+
+
+  saveItem(
+    scheduleId,
+    label,
+    period
+  ) {
+
+    const cleanLabel =
+      String(label || "").trim();
+
+    const validPeriod =
+      this.periods.some(
+        item => item.id === period
+      );
+
+
+    if (!cleanLabel) {
+      this.showToast(
+        "Give the activity a name."
+      );
+      return;
+    }
+
+
+    if (!validPeriod) {
+      return;
+    }
+
+
+    const dayNumber =
+      GlowApp.State
+        .getScheduleDayNumber();
+
+    let forcedAfternoon = false;
+
+
+    GlowApp.State.updateDay(
+      dayNumber,
+      day => {
+
+        const scheduleItem =
+          day.schedule.find(
+            item =>
+              item.id === scheduleId
+          );
+
+
+        if (
+          !scheduleItem ||
+          scheduleItem.category === "food"
+        ) {
+          return;
+        }
+
+
+        const movement =
+          this.getLinkedMovement(
+            day,
+            scheduleItem
+          );
+
+
+        scheduleItem.label =
+          cleanLabel;
+
+
+        if (movement) {
+          movement.label = cleanLabel;
+        }
+
+
+        if (movement?.type === "glute-pump") {
+
+          scheduleItem.period =
+            "afternoon";
+
+          movement.period =
+            "afternoon";
+
+          forcedAfternoon = true;
+          return;
+        }
+
+
+        scheduleItem.period =
+          period;
+
+
+        if (movement) {
+          movement.period = period;
+        }
 
       }
     );
 
+
+    this.editingItemId = null;
+    this.render();
+
+
+    if (forcedAfternoon) {
+      this.showToast(
+        "Glute pump stays in the afternoon."
+      );
+    }
   },
 
 
@@ -943,6 +1214,11 @@ GlowApp.ScheduleView = {
     );
 
 
+    if (this.editingItemId === scheduleId) {
+      this.editingItemId = null;
+    }
+
+
     this.render();
 
 
@@ -1057,6 +1333,10 @@ GlowApp.ScheduleView = {
     const isOther =
       item.category === "custom";
 
+    const isEditing =
+      !isFood &&
+      this.editingItemId === item.id;
+
 
     let badge = "Other";
 
@@ -1076,7 +1356,8 @@ GlowApp.ScheduleView = {
       movement ? "schedule-item--movement" : "",
       isFood ? "schedule-item--fixed" : "",
       isSelfCare ? "schedule-item--self-care" : "",
-      isOther ? "schedule-item--other" : ""
+      isOther ? "schedule-item--other" : "",
+      isEditing ? "schedule-item--editing" : ""
     ]
       .filter(Boolean)
       .join(" ");
@@ -1115,6 +1396,14 @@ GlowApp.ScheduleView = {
     }
 
 
+    const periodLabel =
+      this.periods.find(
+        period => period.id === item.period
+      )?.label ||
+      item.period ||
+      "Unscheduled";
+
+
     const periodOptions =
       this.periods
         .map(
@@ -1134,41 +1423,107 @@ GlowApp.ScheduleView = {
         .join("");
 
 
+    if (isEditing) {
+
+      return `
+        <article
+          class="${classes}"
+          data-schedule-editor-item="${this.escapeHTML(item.id)}"
+        >
+          ${meta}
+
+          <div class="schedule-item__edit-grid">
+            <label class="schedule-item__edit-field">
+              <span>Activity</span>
+              <input
+                class="schedule-item__label-input"
+                type="text"
+                value="${this.escapeAttribute(item.label)}"
+                data-schedule-edit-label="${this.escapeHTML(item.id)}"
+                aria-label="Activity name"
+              >
+            </label>
+
+            <label class="schedule-item__edit-field">
+              <span>Time</span>
+              <select
+                class="schedule-item__period"
+                data-schedule-edit-period="${this.escapeHTML(item.id)}"
+                aria-label="Schedule period"
+                ${
+                  movement?.type === "glute-pump"
+                    ? "disabled"
+                    : ""
+                }
+              >
+                ${periodOptions}
+              </select>
+            </label>
+          </div>
+
+          <div class="schedule-item__edit-actions">
+            <button
+              class="secondary-button schedule-edit-cancel"
+              type="button"
+              data-schedule-action="cancel"
+              data-schedule-id="${this.escapeHTML(item.id)}"
+            >
+              Cancel
+            </button>
+
+            <button
+              class="primary-button schedule-edit-save"
+              type="button"
+              data-schedule-action="save"
+              data-schedule-id="${this.escapeHTML(item.id)}"
+            >
+              Save
+            </button>
+          </div>
+        </article>
+      `;
+    }
+
+
     return `
-      <article class="${classes}">
+      <div
+        class="swipe-row schedule-swipe-row"
+        data-swipe-row
+      >
+        <article class="${classes} swipe-row__content">
 
-        ${meta}
+          ${meta}
 
-        <div class="schedule-item__main">
-          <input
-            class="schedule-item__label-input"
-            type="text"
-            value="${this.escapeAttribute(item.label)}"
-            data-schedule-action="label"
-            data-schedule-id="${this.escapeHTML(item.id)}"
-            aria-label="Schedule item label"
-          >
-        </div>
+          <div class="schedule-item__display">
+            <div class="schedule-item__display-copy">
+              <strong>${this.escapeHTML(item.label)}</strong>
+              <span>${this.escapeHTML(periodLabel)}</span>
+            </div>
 
+            <button
+              class="schedule-edit-button"
+              type="button"
+              data-schedule-action="edit"
+              data-schedule-id="${this.escapeHTML(item.id)}"
+              aria-label="Edit ${this.escapeAttribute(item.label)}"
+              title="Edit"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="M4 20h4l11-11-4-4L4 16v4Z"></path>
+                <path d="m13.5 6.5 4 4"></path>
+              </svg>
+            </button>
+          </div>
 
-        <div class="schedule-item__controls">
-          <select
-            class="schedule-item__period"
-            data-schedule-action="period"
-            data-schedule-id="${this.escapeHTML(item.id)}"
-            aria-label="Schedule period"
-            ${
-              movement?.type === "glute-pump"
-                ? "disabled"
-                : ""
-            }
-          >
-            ${periodOptions}
-          </select>
+        </article>
 
-
+        <div class="swipe-row__action">
           <button
-            class="schedule-delete-button"
+            class="swipe-delete-button schedule-delete-button"
             type="button"
             data-schedule-action="delete"
             data-schedule-id="${this.escapeHTML(item.id)}"
@@ -1186,10 +1541,10 @@ GlowApp.ScheduleView = {
               <path d="M10 11v5"></path>
               <path d="M14 11v5"></path>
             </svg>
+            <span>Remove</span>
           </button>
-
         </div>
-      </article>
+      </div>
     `;
   },
 
