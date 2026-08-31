@@ -2103,3 +2103,174 @@
     gap: 0.25rem 0.45rem;
   }
 }
+
+/* =========================================================
+   TEN DAY RUN — POLISH BATCH 01 / MOBILE
+========================================================= */
+
+@media (max-width: 820px) {
+
+  /* Today hero: same identity, materially less visual weight. */
+  .day-hero {
+    padding:
+      14px
+      var(--page-gutter)
+      18px;
+  }
+
+  .day-hero h1 {
+    margin-top: 0;
+    font-size: clamp(2.65rem, 12.5vw, 3.75rem);
+    line-height: 0.9;
+  }
+
+  .day-score {
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+    margin-bottom: 10px;
+  }
+
+  .day-score__numbers {
+    gap: 4px;
+  }
+
+  .day-score__numbers strong {
+    font-size: clamp(2.15rem, 10vw, 3rem);
+    line-height: 0.9;
+  }
+
+  .day-score__numbers > span {
+    font-size: 0.96rem;
+  }
+
+  .day-score__percentage strong {
+    font-size: 1.35rem;
+  }
+
+  .day-score__percentage span {
+    font-size: 0.64rem;
+  }
+
+  .day-hero .progress-bar {
+    height: 5px;
+    border-radius: var(--radius-pill);
+  }
+
+  .day-status {
+    margin-top: 8px;
+    font-size: 0.72rem;
+  }
+
+  /* Food rhythm: compact meal actions and left-aligned logged foods. */
+  .meal-log {
+    padding-block: 0.48rem 0.64rem;
+  }
+
+  .meal-log__header {
+    gap: 8px;
+  }
+
+  .meal-log__actions {
+    gap: 7px;
+  }
+
+  .meal-calories {
+    font-size: 0.66rem;
+  }
+
+  .meal-food-items {
+    gap: 0.42rem;
+    margin: 0.48rem 0 0.18rem;
+  }
+
+  .meal-food-item {
+    padding: 0.7rem 0.68rem;
+  }
+
+  .meal-food-item__main strong {
+    white-space: normal;
+  }
+
+  .meal-food-item__remove,
+  .meal-add-food {
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+  }
+
+  .meal-add-food {
+    margin-left: 0;
+    padding: 0;
+  }
+
+  /* Progress score already lives in the hero/header; keep it compact. */
+  #view-campaign .view-header {
+    align-items: flex-end;
+  }
+
+  #view-campaign .campaign-score-summary {
+    align-items: flex-end;
+  }
+
+  /* Schedule add flow becomes a small composer under the single CTA. */
+  .schedule-editor__header {
+    align-items: center;
+  }
+
+  #add-schedule-item-button {
+    min-height: 42px;
+    padding-inline: 0.9rem;
+  }
+
+  .schedule-add-panel {
+    margin: -0.15rem 0 1rem;
+    padding: 0.9rem;
+    border-radius: 18px;
+  }
+
+  .schedule-add-panel__grid {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
+  .schedule-add-field select,
+  .schedule-add-field input {
+    min-height: 46px;
+    border-radius: 13px;
+  }
+
+  .schedule-add-panel__actions {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+
+  .schedule-add-panel__actions button {
+    min-height: 44px;
+  }
+
+  .schedule-item,
+  .schedule-item--movement,
+  .schedule-item--self-care,
+  .schedule-item--other {
+    gap: 0.55rem;
+  }
+
+  .schedule-item__meta {
+    margin: 0 0 0.05rem;
+  }
+
+  .schedule-item__badge,
+  .schedule-item__note {
+    min-height: 24px;
+    font-size: 0.61rem;
+  }
+
+  .schedule-item--fixed {
+    padding-right: 0;
+  }
+
+  .schedule-item__static-label {
+    padding-top: 0.1rem;
+  }
+}

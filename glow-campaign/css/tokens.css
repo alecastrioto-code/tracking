@@ -76,6 +76,12 @@
   --mint-soft: #e3f5ef;
   --mint-faint: #f3fbf8;
 
+  /* Quiet neutral family for uncategorised / Other schedule items. */
+  --stone: #c9c2b8;
+  --stone-strong: #81786e;
+  --stone-soft: #ece8e3;
+  --stone-faint: #f8f6f3;
+
   /* Generic action accent. Category components override this. */
   --accent: var(--peach-strong);
   --accent-hover: #ef8559;

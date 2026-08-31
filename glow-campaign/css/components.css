@@ -2822,3 +2822,213 @@ body,
 .schedule-item--movement .schedule-item__badge {
   color: var(--ink);
 }
+
+/* =========================================================
+   TEN DAY RUN — POLISH BATCH 01
+   Scoped refinements for food logging + schedule editing.
+========================================================= */
+
+/* Meal header now carries completion, meal calories and add action. */
+.meal-log__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.meal-log__header .check-row {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.meal-log__actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: var(--space-2);
+}
+
+.meal-calories {
+  color: #9a543d;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.meal-calories[hidden] {
+  display: none;
+}
+
+.meal-food-items {
+  margin: 0.45rem 0 0.3rem;
+}
+
+.meal-food-item {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.meal-food-item__main {
+  flex: 1;
+  text-align: left;
+}
+
+.meal-food-item__remove {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(23, 24, 27, 0.055);
+}
+
+.meal-food-item__remove svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.meal-add-food {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  margin-left: 0;
+  padding: 0;
+  background: rgba(255, 173, 127, 0.13);
+  border: 1px solid rgba(180, 93, 61, 0.10);
+  border-radius: 11px;
+  color: #a95538;
+}
+
+.meal-add-food > span {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* Schedule composer: one entry point, conditional fields. */
+.schedule-add-panel {
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.schedule-add-panel[hidden],
+.schedule-add-field[hidden] {
+  display: none;
+}
+
+.schedule-add-panel__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.schedule-add-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.schedule-add-field > span {
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.schedule-add-field select,
+.schedule-add-field input {
+  width: 100%;
+  min-height: 44px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.schedule-add-panel__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+/* Tags lead the schedule card, rather than sitting under the activity. */
+.schedule-item__meta {
+  order: -1;
+  margin-top: 0;
+  margin-bottom: 0.1rem;
+}
+
+.schedule-item__badge {
+  background: var(--surface-muted);
+  color: var(--ink-muted);
+}
+
+.schedule-item--movement {
+  background: var(--lime-faint);
+  border-color: rgba(113, 140, 19, 0.12);
+}
+
+.schedule-item--movement .schedule-item__badge {
+  background: var(--lime-soft);
+  color: #657915;
+}
+
+.schedule-item--self-care {
+  margin-inline: calc(var(--space-2) * -1);
+  padding-inline: var(--space-2);
+  background: var(--lilac-faint);
+  border-radius: var(--radius-sm);
+}
+
+.schedule-item--self-care .schedule-item__badge {
+  background: var(--lilac-soft);
+  color: #6853ad;
+}
+
+.schedule-item--other {
+  margin-inline: calc(var(--space-2) * -1);
+  padding-inline: var(--space-2);
+  background: var(--stone-faint);
+  border-radius: var(--radius-sm);
+}
+
+.schedule-item--other .schedule-item__badge {
+  background: var(--stone-soft);
+  color: var(--stone-strong);
+}
+
+.schedule-item--fixed {
+  padding-right: 0;
+  background: transparent;
+}
+
+.schedule-item--fixed .schedule-item__badge {
+  background: var(--peach-soft);
+  color: #985139;
+}
+
+.schedule-item__static-label {
+  padding: 0.22rem 0 0.15rem;
+  color: var(--ink);
+  font-size: 0.98rem;
+}
+
+.schedule-item__static-label strong {
+  font-weight: var(--weight-semibold);
+}
+
+/* No interaction target should imply that fixed food goals can move. */
+.schedule-item--fixed:hover {
+  transform: none;
+}

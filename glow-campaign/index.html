@@ -133,8 +133,6 @@
           <div class="day-hero__topline">
 
             <div>
-              <p class="eyebrow">Current mission</p>
-
               <h1 id="today-title">
                 Day <span id="current-day-number">1</span>
                 <span class="muted">/ 10</span>
@@ -264,110 +262,158 @@
             <div class="habit-list meal-log-list">
 
               <section class="meal-log" data-meal-log="breakfast">
-                <label class="check-row">
-                  <input
-                    type="checkbox"
-                    data-food-meal="breakfast"
-                  >
+                <div class="meal-log__header">
+                  <label class="check-row">
+                    <input
+                      type="checkbox"
+                      data-food-meal="breakfast"
+                    >
 
-                  <span class="custom-checkbox"></span>
-                  <span>Breakfast</span>
-                </label>
+                    <span class="custom-checkbox"></span>
+                    <span>Breakfast</span>
+                  </label>
+
+                  <div class="meal-log__actions">
+                    <span
+                      class="meal-calories"
+                      data-meal-calories="breakfast"
+                      hidden
+                    ></span>
+
+                    <button
+                      class="meal-add-food"
+                      type="button"
+                      data-add-food="breakfast"
+                      aria-label="Add food to Breakfast"
+                      title="Add food"
+                    >
+                      <span aria-hidden="true">＋</span>
+                    </button>
+                  </div>
+                </div>
 
                 <div
                   class="meal-food-items"
                   data-meal-items="breakfast"
                   hidden
                 ></div>
-
-                <button
-                  class="meal-add-food"
-                  type="button"
-                  data-add-food="breakfast"
-                >
-                  <span aria-hidden="true">＋</span> Add food
-                </button>
               </section>
 
 
               <section class="meal-log" data-meal-log="lunch">
-                <label class="check-row">
-                  <input
-                    type="checkbox"
-                    data-food-meal="lunch"
-                  >
+                <div class="meal-log__header">
+                  <label class="check-row">
+                    <input
+                      type="checkbox"
+                      data-food-meal="lunch"
+                    >
 
-                  <span class="custom-checkbox"></span>
-                  <span>Lunch</span>
-                </label>
+                    <span class="custom-checkbox"></span>
+                    <span>Lunch</span>
+                  </label>
+
+                  <div class="meal-log__actions">
+                    <span
+                      class="meal-calories"
+                      data-meal-calories="lunch"
+                      hidden
+                    ></span>
+
+                    <button
+                      class="meal-add-food"
+                      type="button"
+                      data-add-food="lunch"
+                      aria-label="Add food to Lunch"
+                      title="Add food"
+                    >
+                      <span aria-hidden="true">＋</span>
+                    </button>
+                  </div>
+                </div>
 
                 <div
                   class="meal-food-items"
                   data-meal-items="lunch"
                   hidden
                 ></div>
-
-                <button
-                  class="meal-add-food"
-                  type="button"
-                  data-add-food="lunch"
-                >
-                  <span aria-hidden="true">＋</span> Add food
-                </button>
               </section>
 
 
               <section class="meal-log" data-meal-log="snack">
-                <label class="check-row">
-                  <input
-                    type="checkbox"
-                    data-food-meal="snack"
-                  >
+                <div class="meal-log__header">
+                  <label class="check-row">
+                    <input
+                      type="checkbox"
+                      data-food-meal="snack"
+                    >
 
-                  <span class="custom-checkbox"></span>
-                  <span>Snack / treat</span>
-                </label>
+                    <span class="custom-checkbox"></span>
+                    <span>Snack / treat</span>
+                  </label>
+
+                  <div class="meal-log__actions">
+                    <span
+                      class="meal-calories"
+                      data-meal-calories="snack"
+                      hidden
+                    ></span>
+
+                    <button
+                      class="meal-add-food"
+                      type="button"
+                      data-add-food="snack"
+                      aria-label="Add food to Snack / treat"
+                      title="Add food"
+                    >
+                      <span aria-hidden="true">＋</span>
+                    </button>
+                  </div>
+                </div>
 
                 <div
                   class="meal-food-items"
                   data-meal-items="snack"
                   hidden
                 ></div>
-
-                <button
-                  class="meal-add-food"
-                  type="button"
-                  data-add-food="snack"
-                >
-                  <span aria-hidden="true">＋</span> Add food
-                </button>
               </section>
 
 
               <section class="meal-log" data-meal-log="dinner">
-                <label class="check-row">
-                  <input
-                    type="checkbox"
-                    data-food-meal="dinner"
-                  >
+                <div class="meal-log__header">
+                  <label class="check-row">
+                    <input
+                      type="checkbox"
+                      data-food-meal="dinner"
+                    >
 
-                  <span class="custom-checkbox"></span>
-                  <span>Dinner</span>
-                </label>
+                    <span class="custom-checkbox"></span>
+                    <span>Dinner</span>
+                  </label>
+
+                  <div class="meal-log__actions">
+                    <span
+                      class="meal-calories"
+                      data-meal-calories="dinner"
+                      hidden
+                    ></span>
+
+                    <button
+                      class="meal-add-food"
+                      type="button"
+                      data-add-food="dinner"
+                      aria-label="Add food to Dinner"
+                      title="Add food"
+                    >
+                      <span aria-hidden="true">＋</span>
+                    </button>
+                  </div>
+                </div>
 
                 <div
                   class="meal-food-items"
                   data-meal-items="dinner"
                   hidden
                 ></div>
-
-                <button
-                  class="meal-add-food"
-                  type="button"
-                  data-add-food="dinner"
-                >
-                  <span aria-hidden="true">＋</span> Add food
-                </button>
               </section>
 
             </div>
@@ -432,13 +478,6 @@
 
             </header>
 
-
-            <p
-              class="nutrition-source-note"
-              id="nutrition-source-note"
-            >
-              Enter totals manually, or add foods above to calculate them automatically.
-            </p>
 
 
             <div class="nutrition-fields">
@@ -1536,29 +1575,6 @@
 
 
 
-        <!-- Reward status -->
-
-        <section
-          class="reward-panel"
-          aria-labelledby="reward-title"
-        >
-
-          <p class="eyebrow">
-            Current reward tier
-          </p>
-
-          <h2 id="reward-title">
-            Run in progress
-          </h2>
-
-          <p id="reward-description">
-            Keep completing the behaviors. Rewards are based only on behavioral completion.
-          </p>
-
-        </section>
-
-
-
         <!-- Recovery trend placeholders -->
 
         <section
@@ -1723,10 +1739,88 @@
               type="button"
               id="add-schedule-item-button"
             >
-              + Add item
+              Add activity
             </button>
 
           </header>
+
+
+          <div
+            class="schedule-add-panel"
+            id="schedule-add-panel"
+            hidden
+          >
+            <div class="schedule-add-panel__grid">
+
+              <label class="schedule-add-field">
+                <span>Group</span>
+                <select id="schedule-activity-category">
+                  <option value="movement">Training</option>
+                  <option value="glow">Self care</option>
+                  <option value="custom">Other</option>
+                </select>
+              </label>
+
+              <label
+                class="schedule-add-field"
+                id="schedule-training-field"
+              >
+                <span>Training</span>
+                <select id="schedule-training-type"></select>
+              </label>
+
+              <label
+                class="schedule-add-field"
+                id="schedule-self-care-field"
+                hidden
+              >
+                <span>Self care</span>
+                <select id="schedule-self-care-type">
+                  <option value="somatoline">Somatoline</option>
+                  <option value="skincare">Skincare</option>
+                  <option value="other">Other</option>
+                </select>
+              </label>
+
+              <label
+                class="schedule-add-field"
+                id="schedule-custom-field"
+                hidden
+              >
+                <span>Activity</span>
+                <input
+                  type="text"
+                  id="schedule-custom-label"
+                  placeholder="Name this activity"
+                  autocomplete="off"
+                >
+              </label>
+
+              <label class="schedule-add-field">
+                <span>Time</span>
+                <select id="schedule-activity-period"></select>
+              </label>
+
+            </div>
+
+            <div class="schedule-add-panel__actions">
+              <button
+                class="secondary-button"
+                type="button"
+                id="cancel-schedule-activity-button"
+              >
+                Cancel
+              </button>
+
+              <button
+                class="primary-button"
+                type="button"
+                id="confirm-schedule-activity-button"
+              >
+                Add to Day <span id="schedule-add-day-number">1</span>
+              </button>
+            </div>
+          </div>
 
 
           <div

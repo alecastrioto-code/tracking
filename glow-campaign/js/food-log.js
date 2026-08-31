@@ -6,7 +6,8 @@
    - automatic nutrition totals
    - recent foods from reliable localStorage food memory
    - barcode lookup through Open Food Facts
-   - text search through Open Food Facts full-text endpoint
+   - generic food search through USDA FoodData Central
+   - packaged-product text search through Open Food Facts
    - manual fallback
 
    Camera scanning uses ZXing Browser and is loaded only when
@@ -181,6 +182,24 @@ GlowApp.FoodLog = {
   },
 
 
+  getMealCalories(day, mealId) {
+
+    this.ensureDayModel(day);
+
+    const items =
+      day.foodLog?.[mealId] ||
+      [];
+
+    const total = items.reduce(
+      (sum, item) =>
+        sum + Number(item.calories || 0),
+      0
+    );
+
+    return Math.round(total);
+  },
+
+
   syncNutrition(day) {
 
     this.ensureDayModel(day);
@@ -265,6 +284,28 @@ GlowApp.FoodLog = {
 
       const items = day.foodLog[meal.id];
 
+      const calorieTotal =
+        document.querySelector(
+          `[data-meal-calories="${meal.id}"]`
+        );
+
+      if (calorieTotal) {
+
+        const calories =
+          this.getMealCalories(
+            day,
+            meal.id
+          );
+
+        calorieTotal.textContent =
+          items.length
+            ? `${calories} kcal`
+            : "";
+
+        calorieTotal.hidden =
+          !items.length;
+      }
+
 
       if (!items.length) {
 
@@ -306,7 +347,17 @@ GlowApp.FoodLog = {
                 aria-label="Remove ${this.escapeAttribute(item.name)} from ${meal.label}"
                 title="Remove"
               >
-                <span aria-hidden="true">×</span>
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d="M4 7h16"></path>
+                  <path d="M9 7V4h6v3"></path>
+                  <path d="M7 7l1 13h8l1-13"></path>
+                  <path d="M10 11v5"></path>
+                  <path d="M14 11v5"></path>
+                </svg>
               </button>
 
             </article>
@@ -317,48 +368,6 @@ GlowApp.FoodLog = {
 
     });
 
-
-    this.renderNutritionSource(day);
-  },
-
-
-  renderNutritionSource(day) {
-
-    const note = document.getElementById(
-      "nutrition-source-note"
-    );
-
-
-    if (!note) {
-      return;
-    }
-
-
-    if (!this.hasItems(day)) {
-
-      note.innerHTML = `
-        Enter totals manually, or add foods above to calculate them automatically.
-      `;
-
-      note.classList.remove(
-        "nutrition-source-note--auto"
-      );
-
-      return;
-    }
-
-
-    const totals = this.getTotals(day);
-
-
-    note.innerHTML = `
-      <strong>Calculated from ${totals.itemCount} logged ${totals.itemCount === 1 ? "food" : "foods"}.</strong>
-      Remove the food log entries to return to manual totals.
-    `;
-
-    note.classList.add(
-      "nutrition-source-note--auto"
-    );
   },
 
 
@@ -883,7 +892,9 @@ GlowApp.FoodLog = {
 
 
     let localFoods = [];
+    let genericFoods = [];
     let remoteFoods = [];
+    let genericError = null;
     let remoteError = null;
 
 
@@ -891,6 +902,13 @@ GlowApp.FoodLog = {
       localFoods = await GlowApp.FoodLibrary.search(parsed.query, 6);
     } catch (error) {
       localFoods = [];
+    }
+
+
+    try {
+      genericFoods = await this.searchUSDA(parsed.query);
+    } catch (error) {
+      genericError = error;
     }
 
 
@@ -914,6 +932,17 @@ GlowApp.FoodLog = {
     );
 
 
+    const uniqueGeneric = genericFoods
+      .filter(food => !seen.has(food.id))
+      .map(food => {
+        seen.add(food.id);
+        return {
+          ...food,
+          resultSourceLabel: "USDA generic food"
+        };
+      });
+
+
     const uniqueRemote = remoteFoods
       .filter(food => !seen.has(food.id))
       .map(food => ({
@@ -924,6 +953,7 @@ GlowApp.FoodLog = {
 
     this.searchResults = [
       ...taggedLocalFoods,
+      ...uniqueGeneric,
       ...uniqueRemote
     ];
 
@@ -932,7 +962,7 @@ GlowApp.FoodLog = {
 
       if (status) {
 
-        status.textContent = remoteError
+        status.textContent = genericError && remoteError
           ? "No local match. Online search is unavailable right now — you can still add it manually."
           : "Nothing reliable found. Add it manually instead.";
       }
@@ -983,9 +1013,19 @@ GlowApp.FoodLog = {
 
     if (status) {
 
-      const onlineCopy = remoteError
-        ? "Online results unavailable; showing foods saved on this device."
-        : "Your foods are ranked first, followed by database matches.";
+      let onlineCopy =
+        "Your foods come first, then common foods and packaged products.";
+
+      if (genericError && remoteError) {
+        onlineCopy =
+          "Online results are unavailable; showing foods saved on this device.";
+      } else if (genericError) {
+        onlineCopy =
+          "Common-food search is unavailable; showing your foods and packaged products.";
+      } else if (remoteError) {
+        onlineCopy =
+          "Packaged-product search is unavailable; showing your foods and common foods.";
+      }
 
       status.textContent = onlineCopy;
     }
@@ -1067,6 +1107,123 @@ GlowApp.FoodLog = {
         Number.isFinite(amountG) && amountG > 0
           ? amountG
           : null
+    };
+  },
+
+
+  async searchUSDA(query) {
+
+    /*
+      FoodData Central covers generic foods much better than a
+      packaged-product database. For this personal static app we use
+      USDA's documented DEMO_KEY, which has intentionally low limits.
+      If it is rate-limited, Open Food Facts and manual entry remain
+      available as fallbacks.
+    */
+
+    const response = await fetch(
+      "https://api.nal.usda.gov/fdc/v1/foods/search?api_key=DEMO_KEY",
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          query,
+          pageSize: 8,
+          dataType: [
+            "Foundation",
+            "SR Legacy",
+            "Survey (FNDDS)"
+          ]
+        })
+      }
+    );
+
+
+    if (!response.ok) {
+      throw new Error(
+        `Generic food search failed (${response.status}).`
+      );
+    }
+
+
+    const data = await response.json();
+
+
+    return (Array.isArray(data.foods) ? data.foods : [])
+      .map(food => this.normalizeUSDAFood(food))
+      .filter(
+        food =>
+          food &&
+          food.name &&
+          food.per100?.calories !== null
+      )
+      .slice(0, 8);
+  },
+
+
+  normalizeUSDAFood(food) {
+
+    if (!food) {
+      return null;
+    }
+
+
+    const nutrients =
+      Array.isArray(food.foodNutrients)
+        ? food.foodNutrients
+        : [];
+
+
+    const nutrientValue = (...ids) => {
+
+      for (const id of ids) {
+
+        const nutrient = nutrients.find(
+          item =>
+            Number(item.nutrientId) === Number(id)
+        );
+
+        const value =
+          this.toNullableNumber(
+            nutrient?.value
+          );
+
+        if (value !== null) {
+          return value;
+        }
+      }
+
+      return null;
+    };
+
+
+    const calories =
+      nutrientValue(1008, 2047, 2048);
+
+    const protein =
+      nutrientValue(1003);
+
+    const fibre =
+      nutrientValue(1079);
+
+
+    return {
+      id: `usda-${food.fdcId}`,
+      name:
+        String(food.description || "").trim(),
+      brand: "",
+      source: "usda",
+      barcode: "",
+      dataType:
+        String(food.dataType || ""),
+      per100: {
+        calories,
+        protein,
+        fibre
+      }
     };
   },
 
@@ -2049,6 +2206,11 @@ GlowApp.FoodLog = {
 
 
   getSourceCopy(food) {
+
+    if (food?.source === "usda") {
+      return "Generic nutrition data from USDA FoodData Central. Adjust the portion to match what you had.";
+    }
+
 
     if (food?.source === "openfoodfacts") {
       return "Product data from Open Food Facts. Check the package if anything looks wrong.";
