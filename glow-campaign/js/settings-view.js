@@ -22,7 +22,6 @@ GlowApp.SettingsView = {
 
     this.bindNutritionSettings();
     this.bindWaterSettings();
-    this.bindGlowSettings();
     this.bindRewardSettings();
 
     this.initialized = true;
@@ -46,13 +45,13 @@ GlowApp.SettingsView = {
 
 
     this.setInputValue(
-      "setting-calories-min",
-      settings.nutrition.caloriesMin
+      "setting-calories-max",
+      settings.nutrition.caloriesMax
     );
 
     this.setInputValue(
-      "setting-calories-max",
-      settings.nutrition.caloriesMax
+      "setting-calories-grace-max",
+      settings.nutrition.caloriesGraceMax
     );
 
     this.setInputValue(
@@ -68,11 +67,6 @@ GlowApp.SettingsView = {
     this.setInputValue(
       "setting-water-target",
       settings.water.targetGlasses
-    );
-
-    this.setInputValue(
-      "setting-skincare-label",
-      settings.glow.skincareLabel
     );
 
 
@@ -92,13 +86,13 @@ GlowApp.SettingsView = {
     const fields = [
 
       {
-        id: "setting-calories-min",
-        key: "caloriesMin"
+        id: "setting-calories-max",
+        key: "caloriesMax"
       },
 
       {
-        id: "setting-calories-max",
-        key: "caloriesMax"
+        id: "setting-calories-grace-max",
+        key: "caloriesGraceMax"
       },
 
       {
@@ -175,53 +169,22 @@ GlowApp.SettingsView = {
 
   validateCalorieRange() {
 
-    const settings =
-      GlowApp.State.get().settings;
+    const settings = GlowApp.State.get().settings;
+    const max = Number(settings.nutrition.caloriesMax);
+    const graceMax = Number(settings.nutrition.caloriesGraceMax);
 
-
-    const min =
-      Number(
-        settings.nutrition
-          .caloriesMin
-      );
-
-    const max =
-      Number(
-        settings.nutrition
-          .caloriesMax
-      );
-
-
-    if (min <= max) {
+    if (graceMax >= max) {
       return;
     }
 
-
-    /*
-      If the values cross, swap them rather than leaving
-      impossible scoring rules.
-    */
-
     GlowApp.State.updateSettings(
       current => {
-
-        current.nutrition
-          .caloriesMin = max;
-
-        current.nutrition
-          .caloriesMax = min;
-
+        current.nutrition.caloriesGraceMax = max;
       }
     );
 
-
     this.render();
-
-
-    this.showToast(
-      "Calorie bounds reordered."
-    );
-
+    this.showToast("Grace ceiling cannot be below the full-point ceiling.");
   },
 
 
@@ -281,142 +244,6 @@ GlowApp.SettingsView = {
 
       }
     );
-
-  },
-
-
-  /* =======================================================
-     GLOW LABEL
-  ======================================================== */
-
-  bindGlowSettings() {
-
-    const input =
-      document.getElementById(
-        "setting-skincare-label"
-      );
-
-
-    if (!input) {
-      return;
-    }
-
-
-    input.addEventListener(
-      "change",
-      () => {
-
-        const label =
-          input.value.trim();
-
-
-        if (!label) {
-
-          this.render();
-          return;
-
-        }
-
-
-        this.updateSkincareLabel(
-          label
-        );
-
-
-        this.showToast(
-          "Self-care label updated."
-        );
-
-      }
-    );
-
-  },
-
-
-  updateSkincareLabel(newLabel) {
-
-    const state =
-      GlowApp.State.get();
-
-
-    const oldLabel =
-      state.settings.glow
-        .skincareLabel;
-
-
-    /*
-      Update global default.
-    */
-
-    state.settings.glow
-      .skincareLabel =
-      newLabel;
-
-
-    /*
-      Existing days that still use the old default follow
-      the new label.
-
-      If you later customise an individual day manually,
-      that custom wording is preserved.
-    */
-
-    state.campaigns.forEach(
-      campaign => {
-
-        campaign.days.forEach(
-          day => {
-
-            if (
-              !day.glow
-                .skincareLabel ||
-              day.glow
-                .skincareLabel ===
-                oldLabel
-            ) {
-
-              day.glow
-                .skincareLabel =
-                newLabel;
-
-            }
-
-
-            /*
-              Keep the timeline copy aligned as well.
-            */
-
-            day.schedule
-              ?.forEach(
-                item => {
-
-                  if (
-                    item.category ===
-                      "glow" &&
-                    (
-                      item.label ===
-                        oldLabel ||
-                      item.label ===
-                        "PM skincare"
-                    )
-                  ) {
-
-                    item.label =
-                      newLabel;
-
-                  }
-
-                }
-              );
-
-          }
-        );
-
-      }
-    );
-
-
-    GlowApp.State.save();
 
   },
 

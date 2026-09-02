@@ -26,27 +26,27 @@ GlowApp.State = {
 
     const savedState = GlowApp.Storage.load();
 
-
-    if (savedState) {
-
-      this.data = savedState;
-
-    } else {
-
+    /*
+      v3 intentionally starts a fresh experiment. The food library
+      lives under its own localStorage key, so this resets run data
+      without erasing remembered foods. Once saved as v3, reopening
+      the app never resets it again.
+    */
+    if (savedState && Number(savedState.version || 0) < 3) {
       this.data = GlowApp.createDefaultAppState();
-
-      GlowApp.Storage.save(
-        this.data
-      );
-
+      GlowApp.Storage.save(this.data);
+    } else if (savedState) {
+      this.data = savedState;
+    } else {
+      this.data = GlowApp.createDefaultAppState();
+      GlowApp.Storage.save(this.data);
     }
-
 
     this.migrateLegacyCopy();
     this.migrateFoodLoggingModel();
     this.ensureValidSelections();
+    this.ensureChallengeForDay(this.getSelectedDayNumber());
     this.save();
-
 
     return this.data;
   },
@@ -406,6 +406,94 @@ GlowApp.State = {
 
 
   /* =======================================================
+     CHALLENGE ASSIGNMENT
+
+     Odd days receive a flexibility challenge. A failed challenge
+     repeats on the next flexibility day; a passed challenge is
+     removed from the run pool. Even days use the fixed
+     30-minute disconnection challenge.
+  ======================================================== */
+
+  ensureChallengeForDay(dayNumber) {
+
+    const campaign = this.getActiveCampaign();
+    const day = this.getDay(dayNumber);
+
+    if (!campaign || !day) {
+      return null;
+    }
+
+    if (!day.challenge) {
+      day.challenge = Number(dayNumber) % 2 === 0
+        ? { type: "disconnection", challengeId: "disconnection", label: "30 minutes of disconnection", done: false }
+        : { type: "flexibility", challengeId: null, label: "", done: false };
+    }
+
+    if (day.challenge.type !== "flexibility") {
+      return day.challenge;
+    }
+
+    if (day.challenge.challengeId) {
+      return day.challenge;
+    }
+
+    const previousDayNumber = Number(dayNumber) - 2;
+
+    if (previousDayNumber >= 1) {
+      const previousDay = this.getDay(previousDayNumber);
+      this.ensureChallengeForDay(previousDayNumber);
+
+      if (previousDay?.challenge?.challengeId) {
+        const previousScore = GlowApp.Scoring.getDayScore(previousDay, this.data.settings);
+        const previousStatus = GlowApp.Scoring.getChallengeStatus(previousDay, previousScore);
+
+        if (!previousStatus.passed) {
+          day.challenge.challengeId = previousDay.challenge.challengeId;
+          day.challenge.label = previousDay.challenge.label;
+          this.save();
+          return day.challenge;
+        }
+      }
+    }
+
+    const pool = Array.isArray(campaign.challengePool) && campaign.challengePool.length
+      ? campaign.challengePool
+      : GlowApp.FLEXIBILITY_CHALLENGES.map(item => item.id);
+
+    campaign.challengePool = pool.slice();
+
+    const passedIds = new Set();
+    campaign.days
+      .filter(candidate => candidate.dayNumber < Number(dayNumber) && candidate.challenge?.type === "flexibility")
+      .forEach(candidate => {
+        if (!candidate.challenge?.challengeId) return;
+        const candidateScore = GlowApp.Scoring.getDayScore(candidate, this.data.settings);
+        if (GlowApp.Scoring.getChallengeStatus(candidate, candidateScore).passed) {
+          passedIds.add(candidate.challenge.challengeId);
+        }
+      });
+
+    let available = pool.filter(id => !passedIds.has(id));
+    if (!available.length) {
+      available = pool.slice();
+    }
+
+    const chosenId = available[Math.floor(Math.random() * available.length)];
+    const definition = GlowApp.FLEXIBILITY_CHALLENGES.find(item => item.id === chosenId);
+
+    if (!definition) {
+      return day.challenge;
+    }
+
+    day.challenge.challengeId = definition.id;
+    day.challenge.label = definition.label;
+    this.save();
+
+    return day.challenge;
+  },
+
+
+  /* =======================================================
      UPDATE DAY
 
      Generic helper for mutations.
@@ -529,178 +617,23 @@ GlowApp.State = {
 
 resetActiveCampaign() {
 
-  const campaign =
-    this.getActiveCampaign();
-
-
+  const campaign = this.getActiveCampaign();
   if (!campaign) {
     return false;
   }
 
+  campaign.days = GlowApp.createDefaultDays();
+  campaign.challengePool = GlowApp.FLEXIBILITY_CHALLENGES.map(item => item.id);
+  campaign.currentDay = 1;
+  campaign.status = "active";
+  campaign.startDate = new Date().toISOString().slice(0, 10);
 
-  campaign.days.forEach(
-    day => {
-
-      /* ---------------------------------------------
-         Food
-      ---------------------------------------------- */
-
-      day.food = {
-        breakfast: false,
-        lunch: false,
-        snack: false,
-        dinner: false,
-        continuousGrazing: false
-      };
-
-
-      /* ---------------------------------------------
-         Nutrition
-      ---------------------------------------------- */
-
-      day.nutrition = {
-        calories: null,
-        protein: null,
-        fibre: null,
-        source: "manual",
-        manualValues: {
-          calories: null,
-          protein: null,
-          fibre: null
-        }
-      };
-
-
-      /* ---------------------------------------------
-         Food log
-
-         Clear foods from this run, but keep the global
-         local food library for fast reuse next time.
-      ---------------------------------------------- */
-
-      day.foodLog = {
-        breakfast: [],
-        lunch: [],
-        snack: [],
-        dinner: []
-      };
-
-
-      /* ---------------------------------------------
-         Water
-
-         Preserve current number of glasses.
-      ---------------------------------------------- */
-
-      const waterLength =
-        Array.isArray(
-          day.water?.glasses
-        )
-          ? day.water.glasses.length
-          : this.data.settings
-              .water
-              .targetGlasses;
-
-
-      day.water = {
-        glasses:
-          Array(
-            waterLength
-          ).fill(false)
-      };
-
-
-      /* ---------------------------------------------
-         Movement
-
-         Preserve workout plan, labels, timing and OR
-         groups. Reset completion only.
-      ---------------------------------------------- */
-
-      if (
-        Array.isArray(day.movement)
-      ) {
-
-        day.movement.forEach(
-          movement => {
-
-            movement.completed =
-              false;
-
-          }
-        );
-
-      }
-
-
-      /* ---------------------------------------------
-         Glow
-      ---------------------------------------------- */
-
-      day.glow.somatoline =
-        false;
-
-      day.glow.skincare =
-        false;
-
-
-      /* ---------------------------------------------
-         Dog walk
-      ---------------------------------------------- */
-
-      day.dogWalk.completed =
-        false;
-
-
-      /* ---------------------------------------------
-         Recovery
-      ---------------------------------------------- */
-
-      day.recovery = {
-        sleep: null,
-        hunger: null,
-        soreness: null,
-        mood: null
-      };
-
-
-      /* ---------------------------------------------
-         Measurements
-      ---------------------------------------------- */
-
-      day.measurements = {
-        weight: null,
-        waist: null,
-        hips: null,
-        bust: null,
-        notes: "",
-        progressPhotoReminder: false
-      };
-
-    }
-  );
-
-
-  campaign.currentDay =
-    1;
-
-  campaign.status =
-    "active";
-
-
-  this.data.ui.selectedDay =
-    1;
-
-  this.data.ui.scheduleDay =
-    1;
-
-  this.data.ui.activeView =
-    "today";
-
+  this.data.ui.selectedDay = 1;
+  this.data.ui.scheduleDay = 1;
+  this.data.ui.activeView = "today";
 
   this.save();
-
-
+  this.ensureChallengeForDay(1);
   return true;
 
 },
@@ -815,7 +748,7 @@ resetActiveCampaign() {
 
     this.data.version = Math.max(
       Number(this.data.version || 1),
-      2
+      3
     );
 
 

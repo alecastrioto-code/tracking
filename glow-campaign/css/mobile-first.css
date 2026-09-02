@@ -2347,3 +2347,39 @@
     margin-top: 0.25rem;
   }
 }
+
+/* =========================================================
+   TEN DAY RUN — TODAY'S RHYTHM V3 / MOBILE
+========================================================= */
+
+@media (max-width: 820px) {
+  .binge-reflection {
+    padding: 0.85rem;
+  }
+
+  .daily-challenge-card {
+    margin-top: 1rem;
+    border-radius: 20px;
+  }
+
+  .daily-challenge-card__header {
+    align-items: flex-start;
+  }
+
+  .daily-challenge-copy {
+    margin: 0.9rem 0;
+  }
+
+  .calorie-trend-panel {
+    padding: 1rem;
+    border-radius: 20px;
+  }
+
+  .calorie-trend__chart {
+    height: 150px;
+  }
+
+  .calorie-trend__legend {
+    gap: 0.45rem 0.8rem;
+  }
+}

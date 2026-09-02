@@ -12,8 +12,8 @@ window.GlowApp = window.GlowApp || {};
 GlowApp.DEFAULT_SETTINGS = {
 
   nutrition: {
-    caloriesMin: 1200,
-    caloriesMax: 1500,
+    caloriesMax: 1600,
+    caloriesGraceMax: 1700,
     proteinMin: 90,
     fibreMin: 25
   },
@@ -41,7 +41,7 @@ GlowApp.DEFAULT_SETTINGS = {
       label: "Legendary / Perfect-enough run",
       minPercent: 95,
       maxPercent: 100,
-      reward: "Buy an outfit or piece of clothing I really want"
+      reward: "Massage / salon treatment / fancy dinner"
     },
 
     {
@@ -49,7 +49,7 @@ GlowApp.DEFAULT_SETTINGS = {
       label: "Mission accomplished",
       minPercent: 80,
       maxPercent: 94.99,
-      reward: "Massage / salon / beauty treatment"
+      reward: "Rent a car + go somewhere nice"
     },
 
     {
@@ -65,6 +65,39 @@ GlowApp.DEFAULT_SETTINGS = {
 };
 
 
+
+
+/* =========================================================
+   FLEXIBILITY CHALLENGES
+========================================================= */
+
+GlowApp.FLEXIBILITY_CHALLENGES = [
+  { id: "condiment-oil", label: "Use condiment on one dish — oil" },
+  { id: "normal-pasta", label: "Have a normal-sized pasta dish" },
+  { id: "breakfast-out", label: "Have breakfast out" },
+  { id: "stay-in-bed", label: "Stay in bed late" },
+  { id: "leave-half", label: "Leave half of something for tomorrow" },
+  { id: "enjoy-before-calories", label: "Eat something you like without checking calories first" },
+  { id: "drink-out", label: "Have a drink out" },
+  { id: "someone-else-portions", label: "Let someone else portion one meal without correcting or weighing it" },
+  { id: "cook-unweighed", label: "Cook one ingredient without weighing it" },
+  { id: "bread-twice", label: "Eat bread at two different meals in the same day" },
+  { id: "carbs-and-fat", label: "Have a meal containing both carbs and fat without compensating elsewhere" },
+  { id: "normal-spread", label: "Use cheese, butter or Philadelphia normally rather than the thinnest possible layer" },
+  { id: "later-dinner", label: "Eat dinner later than usual if you’re hungry" },
+  { id: "planned-snack", label: "Have the planned snack even if lunch was slightly larger than expected" },
+  { id: "choose-menu-want", label: "Choose the thing you actually want from a menu" },
+  { id: "dessert-after-meal", label: "Have dessert after a normal meal without making the meal smaller to earn it" },
+  { id: "track-afterward", label: "Eat one meal without tracking it until afterward" },
+  { id: "no-measuring-day", label: "Take one full day without weighing yourself or measuring anything" },
+  { id: "keep-treat", label: "Buy a multi-serving treat and intentionally keep some for another day" },
+  { id: "rest-with-food", label: "Have a rest day without reducing food because you didn’t train" },
+  { id: "normal-version", label: "Choose the full-fat or normal version of something you normally buy light" },
+  { id: "add-carb", label: "Add a carb to a meal because it improves the meal, not because training justifies it" },
+  { id: "spontaneous-offer", label: "Eat something spontaneously offered by someone without doing calorie archaeology" }
+];
+
+
 /* =========================================================
    WORKOUT CATALOGUE
 
@@ -72,6 +105,27 @@ GlowApp.DEFAULT_SETTINGS = {
 ========================================================= */
 
 GlowApp.WORKOUT_TYPES = [
+
+  {
+    id: "morning-walk-jog",
+    label: "Morning walk / jog",
+    defaultPeriod: "morning",
+    defaultPoints: 1
+  },
+
+  {
+    id: "evening-walk",
+    label: "Evening walk",
+    defaultPeriod: "evening",
+    defaultPoints: 2
+  },
+
+  {
+    id: "upper-back-arms",
+    label: "Upper back / arms",
+    defaultPeriod: "morning",
+    defaultPoints: 1
+  },
 
   {
     id: "glute-strength",
@@ -165,7 +219,8 @@ GlowApp.createMovementItem = function ({
   type,
   label,
   period = "morning",
-  alternativeGroup = null
+  alternativeGroup = null,
+  points = 1
 }) {
 
   return {
@@ -174,6 +229,7 @@ GlowApp.createMovementItem = function ({
     label,
     period,
     completed: false,
+    points: Number(points) > 0 ? Number(points) : 1,
 
     /*
       Normally every movement item is worth one point.
@@ -199,7 +255,9 @@ GlowApp.createScheduleItem = function ({
   period,
   category,
   scored = false,
-  linkedMovementType = null
+  linkedMovementType = null,
+  linkedMovementId = null,
+  points = 1
 }) {
 
   return {
@@ -208,7 +266,9 @@ GlowApp.createScheduleItem = function ({
     period,
     category,
     scored,
-    linkedMovementType
+    linkedMovementType,
+    linkedMovementId,
+    points: scored ? (Number(points) > 0 ? Number(points) : 1) : 0
   };
 
 };
@@ -223,49 +283,10 @@ GlowApp.createScheduleItem = function ({
 GlowApp.createBaseSchedule = function () {
 
   return [
-
-    GlowApp.createScheduleItem({
-      label: "Breakfast",
-      period: "morning",
-      category: "food",
-      scored: true
-    }),
-
-    GlowApp.createScheduleItem({
-      label: "Lunch",
-      period: "midday",
-      category: "food",
-      scored: true
-    }),
-
-    GlowApp.createScheduleItem({
-      label: "Snack / treat",
-      period: "afternoon",
-      category: "food",
-      scored: true
-    }),
-
-    GlowApp.createScheduleItem({
-      label: "Evening dog walk",
-      period: "evening",
-      category: "dog",
-      scored: true
-    }),
-
-    GlowApp.createScheduleItem({
-      label: "Dinner",
-      period: "evening",
-      category: "food",
-      scored: true
-    }),
-
-    GlowApp.createScheduleItem({
-      label: "PM skincare",
-      period: "evening",
-      category: "glow",
-      scored: true
-    })
-
+    GlowApp.createScheduleItem({ label: "Breakfast", period: "morning", category: "food", scored: true }),
+    GlowApp.createScheduleItem({ label: "Lunch", period: "midday", category: "food", scored: true }),
+    GlowApp.createScheduleItem({ label: "Snack / treat", period: "afternoon", category: "food", scored: true }),
+    GlowApp.createScheduleItem({ label: "Dinner", period: "evening", category: "food", scored: true })
   ];
 
 };
@@ -290,7 +311,9 @@ GlowApp.addMovementToSchedule = function (
         period: movement.period,
         category: "movement",
         scored: true,
-        linkedMovementType: movement.type
+        linkedMovementType: movement.type,
+        linkedMovementId: movement.id,
+        points: movement.points
       })
     );
 
@@ -313,156 +336,83 @@ GlowApp.createEmptyDayState = function (
 
   const schedule = GlowApp.createBaseSchedule();
 
-  GlowApp.addMovementToSchedule(
-    schedule,
-    movement
-  );
+  GlowApp.addMovementToSchedule(schedule, movement);
 
+  const selfCareDefinitions = [
+    ...(options.morningRoutine ? [{ label: "Morning routine", period: "morning" }] : []),
+    { label: "Evening routine", period: "evening" }
+  ];
+
+  const selfCareCompletions = {};
+
+  selfCareDefinitions.forEach(definition => {
+    const item = GlowApp.createScheduleItem({
+      label: definition.label,
+      period: definition.period,
+      category: "glow",
+      scored: true,
+      points: 1
+    });
+
+    schedule.push(item);
+    selfCareCompletions[item.id] = false;
+  });
+
+  const isFlexibilityDay = dayNumber % 2 === 1;
 
   return {
-
     dayNumber,
-
-
-    /* -----------------------------------------------------
-       FOOD RHYTHM
-    ------------------------------------------------------ */
 
     food: {
       breakfast: false,
       lunch: false,
       snack: false,
       dinner: false,
-      continuousGrazing: false
+      continuousGrazing: false,
+      binge: false,
+      bingeReflection: ""
     },
-
-
-    /* -----------------------------------------------------
-       NUTRITION
-    ------------------------------------------------------ */
 
     nutrition: {
       calories: null,
       protein: null,
       fibre: null,
-
-      /*
-        Manual values stay available as a fallback. Once foods are
-        logged, food-log.js derives the visible totals automatically.
-      */
       source: "manual",
-
-      manualValues: {
-        calories: null,
-        protein: null,
-        fibre: null
-      }
+      manualValues: { calories: null, protein: null, fibre: null }
     },
 
+    foodLog: { breakfast: [], lunch: [], snack: [], dinner: [] },
 
-    /* -----------------------------------------------------
-       FOOD LOG
+    water: { glasses: [false, false, false, false, false, false] },
 
-       Food Rhythm above remains behavioural scoring.
-       Food Log records what was eaten within each meal.
-    ------------------------------------------------------ */
-
-    foodLog: {
-      breakfast: [],
-      lunch: [],
-      snack: [],
-      dinner: []
-    },
-
-
-    /* -----------------------------------------------------
-       WATER
-    ------------------------------------------------------ */
-
-    water: {
-      glasses: [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    },
-
-
-    /* -----------------------------------------------------
-       GLOW
-    ------------------------------------------------------ */
-
+    /* Legacy object retained so old helper code/imports fail safely. */
     glow: {
       somatoline: false,
       skincare: false,
-
-      skincareLabel:
-        options.skincareLabel ||
-        GlowApp.DEFAULT_SETTINGS.glow.skincareLabel,
-
-      glowDay: {
-        enabled: options.glowDay?.enabled || false,
-        label: options.glowDay?.label || "",
-        note: options.glowDay?.note || ""
-      }
+      skincareLabel: options.skincareLabel || GlowApp.DEFAULT_SETTINGS.glow.skincareLabel,
+      glowDay: { enabled: false, label: "", note: "" }
     },
 
-
-    /* -----------------------------------------------------
-       MOVEMENT
-    ------------------------------------------------------ */
+    selfCare: {
+      completions: selfCareCompletions
+    },
 
     movement,
 
+    /* Legacy dog state retained, but the v3 plan scores evening walk as movement. */
+    dogWalk: { completed: false },
 
-    /* -----------------------------------------------------
-       DOG WALK
-    ------------------------------------------------------ */
+    challenge: isFlexibilityDay
+      ? { type: "flexibility", challengeId: null, label: "", done: false }
+      : { type: "disconnection", challengeId: "disconnection", label: "30 minutes of disconnection", done: false },
 
-    dogWalk: {
-      completed: false
-    },
-
-
-    /* -----------------------------------------------------
-       RECOVERY — NEVER SCORED
-
-       Null means "not logged yet".
-       We don't default these to 3, because that would make
-       it look as though recovery data exists when it doesn't.
-    ------------------------------------------------------ */
-
-    recovery: {
-      sleep: null,
-      hunger: null,
-      soreness: null,
-      mood: null
-    },
-
-
-    /* -----------------------------------------------------
-       TIMELINE / SCHEDULE
-    ------------------------------------------------------ */
+    recovery: { sleep: null, hunger: null, soreness: null, mood: null },
 
     schedule,
 
-
-    /* -----------------------------------------------------
-       DAY 10 INFORMATIONAL TRACKING
-    ------------------------------------------------------ */
-
     measurements: {
-      weight: null,
-      waist: null,
-      hips: null,
-      bust: null,
-      notes: "",
-      progressPhotoReminder: false
+      weight: null, waist: null, hips: null, bust: null, notes: "", progressPhotoReminder: false
     }
-
   };
 
 };
@@ -474,319 +424,54 @@ GlowApp.createEmptyDayState = function (
 
 GlowApp.createDefaultDays = function () {
 
-  /* =======================================================
-     DAY 1
-  ======================================================== */
-
-  const day1Movement = [
-
-    GlowApp.createMovementItem({
-      type: "jog",
-      label: "Jog",
-      period: "morning"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "glute-strength",
-      label: "Glute strength",
-      period: "morning"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "abs",
-      label: "Abs",
-      period: "afternoon"
-    })
-
-  ];
-
-
-  /* =======================================================
-     DAY 2
-  ======================================================== */
-
-  const day2Movement = [
-
-    GlowApp.createMovementItem({
-      type: "jog",
-      label: "Jog",
-      period: "morning"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "total-body-conditioning",
-      label: "Total-body conditioning",
-      period: "morning"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "mobility",
-      label: "Mobility",
-      period: "evening"
-    })
-
-  ];
-
-
-  /* =======================================================
-     DAY 3
-  ======================================================== */
-
-  const day3Movement = [
-
-    GlowApp.createMovementItem({
-      type: "upper-back-strength",
-      label: "Upper-back strength",
-      period: "morning"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "abs",
-      label: "Abs",
-      period: "afternoon"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "walk",
-      label: "Walk",
-      period: "afternoon"
-    })
-
-  ];
-
-
-  /* =======================================================
-     DAY 4
-
-     Walk OR jog = one available movement point.
-  ======================================================== */
-
-  const day4Movement = [
-
-    GlowApp.createMovementItem({
-      type: "walk",
-      label: "Easy walk",
-      period: "morning",
-      alternativeGroup: "day4-easy-cardio"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "jog",
-      label: "Easy jog",
-      period: "morning",
-      alternativeGroup: "day4-easy-cardio"
-    })
-
-  ];
-
-
-  /* =======================================================
-     DAY 5
-  ======================================================== */
-
-  const day5Movement = [
-
-    GlowApp.createMovementItem({
-      type: "jog",
-      label: "Jog",
-      period: "morning"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "glute-strength",
-      label: "Glute strength",
-      period: "morning"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "glute-pump",
-      label: "Glute pump",
-      period: "afternoon"
-    })
-
-  ];
-
-
-  /* =======================================================
-     DAY 6
-  ======================================================== */
-
-  const day6Movement = [
-
-    GlowApp.createMovementItem({
-      type: "total-body-conditioning",
-      label: "Total-body conditioning",
-      period: "morning"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "walk",
-      label: "Walk",
-      period: "afternoon"
-    })
-
-  ];
-
-
-  /* =======================================================
-     DAY 7
-  ======================================================== */
-
-  const day7Movement = [
-
-    GlowApp.createMovementItem({
-      type: "glute-strength",
-      label: "Glute strength",
-      period: "morning"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "walk",
-      label: "Walk",
-      period: "afternoon"
-    })
-
-  ];
-
-
-  /* =======================================================
-     DAY 8
-  ======================================================== */
-
-  const day8Movement = [
-
-    GlowApp.createMovementItem({
-      type: "jog",
-      label: "Jog",
-      period: "morning"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "glute-strength",
-      label: "Glute strength",
-      period: "morning"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "abs",
-      label: "Abs",
-      period: "afternoon"
-    })
-
-  ];
-
-
-  /* =======================================================
-     DAY 9
-  ======================================================== */
-
-  const day9Movement = [
-
-    GlowApp.createMovementItem({
-      type: "jog",
-      label: "Jog",
-      period: "morning"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "arms-pilates",
-      label: "Arms conditioning / Pilates",
-      period: "afternoon"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "mobility",
-      label: "Mobility",
-      period: "evening"
-    })
-
-  ];
-
-
-  /* =======================================================
-     DAY 10
-  ======================================================== */
-
-  const day10Movement = [
-
-    GlowApp.createMovementItem({
-      type: "glute-conditioning",
-      label: "Glute conditioning",
-      period: "morning"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "abs",
-      label: "Abs",
-      period: "afternoon"
-    }),
-
-    GlowApp.createMovementItem({
-      type: "walk",
-      label: "Walk",
-      period: "afternoon"
-    })
-
-  ];
-
-
-  /* =======================================================
-     RETURN DAYS
-  ======================================================== */
-
-  return [
-
-    GlowApp.createEmptyDayState(
-      1,
-      day1Movement
-    ),
-
-    GlowApp.createEmptyDayState(
-      2,
-      day2Movement
-    ),
-
-    GlowApp.createEmptyDayState(
-      3,
-      day3Movement
-    ),
-
-    GlowApp.createEmptyDayState(
-      4,
-      day4Movement
-    ),
-
-    GlowApp.createEmptyDayState(
-      5,
-      day5Movement
-    ),
-
-    GlowApp.createEmptyDayState(
-      6,
-      day6Movement
-    ),
-
-    GlowApp.createEmptyDayState(
-      7,
-      day7Movement
-    ),
-
-    GlowApp.createEmptyDayState(
-      8,
-      day8Movement
-    ),
-
-    GlowApp.createEmptyDayState(
-      9,
-      day9Movement
-    ),
-
-    GlowApp.createEmptyDayState(
-      10,
-      day10Movement
-    )
-
-  ];
+  const strengthPlan = {
+    1: { type: "glute-strength", label: "Glutes strength" },
+    2: { type: "abs", label: "Abs" },
+    3: { type: "total-body-conditioning", label: "Total body conditioning" },
+    5: { type: "glute-strength", label: "Glutes strength" },
+    6: { type: "abs", label: "Abs" },
+    7: { type: "upper-back-arms", label: "Upper back / arms" },
+    9: { type: "glute-strength", label: "Glutes strength" },
+    10: { type: "abs", label: "Abs" }
+  };
+
+  return Array.from({ length: 10 }, (_, index) => {
+    const dayNumber = index + 1;
+    const restDay = dayNumber === 4 || dayNumber === 8;
+    const movement = [];
+
+    if (!restDay) {
+      movement.push(
+        GlowApp.createMovementItem({
+          type: "morning-walk-jog",
+          label: "Morning walk / jog",
+          period: "morning",
+          points: 1
+        }),
+        GlowApp.createMovementItem({
+          type: strengthPlan[dayNumber].type,
+          label: strengthPlan[dayNumber].label,
+          period: "morning",
+          points: 1
+        })
+      );
+    }
+
+    movement.push(
+      GlowApp.createMovementItem({
+        type: "evening-walk",
+        label: "Evening walk",
+        period: "evening",
+        points: 2
+      })
+    );
+
+    return GlowApp.createEmptyDayState(
+      dayNumber,
+      movement,
+      { morningRoutine: [1, 4, 8].includes(dayNumber) }
+    );
+  });
 
 };
 
@@ -817,6 +502,8 @@ GlowApp.createDefaultCampaign = function () {
 
     status: "active",
 
+    challengePool: GlowApp.FLEXIBILITY_CHALLENGES.map(item => item.id),
+
     days: GlowApp.createDefaultDays()
 
   };
@@ -834,7 +521,7 @@ GlowApp.createDefaultAppState = function () {
 
   return {
 
-    version: 2,
+    version: 3,
 
     settings: JSON.parse(
       JSON.stringify(

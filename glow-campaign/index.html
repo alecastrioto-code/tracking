@@ -450,6 +450,31 @@
               Grazing marked. Meal data is preserved, but Food Rhythm scores 0 / 4.
             </p>
 
+
+            <div class="card-divider"></div>
+
+            <label class="toggle-row toggle-row--warning binge-toggle-row">
+              <span>
+                <strong>Binge / lost track</strong>
+                <small>Marks Food Rhythm and the calorie target as missed. No extra penalty.</small>
+              </span>
+
+              <span class="toggle">
+                <input type="checkbox" id="binge-toggle">
+                <span class="toggle__track"></span>
+              </span>
+            </label>
+
+            <div class="binge-reflection" id="binge-reflection-wrap" hidden>
+              <label for="binge-reflection">Self reflection</label>
+              <textarea
+                id="binge-reflection"
+                rows="4"
+                placeholder="What happened? What do I want to notice or do differently next time?"
+              ></textarea>
+              <small id="binge-reflection-status">Required when binge is marked.</small>
+            </div>
+
           </section>
 
 
@@ -527,7 +552,7 @@
                   class="target-copy"
                   id="calories-target-copy"
                 >
-                  Target 1200–1500 kcal
+                  Full point ≤1600 kcal · 0.9 through 1700
                 </small>
 
               </div>
@@ -880,7 +905,7 @@
 
 
           <!-- =================================================
-            GLOW
+            TODAY'S RHYTHM / SELF CARE
           ================================================== -->
 
           <section
@@ -890,100 +915,51 @@
           >
 
             <header class="card-header">
-
               <div>
                 <p class="eyebrow">05</p>
-                <h2 id="glow-title">Evening self care</h2>
+                <h2 id="glow-title">Today’s Rhythm</h2>
               </div>
 
               <div class="card-score">
                 <strong id="glow-score">0</strong>
-                <span>/ 2</span>
+                <span>/ <span id="glow-possible">1</span></span>
               </div>
-
             </header>
 
-
-            <div class="habit-list">
-
-              <label class="check-row">
-                <input
-                  type="checkbox"
-                  id="somatoline-checkbox"
-                >
-
-                <span class="custom-checkbox"></span>
-
-                <span>Somatoline</span>
-              </label>
-
-
-              <label class="check-row">
-                <input
-                  type="checkbox"
-                  id="skincare-checkbox"
-                >
-
-                <span class="custom-checkbox"></span>
-
-                <span id="skincare-goal-label">
-                  PM skincare
-                </span>
-              </label>
-
-            </div>
+            <div class="habit-list" id="self-care-list"></div>
 
           </section>
 
 
 
-          <!-- =================================================
-            EVENING DOG WALK
-          ================================================== -->
-
-          <section
-            class="dashboard-card dashboard-card--dog"
-            id="dog-walk-card"
-            aria-labelledby="dog-walk-title"
-          >
-
-            <header class="card-header">
-
-              <div>
-                <p class="eyebrow">06</p>
-                <h2 id="dog-walk-title">Evening Walk</h2>
-              </div>
-
-              <div class="card-score">
-                <strong id="dog-walk-score">0</strong>
-                <span>/ 1</span>
-              </div>
-
-            </header>
-
-
-            <label class="big-check-row">
-
-              <input
-                type="checkbox"
-                id="dog-walk-checkbox"
-              >
-
-              <span class="custom-checkbox"></span>
-
-              <span>
-                <strong>Evening dog walk</strong>
-                <small>
-                  Nervous-system maintenance mission.
-                </small>
-              </span>
-
-            </label>
-
-          </section>
 
         </div>
 
+
+
+        <section
+          class="daily-challenge-card"
+          id="daily-challenge-card"
+          aria-labelledby="daily-challenge-title"
+        >
+          <header class="daily-challenge-card__header">
+            <div>
+              <p class="eyebrow" id="daily-challenge-type">Daily extra</p>
+              <h2 id="daily-challenge-title">Challenge</h2>
+            </div>
+            <span class="daily-challenge-status" id="daily-challenge-status">Not done</span>
+          </header>
+
+          <p class="daily-challenge-copy" id="daily-challenge-copy">—</p>
+
+          <label class="check-row daily-challenge-check">
+            <input type="checkbox" id="challenge-done">
+            <span class="custom-checkbox"></span>
+            <span>Done</span>
+          </label>
+
+          <p class="daily-challenge-rule">Extra to the score · passes when marked done and today reaches 90%.</p>
+        </section>
 
 
         <!-- =====================================================
@@ -1032,9 +1008,10 @@
               </header>
 
               <ul>
-                <li>Jog</li>
-                <li>Glute strength</li>
                 <li>Breakfast</li>
+                <li>Morning walk / jog</li>
+                <li>Glutes strength</li>
+                <li>Morning routine</li>
               </ul>
 
             </section>
@@ -1069,7 +1046,6 @@
 
               <ul>
                 <li>Snack / treat</li>
-                <li>Abs</li>
               </ul>
 
             </section>
@@ -1086,9 +1062,9 @@
               </header>
 
               <ul>
-                <li>Dog walk</li>
                 <li>Dinner</li>
-                <li>PM skincare</li>
+                <li>Evening walk</li>
+                <li>Evening routine</li>
               </ul>
 
             </section>
@@ -1575,6 +1551,23 @@
 
 
 
+        <section
+          class="calorie-trend-panel"
+          aria-labelledby="calorie-trend-title"
+        >
+          <header class="section-header">
+            <div>
+              <p class="eyebrow">Nutrition pattern</p>
+              <h2 id="calorie-trend-title">Calories + binge tracker</h2>
+            </div>
+          </header>
+
+          <div id="calorie-binge-trend" class="calorie-binge-trend">
+            <div class="trend-empty">No calorie or binge data yet</div>
+          </div>
+        </section>
+
+
         <!-- Recovery trend placeholders -->
 
         <section
@@ -1776,8 +1769,8 @@
               >
                 <span>Self care</span>
                 <select id="schedule-self-care-type">
-                  <option value="somatoline">Somatoline</option>
-                  <option value="skincare">Skincare</option>
+                  <option value="morning-routine">Morning routine</option>
+                  <option value="evening-routine">Evening routine</option>
                   <option value="other">Other</option>
                 </select>
               </label>
@@ -1888,22 +1881,22 @@
           <div class="settings-grid">
 
             <label class="field">
-              <span>Minimum calories</span>
+              <span>Full-score calorie ceiling</span>
               <input
                 type="number"
-                id="setting-calories-min"
-                value="1200"
+                id="setting-calories-max"
+                value="1600"
                 min="0"
               >
             </label>
 
 
             <label class="field">
-              <span>Maximum calories</span>
+              <span>0.9 grace ceiling</span>
               <input
                 type="number"
-                id="setting-calories-max"
-                value="1500"
+                id="setting-calories-grace-max"
+                value="1700"
                 min="0"
               >
             </label>
@@ -1975,32 +1968,6 @@
 
 
 
-        <!-- Glow settings -->
-
-        <section
-          class="settings-panel"
-          aria-labelledby="glow-settings-title"
-        >
-
-          <header>
-            <p class="eyebrow">Evening self care</p>
-            <h2 id="glow-settings-title">
-              Habit labels
-            </h2>
-          </header>
-
-
-          <label class="field field--full">
-            <span>Evening skincare label</span>
-
-            <input
-              type="text"
-              id="setting-skincare-label"
-              value="PM skincare"
-            >
-          </label>
-
-        </section>
 
 
 
@@ -2041,7 +2008,7 @@
                 <input
                   type="text"
                   id="setting-reward-legendary"
-                  value="Buy an outfit or piece of clothing I really want"
+                  value="Massage / salon treatment / fancy dinner"
                 >
               </label>
 
@@ -2065,7 +2032,7 @@
                 <input
                   type="text"
                   id="setting-reward-accomplished"
-                  value="Massage / salon / beauty treatment"
+                  value="Rent a car + go somewhere nice"
                 >
               </label>
 

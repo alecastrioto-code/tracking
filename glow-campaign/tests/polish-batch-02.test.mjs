@@ -258,7 +258,7 @@ await test('Schedule save updates both the schedule item and linked movement wit
 });
 
 await test('PWA shell cache is bumped for batch 02 assets', () => {
-  assert.match(read('service-worker.js'), /ten-day-run-shell-v3/);
+  assert.match(read('service-worker.js'), /ten-day-run-shell-v4/);
 });
 await test('Progress hero uses a dedicated campaign layout hook', () => {
   const html = read('index.html');

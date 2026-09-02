@@ -393,6 +393,120 @@ GlowApp.Recovery = {
 
 
   /* =======================================================
+     CALORIE + BINGE SERIES
+
+     Binge days deliberately have no calorie value. We do not
+     estimate a number when tracking was lost.
+  ======================================================== */
+
+  getCalorieSeries(
+    campaign = GlowApp.State?.getActiveCampaign?.()
+  ) {
+    if (!campaign || !Array.isArray(campaign.days)) {
+      return [];
+    }
+
+    return campaign.days.map(day => {
+      const binge = day?.food?.binge === true;
+      const raw = day?.nutrition?.calories;
+      const numeric = raw === null || raw === undefined || raw === "" ? null : Number(raw);
+
+      return {
+        day: day.dayNumber,
+        value: binge || !Number.isFinite(numeric) ? null : numeric,
+        binge
+      };
+    });
+  },
+
+
+  renderCalorieTrend(
+    campaign = GlowApp.State?.getActiveCampaign?.()
+  ) {
+    const container = document.getElementById("calorie-binge-trend");
+    if (!container || !campaign) {
+      return;
+    }
+
+    const values = this.getCalorieSeries(campaign);
+    const hasData = values.some(point => point.value !== null || point.binge);
+
+    if (!hasData) {
+      container.innerHTML = `<div class="trend-empty">No calorie or binge data yet</div>`;
+      return;
+    }
+
+    container.innerHTML = this.buildCalorieTrend(values);
+  },
+
+
+  buildCalorieTrend(values) {
+    const width = 100;
+    const height = 54;
+    const paddingX = 5;
+    const paddingY = 6;
+    const usableWidth = width - paddingX * 2;
+    const usableHeight = height - paddingY * 2;
+    const loggedValues = values.filter(point => point.value !== null).map(point => point.value);
+    const maxValue = Math.max(1800, ...loggedValues);
+    const xFor = index => paddingX + (index / Math.max(values.length - 1, 1)) * usableWidth;
+    const yFor = value => paddingY + (1 - Math.min(Math.max(value / maxValue, 0), 1)) * usableHeight;
+
+    const points = values.map((item, index) => ({
+      ...item,
+      x: xFor(index),
+      y: item.value === null ? null : yFor(item.value)
+    }));
+
+    let path = "";
+    let connected = false;
+    points.forEach(point => {
+      if (point.y === null) {
+        connected = false;
+        return;
+      }
+      path += `${connected ? "L" : "M"} ${point.x} ${point.y} `;
+      connected = true;
+    });
+
+    const circles = points
+      .filter(point => point.y !== null)
+      .map(point => `<circle class="calorie-trend__point" cx="${point.x}" cy="${point.y}" r="2"></circle>`)
+      .join("");
+
+    const bingeMarkers = points
+      .filter(point => point.binge)
+      .map(point => `
+        <g class="calorie-trend__binge" transform="translate(${point.x} ${height / 2})">
+          <circle r="3"></circle>
+          <text x="0" y="1.4" text-anchor="middle">B</text>
+        </g>
+      `)
+      .join("");
+
+    return `
+      <div class="calorie-trend__legend">
+        <span><i class="calorie-trend__key calorie-trend__key--target"></i>1600 target</span>
+        <span><i class="calorie-trend__key calorie-trend__key--grace"></i>1700 grace</span>
+        <span><i class="calorie-trend__key calorie-trend__key--binge"></i>Binge · untracked</span>
+      </div>
+      <div class="calorie-trend__chart">
+        <svg class="calorie-trend__svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="10-day calorie trend with binge days marked as untracked">
+          <line class="calorie-trend__guide calorie-trend__guide--target" x1="${paddingX}" x2="${width - paddingX}" y1="${yFor(1600)}" y2="${yFor(1600)}"></line>
+          <line class="calorie-trend__guide calorie-trend__guide--grace" x1="${paddingX}" x2="${width - paddingX}" y1="${yFor(1700)}" y2="${yFor(1700)}"></line>
+          <path class="calorie-trend__line" d="${path.trim()}"></path>
+          <g>${circles}</g>
+          <g>${bingeMarkers}</g>
+        </svg>
+      </div>
+      <div class="trend-days calorie-trend__days">
+        ${points.map(point => `<span class="${point.binge ? "is-binge" : point.value === null ? "is-empty" : ""}">${point.day}</span>`).join("")}
+      </div>
+    `;
+  },
+
+
+  /* =======================================================
      LOGGED DAY COUNT
   ======================================================== */
 

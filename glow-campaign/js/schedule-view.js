@@ -379,7 +379,8 @@ GlowApp.ScheduleView = {
                 GlowApp.createMovementItem({
                   type: workout.id,
                   label: workout.label,
-                  period
+                  period,
+                  points: workout.defaultPoints || 1
                 });
 
               day.movement.push(
@@ -393,11 +394,12 @@ GlowApp.ScheduleView = {
                   category: "movement",
                   scored: true,
                   linkedMovementType:
-                    workout.id
+                    workout.id,
+                  linkedMovementId:
+                    movement.id,
+                  points:
+                    movement.points
                 });
-
-              scheduleItem.linkedMovementId =
-                movement.id;
 
               day.schedule.push(
                 scheduleItem
@@ -411,12 +413,14 @@ GlowApp.ScheduleView = {
 
             const selfCareType =
               selfCareSelect?.value ||
-              "somatoline";
+              "morning-routine";
 
-            if (selfCareType === "somatoline") {
-              label = "Somatoline";
-            } else if (selfCareType === "skincare") {
-              label = "Skincare";
+            if (selfCareType === "morning-routine") {
+              label = "Morning routine";
+              period = "morning";
+            } else if (selfCareType === "evening-routine") {
+              label = "Evening routine";
+              period = "evening";
             } else {
               label = String(
                 customInput?.value ||
@@ -447,17 +451,21 @@ GlowApp.ScheduleView = {
             dayNumber,
             day => {
 
-              day.schedule.push(
-                GlowApp.createScheduleItem({
-                  label,
-                  period,
-                  category:
-                    category === "glow"
-                      ? "glow"
-                      : "custom",
-                  scored: false
-                })
-              );
+              const scheduleItem = GlowApp.createScheduleItem({
+                label,
+                period,
+                category: category === "glow" ? "glow" : "custom",
+                scored: category === "glow",
+                points: category === "glow" ? 1 : 0
+              });
+
+              day.schedule.push(scheduleItem);
+
+              if (category === "glow") {
+                day.selfCare ||= { completions: {} };
+                day.selfCare.completions ||= {};
+                day.selfCare.completions[scheduleItem.id] = false;
+              }
             }
           );
         }
@@ -507,7 +515,7 @@ GlowApp.ScheduleView = {
       document.getElementById(
         "schedule-self-care-type"
       )?.value ||
-      "somatoline";
+      "morning-routine";
 
     const trainingType =
       document.getElementById(
@@ -545,16 +553,21 @@ GlowApp.ScheduleView = {
 
     if (periodSelect) {
 
-      const glutePump =
-        category === "movement" &&
-        trainingType === "glute-pump";
+      const workout = category === "movement"
+        ? GlowApp.WORKOUT_TYPES.find(item => item.id === trainingType)
+        : null;
 
-      if (glutePump) {
-        periodSelect.value = "afternoon";
+      const selfCarePreset = category === "glow" && selfCareType !== "other";
+
+      if (workout?.defaultPeriod) {
+        periodSelect.value = workout.defaultPeriod;
+      } else if (selfCareType === "morning-routine") {
+        periodSelect.value = "morning";
+      } else if (selfCareType === "evening-routine") {
+        periodSelect.value = "evening";
       }
 
-      periodSelect.disabled =
-        glutePump;
+      periodSelect.disabled = workout?.id === "glute-pump" || selfCarePreset;
     }
   },
 
@@ -1203,6 +1216,10 @@ GlowApp.ScheduleView = {
         }
 
 
+        if (scheduleItem.category === "glow" && day.selfCare?.completions) {
+          delete day.selfCare.completions[scheduleId];
+        }
+
         day.schedule =
           day.schedule.filter(
             item =>
@@ -1341,13 +1358,14 @@ GlowApp.ScheduleView = {
     let badge = "Other";
 
     if (movement) {
-      badge = "Training";
+      const movementPoints = Number(movement.points) > 0 ? Number(movement.points) : 1;
+      badge = `Training · ${movementPoints} pt${movementPoints === 1 ? "" : "s"}`;
     } else if (isFood) {
       badge = "Food goal";
     } else if (item.category === "dog") {
       badge = "Dog walk";
     } else if (isSelfCare) {
-      badge = "Self care";
+      badge = "Self care · 1 pt";
     }
 
 

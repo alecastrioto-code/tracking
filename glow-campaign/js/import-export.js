@@ -82,7 +82,7 @@ GlowApp.ImportExport = {
 
     const backup = {
       format: "ten-day-run-backup",
-      version: 2,
+      version: 3,
       exportedAt: new Date().toISOString(),
       state,
       foodLibrary

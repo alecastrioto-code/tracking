@@ -3304,3 +3304,248 @@ body,
   background: rgba(255, 173, 127, 0.16);
   border-color: rgba(180, 93, 61, 0.055);
 }
+
+/* =========================================================
+   TEN DAY RUN — TODAY'S RHYTHM V3
+   Reflection, challenge and calorie/binge trend surfaces.
+========================================================= */
+
+.binge-reflection {
+  margin-top: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--coral-strong) 28%, var(--border));
+  border-radius: var(--radius-md);
+  background: var(--coral-faint);
+}
+
+.binge-reflection[hidden] {
+  display: none;
+}
+
+.binge-reflection label {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.binge-reflection textarea {
+  width: 100%;
+  min-height: 104px;
+  resize: vertical;
+  padding: 0.8rem 0.9rem;
+  color: var(--ink);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  line-height: 1.45;
+}
+
+.binge-reflection textarea:focus {
+  outline: 2px solid color-mix(in srgb, var(--coral-strong) 35%, transparent);
+  outline-offset: 2px;
+  border-color: var(--coral-strong);
+}
+
+#binge-reflection-status {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+}
+
+#binge-reflection-status.is-complete {
+  color: var(--success);
+}
+
+#binge-reflection-status.is-missed {
+  color: var(--danger);
+}
+
+.self-care-row .check-row__copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.self-care-row .check-row__copy small {
+  color: var(--ink-muted);
+}
+
+.daily-challenge-card {
+  margin-top: var(--space-5);
+  padding: clamp(1rem, 3vw, 1.35rem);
+  border: 1px solid color-mix(in srgb, var(--butter-strong) 34%, var(--border));
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--butter) 44%, transparent), transparent 38%),
+    var(--butter-faint);
+  box-shadow: var(--shadow-butter);
+}
+
+.daily-challenge-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.daily-challenge-card__header h2 {
+  margin-top: 0.18rem;
+}
+
+.daily-challenge-status {
+  flex-shrink: 0;
+  padding: 0.42rem 0.62rem;
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--butter) 40%, white);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.daily-challenge-status.is-complete {
+  color: #255b43;
+  background: var(--success-soft);
+}
+
+.daily-challenge-status.is-pending {
+  color: #795418;
+  background: var(--warning-soft);
+}
+
+.daily-challenge-copy {
+  max-width: 52rem;
+  margin: var(--space-4) 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+  font-weight: var(--weight-semibold);
+  line-height: 1.25;
+}
+
+.daily-challenge-check {
+  width: fit-content;
+}
+
+.daily-challenge-rule {
+  margin: var(--space-3) 0 0;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+}
+
+.calorie-trend-panel {
+  margin-top: var(--space-6);
+  padding: clamp(1rem, 3vw, 1.35rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-sm);
+}
+
+.calorie-binge-trend {
+  margin-top: var(--space-4);
+}
+
+.calorie-trend__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1rem;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: var(--weight-semibold);
+}
+
+.calorie-trend__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.calorie-trend__key {
+  width: 14px;
+  height: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+}
+
+.calorie-trend__key--target {
+  background: var(--success);
+}
+
+.calorie-trend__key--grace {
+  background: var(--warning);
+}
+
+.calorie-trend__key--binge {
+  width: 8px;
+  height: 8px;
+  background: var(--coral-strong);
+}
+
+.calorie-trend__chart {
+  height: 180px;
+  margin-top: var(--space-4);
+}
+
+.calorie-trend__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.calorie-trend__guide {
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.calorie-trend__guide--target {
+  stroke: var(--success);
+}
+
+.calorie-trend__guide--grace {
+  stroke: var(--warning);
+}
+
+.calorie-trend__line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.calorie-trend__point {
+  fill: var(--surface-raised);
+  stroke: var(--ink);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.calorie-trend__binge circle {
+  fill: var(--coral-strong);
+  vector-effect: non-scaling-stroke;
+}
+
+.calorie-trend__binge text {
+  fill: white;
+  font-size: 4px;
+  font-family: var(--font-mono);
+  font-weight: 800;
+}
+
+.calorie-trend__days span.is-binge {
+  color: var(--danger);
+  font-weight: var(--weight-bold);
+  opacity: 1;
+}

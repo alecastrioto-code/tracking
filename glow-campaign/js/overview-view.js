@@ -46,13 +46,8 @@ GlowApp.OverviewView = {
     },
 
     {
-      id: "dogWalk",
-      label: "Dog walk"
-    },
-
-    {
       id: "glow",
-      label: "Evening self care"
+      label: "Today’s Rhythm"
     }
 
   ],
@@ -524,13 +519,10 @@ GlowApp.OverviewView = {
       );
 
 
-    const glowUsed =
-      day.glow?.somatoline === true ||
-      day.glow?.skincare === true;
-
-
-    const dogUsed =
-      day.dogWalk?.completed === true;
+    const selfCareUsed =
+      Object.values(
+        day.selfCare?.completions || {}
+      ).some(Boolean);
 
 
     return (
@@ -538,8 +530,7 @@ GlowApp.OverviewView = {
       nutritionUsed ||
       waterUsed ||
       movementUsed ||
-      glowUsed ||
-      dogUsed
+      selfCareUsed
     );
 
   },
@@ -556,17 +547,16 @@ GlowApp.OverviewView = {
 
 renderRecoveryStatus(campaign) {
 
-  if (
-    GlowApp.Recovery &&
-    typeof GlowApp.Recovery
-      .renderOverviewTrends === "function"
-  ) {
+  if (!GlowApp.Recovery) {
+    return;
+  }
 
-    GlowApp.Recovery
-      .renderOverviewTrends(
-        campaign
-      );
+  if (typeof GlowApp.Recovery.renderCalorieTrend === "function") {
+    GlowApp.Recovery.renderCalorieTrend(campaign);
+  }
 
+  if (typeof GlowApp.Recovery.renderOverviewTrends === "function") {
+    GlowApp.Recovery.renderOverviewTrends(campaign);
   }
 
 },
