@@ -7,16 +7,16 @@
 
   <meta
     name="description"
-    content="A personal 10-day behavioral consistency tracker."
+    content="A personal 14-day behavioral consistency sprint companion."
   >
 
-  <title>Ten Day Run</title>
+  <title>The Run</title>
 
   <!-- Home-screen / web-app metadata -->
   <meta name="theme-color" content="#ffffff">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Ten Day Run">
+  <meta name="apple-mobile-web-app-title" content="The Run">
 
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
@@ -45,8 +45,8 @@
         <span class="app-brand__mark" aria-hidden="true">✦</span>
 
         <span class="app-brand__text">
-          <strong>Ten Day Run</strong>
-          <small>10-day operation</small>
+          <strong>The Run</strong>
+          <small>14-day operation</small>
         </span>
       </a>
 
@@ -91,9 +91,9 @@
         <button
           class="nav-link"
           type="button"
-          data-view-link="schedule"
+          data-view-link="plan"
         >
-          Schedule
+          Plan
         </button>
 
         <button
@@ -135,12 +135,12 @@
             <div>
               <h1 id="today-title">
                 Day <span id="current-day-number">1</span>
-                <span class="muted">/ 10</span>
+                <span class="muted">/ 14</span>
               </h1>
             </div>
 
 
-            <div class="day-selector" aria-label="10-day run day navigation">
+            <div class="day-selector" aria-label="14-day run day navigation">
 
               <button
                 type="button"
@@ -263,161 +263,77 @@
 
               <section class="meal-log" data-meal-log="breakfast">
                 <div class="meal-log__header meal-log__strip">
-                  <div class="meal-log__identity">
-                    <label class="check-row">
-                      <input
-                        type="checkbox"
-                        data-food-meal="breakfast"
-                      >
-
-                      <span class="custom-checkbox"></span>
-                      <span>Breakfast</span>
-                    </label>
-
-                    <span
-                      class="meal-calories"
-                      data-meal-calories="breakfast"
-                      hidden
-                    ></span>
-                  </div>
-
-                  <button
-                    class="meal-add-food"
-                    type="button"
-                    data-add-food="breakfast"
-                    aria-label="Add food to Breakfast"
-                    title="Add food"
-                  >
-                    <span aria-hidden="true">＋</span>
+                  <button class="meal-collapse-toggle" type="button" data-toggle-meal="breakfast" aria-expanded="false">
+                    <span class="meal-log__identity">
+                      <strong data-meal-title="breakfast">Breakfast</strong>
+                      <span class="meal-summary" data-meal-summary="breakfast">No food planned</span>
+                      <small class="meal-window-state" data-meal-window="breakfast"></small>
+                    </span>
+                    <span class="meal-chevron" aria-hidden="true">⌄</span>
                   </button>
+                  <div class="meal-log__actions">
+                    <button class="meal-confirm-button" type="button" data-confirm-meal="breakfast" hidden>Mark meal eaten</button>
+                    <button class="meal-add-food" type="button" data-add-food="breakfast" aria-label="Add food to Breakfast" title="Add food"><span aria-hidden="true">＋</span></button>
+                  </div>
                 </div>
-
-                <div
-                  class="meal-food-items"
-                  data-meal-items="breakfast"
-                  hidden
-                ></div>
+                <div class="meal-food-items" data-meal-items="breakfast" hidden></div>
               </section>
-
 
               <section class="meal-log" data-meal-log="lunch">
                 <div class="meal-log__header meal-log__strip">
-                  <div class="meal-log__identity">
-                    <label class="check-row">
-                      <input
-                        type="checkbox"
-                        data-food-meal="lunch"
-                      >
-
-                      <span class="custom-checkbox"></span>
-                      <span>Lunch</span>
-                    </label>
-
-                    <span
-                      class="meal-calories"
-                      data-meal-calories="lunch"
-                      hidden
-                    ></span>
-                  </div>
-
-                  <button
-                    class="meal-add-food"
-                    type="button"
-                    data-add-food="lunch"
-                    aria-label="Add food to Lunch"
-                    title="Add food"
-                  >
-                    <span aria-hidden="true">＋</span>
+                  <button class="meal-collapse-toggle" type="button" data-toggle-meal="lunch" aria-expanded="false">
+                    <span class="meal-log__identity">
+                      <strong data-meal-title="lunch">Lunch</strong>
+                      <span class="meal-summary" data-meal-summary="lunch">No food planned</span>
+                      <small class="meal-window-state" data-meal-window="lunch"></small>
+                    </span>
+                    <span class="meal-chevron" aria-hidden="true">⌄</span>
                   </button>
+                  <div class="meal-log__actions">
+                    <button class="meal-confirm-button" type="button" data-confirm-meal="lunch" hidden>Mark meal eaten</button>
+                    <button class="meal-add-food" type="button" data-add-food="lunch" aria-label="Add food to Lunch" title="Add food"><span aria-hidden="true">＋</span></button>
+                  </div>
                 </div>
-
-                <div
-                  class="meal-food-items"
-                  data-meal-items="lunch"
-                  hidden
-                ></div>
+                <div class="meal-food-items" data-meal-items="lunch" hidden></div>
               </section>
-
 
               <section class="meal-log" data-meal-log="snack">
                 <div class="meal-log__header meal-log__strip">
-                  <div class="meal-log__identity">
-                    <label class="check-row">
-                      <input
-                        type="checkbox"
-                        data-food-meal="snack"
-                      >
-
-                      <span class="custom-checkbox"></span>
-                      <span>Snack / treat</span>
-                    </label>
-
-                    <span
-                      class="meal-calories"
-                      data-meal-calories="snack"
-                      hidden
-                    ></span>
-                  </div>
-
-                  <button
-                    class="meal-add-food"
-                    type="button"
-                    data-add-food="snack"
-                    aria-label="Add food to Snack / treat"
-                    title="Add food"
-                  >
-                    <span aria-hidden="true">＋</span>
+                  <button class="meal-collapse-toggle" type="button" data-toggle-meal="snack" aria-expanded="false">
+                    <span class="meal-log__identity">
+                      <strong data-meal-title="snack">Snack</strong>
+                      <span class="meal-summary" data-meal-summary="snack">No food planned</span>
+                      <small class="meal-window-state" data-meal-window="snack"></small>
+                    </span>
+                    <span class="meal-chevron" aria-hidden="true">⌄</span>
                   </button>
+                  <div class="meal-log__actions">
+                    <button class="meal-confirm-button" type="button" data-confirm-meal="snack" hidden>Mark meal eaten</button>
+                    <button class="meal-add-food" type="button" data-add-food="snack" aria-label="Add food to Snack" title="Add food"><span aria-hidden="true">＋</span></button>
+                  </div>
                 </div>
-
-                <div
-                  class="meal-food-items"
-                  data-meal-items="snack"
-                  hidden
-                ></div>
+                <div class="meal-food-items" data-meal-items="snack" hidden></div>
               </section>
-
 
               <section class="meal-log" data-meal-log="dinner">
                 <div class="meal-log__header meal-log__strip">
-                  <div class="meal-log__identity">
-                    <label class="check-row">
-                      <input
-                        type="checkbox"
-                        data-food-meal="dinner"
-                      >
-
-                      <span class="custom-checkbox"></span>
-                      <span>Dinner</span>
-                    </label>
-
-                    <span
-                      class="meal-calories"
-                      data-meal-calories="dinner"
-                      hidden
-                    ></span>
-                  </div>
-
-                  <button
-                    class="meal-add-food"
-                    type="button"
-                    data-add-food="dinner"
-                    aria-label="Add food to Dinner"
-                    title="Add food"
-                  >
-                    <span aria-hidden="true">＋</span>
+                  <button class="meal-collapse-toggle" type="button" data-toggle-meal="dinner" aria-expanded="false">
+                    <span class="meal-log__identity">
+                      <strong data-meal-title="dinner">Dinner</strong>
+                      <span class="meal-summary" data-meal-summary="dinner">No food planned</span>
+                      <small class="meal-window-state" data-meal-window="dinner"></small>
+                    </span>
+                    <span class="meal-chevron" aria-hidden="true">⌄</span>
                   </button>
+                  <div class="meal-log__actions">
+                    <button class="meal-confirm-button" type="button" data-confirm-meal="dinner" hidden>Mark meal eaten</button>
+                    <button class="meal-add-food" type="button" data-add-food="dinner" aria-label="Add food to Dinner" title="Add food"><span aria-hidden="true">＋</span></button>
+                  </div>
                 </div>
-
-                <div
-                  class="meal-food-items"
-                  data-meal-items="dinner"
-                  hidden
-                ></div>
+                <div class="meal-food-items" data-meal-items="dinner" hidden></div>
               </section>
 
             </div>
-
 
             <div class="card-divider"></div>
 
@@ -505,6 +421,8 @@
 
 
 
+            <p class="nutrition-plan-summary" id="nutrition-plan-summary">No food plan loaded for this day.</p>
+
             <div class="nutrition-fields">
 
 
@@ -552,7 +470,7 @@
                   class="target-copy"
                   id="calories-target-copy"
                 >
-                  Full point ≤1600 kcal · 0.9 through 1700
+                  Full point ≤1400 kcal · 0.9 through 1500
                 </small>
 
               </div>
@@ -854,50 +772,27 @@
                 already has visible content.
               -->
 
-              <label class="movement-row">
-                <input
-                  type="checkbox"
-                  data-movement-id="example-jog"
-                >
-
-                <span class="custom-checkbox"></span>
-
+              <div class="movement-row movement-row--optional">
+                <span class="custom-checkbox custom-checkbox--disabled" aria-hidden="true"></span>
                 <span class="movement-row__content">
-                  <strong>Jog</strong>
+                  <span class="movement-badge">OPTIONAL</span>
+                  <strong>Optional morning walk</strong>
                   <small>Morning</small>
                 </span>
-              </label>
+              </div>
 
-
-              <label class="movement-row">
-                <input
-                  type="checkbox"
-                  data-movement-id="example-glute-strength"
-                >
-
+              <div class="movement-row">
+                <input type="checkbox" data-movement-id="example-glutes-long">
                 <span class="custom-checkbox"></span>
-
                 <span class="movement-row__content">
-                  <strong>Glute strength</strong>
-                  <small>Morning</small>
-                </span>
-              </label>
-
-
-              <label class="movement-row">
-                <input
-                  type="checkbox"
-                  data-movement-id="example-abs"
-                >
-
-                <span class="custom-checkbox"></span>
-
-                <span class="movement-row__content">
-                  <strong>Abs</strong>
+                  <span class="movement-badge">1 PT</span>
+                  <strong>Glutes strength — Long</strong>
                   <small>Afternoon</small>
                 </span>
-              </label>
-
+                <span class="movement-row__actions">
+                  <button class="text-button" type="button">View workout</button>
+                </span>
+              </div>
             </div>
 
           </section>
@@ -927,11 +822,22 @@
             </header>
 
             <div class="habit-list" id="self-care-list"></div>
+            <div class="card-divider"></div>
+            <div class="extra-task-section">
+              <p class="eyebrow">Extra self care · no points</p>
+              <div class="today-task-list" id="extra-self-care-list"></div>
+            </div>
 
           </section>
 
 
 
+
+          <section class="dashboard-card dashboard-card--wide" id="adulting-quests-card" aria-labelledby="adulting-quests-title">
+            <header class="card-header"><div><p class="eyebrow">Non-scoring</p><h2 id="adulting-quests-title">Adulting &amp; Quests</h2></div></header>
+            <p class="card-intro">Life admin and side quests for today. They never affect your run score.</p>
+            <div class="today-task-list" id="adulting-quests-list"></div>
+          </section>
 
         </div>
 
@@ -962,118 +868,11 @@
         </section>
 
 
-        <!-- =====================================================
-          TODAY'S SCHEDULE
-        ====================================================== -->
-
-        <section
-          class="schedule-preview"
-          aria-labelledby="today-schedule-title"
-        >
-
-          <header class="section-header">
-
-            <div>
-              <p class="eyebrow">Today's timeline</p>
-              <h2 id="today-schedule-title">
-                Operation schedule
-              </h2>
-            </div>
-
-
-            <button
-              class="text-button"
-              type="button"
-              data-view-link="schedule"
-            >
-              Edit schedule →
-            </button>
-
-          </header>
-
-
-          <div
-            class="timeline"
-            id="today-timeline"
-          >
-
-
-            <!-- Morning -->
-
-            <section class="timeline-block">
-
-              <header>
-                <span class="timeline-block__marker"></span>
-                <h3>Morning</h3>
-              </header>
-
-              <ul>
-                <li>Breakfast</li>
-                <li>Morning walk / jog</li>
-                <li>Glutes strength</li>
-                <li>Morning routine</li>
-              </ul>
-
-            </section>
-
-
-
-            <!-- Midday -->
-
-            <section class="timeline-block">
-
-              <header>
-                <span class="timeline-block__marker"></span>
-                <h3>Midday</h3>
-              </header>
-
-              <ul>
-                <li>Lunch</li>
-              </ul>
-
-            </section>
-
-
-
-            <!-- Afternoon -->
-
-            <section class="timeline-block">
-
-              <header>
-                <span class="timeline-block__marker"></span>
-                <h3>Afternoon</h3>
-              </header>
-
-              <ul>
-                <li>Snack / treat</li>
-              </ul>
-
-            </section>
-
-
-
-            <!-- Evening -->
-
-            <section class="timeline-block">
-
-              <header>
-                <span class="timeline-block__marker"></span>
-                <h3>Evening</h3>
-              </header>
-
-              <ul>
-                <li>Dinner</li>
-                <li>Evening walk</li>
-                <li>Evening routine</li>
-              </ul>
-
-            </section>
-
-          </div>
-
+        <section class="grocery-card" id="tomorrow-grocery-card" aria-labelledby="tomorrow-grocery-title">
+          <header class="section-header"><div><p class="eyebrow">For tomorrow</p><h2 id="tomorrow-grocery-title">Grocery</h2></div><span class="grocery-target-day" id="grocery-target-day"></span></header>
+          <div class="grocery-list" id="tomorrow-grocery-list"></div>
+          <div class="grocery-add"><input type="text" id="grocery-manual-input" placeholder="Add something else" autocomplete="off"><button type="button" class="secondary-button" id="grocery-manual-add">+ Add item</button></div>
         </section>
-
-
 
         <!-- =====================================================
           RECOVERY
@@ -1249,12 +1048,12 @@
 
 
         <!-- =====================================================
-          DAY 10 MEASUREMENTS
+          DAY 14 MEASUREMENTS
         ====================================================== -->
 
         <section
           class="measurements-panel"
-          id="day-10-measurements"
+          id="day-14-measurements"
           aria-labelledby="measurements-title"
           hidden
         >
@@ -1262,7 +1061,7 @@
           <header class="section-header">
 
             <div>
-              <p class="eyebrow">Day 10 — information only</p>
+              <p class="eyebrow">Day 14 — information only</p>
               <h2 id="measurements-title">
                 Final tracking
               </h2>
@@ -1412,9 +1211,7 @@
               0 / 0 pts
             </span>
 
-            <span>
-              overall completion
-            </span>
+            <span id="campaign-day-label">Day 1 / 14</span>
 
           </div>
 
@@ -1450,7 +1247,7 @@
             <div>
               <p class="eyebrow">Behavior board</p>
               <h2 id="campaign-board-title">
-                10-day map
+                14-day map
               </h2>
             </div>
 
@@ -1532,6 +1329,30 @@
                     </button>
                   </th>
 
+                  <th scope="col">
+                    <button type="button" data-day-select="11">
+                      D11
+                    </button>
+                  </th>
+
+                  <th scope="col">
+                    <button type="button" data-day-select="12">
+                      D12
+                    </button>
+                  </th>
+
+                  <th scope="col">
+                    <button type="button" data-day-select="13">
+                      D13
+                    </button>
+                  </th>
+
+                  <th scope="col">
+                    <button type="button" data-day-select="14">
+                      D14
+                    </button>
+                  </th>
+
                 </tr>
 
               </thead>
@@ -1567,6 +1388,30 @@
           </div>
         </section>
 
+
+        <section class="progress-summary-grid">
+          <article class="progress-mini-card"><span>Challenge history</span><div id="challenge-history-strip" class="challenge-history-strip"></div></article>
+          <article class="progress-mini-card"><span>Training</span><strong id="training-progress-summary">0 / 0 required blocks</strong></article>
+        </section>
+
+        <section class="final-reward-panel" id="final-reward-panel" hidden aria-labelledby="reward-title">
+          <header class="section-header"><div><p class="eyebrow">Sprint outcome</p><h2 id="reward-title">Sprint complete</h2></div></header>
+          <p id="reward-description"></p>
+        </section>
+
+        <section class="archive-panel" aria-labelledby="archive-title">
+          <header class="section-header"><div><p class="eyebrow">Sprint history</p><h2 id="archive-title">Previous runs</h2></div></header>
+          <div id="archive-comparison"></div>
+        </section>
+
+        <section class="sprint-end-panel" id="sprint-end-panel" hidden aria-labelledby="sprint-end-title">
+          <header class="section-header"><div><p class="eyebrow">14 days complete</p><h2 id="sprint-end-title">Start the next sprint</h2></div></header>
+          <p>Archive this sprint as a summary and begin fresh. Unfinished one-off Brain Dump tasks return as unscheduled; daily repeats carry forward.</p>
+          <div class="sprint-end-actions">
+            <button class="primary-button" type="button" id="start-next-empty">Start with no food plan</button>
+            <button class="secondary-button" type="button" id="start-next-reuse">Reuse previous food plan</button>
+          </div>
+        </section>
 
         <!-- Recovery trend placeholders -->
 
@@ -1624,212 +1469,41 @@
 
 
       <!-- =======================================================
-        SCHEDULE VIEW
+        PLAN VIEW
       ======================================================== -->
-
-      <section
-        class="app-view"
-        id="view-schedule"
-        data-view="schedule"
-        aria-labelledby="schedule-title"
-        hidden
-      >
-
-        <header class="view-header">
-
-          <div>
-            <p class="eyebrow">
-              Run planner
-            </p>
-
-            <h1 id="schedule-title">
-              Schedule
-            </h1>
-
-            <p class="view-description">
-              Change workout placement and daily timing without touching the code.
-            </p>
-          </div>
-
-        </header>
-
-
-        <!-- Day tabs -->
-
-        <div
-          class="day-tabs"
-          id="schedule-day-tabs"
-          role="tablist"
-          aria-label="Schedule days"
-        >
-
-          <button type="button" role="tab" data-schedule-day="1">
-            D1
-          </button>
-
-          <button type="button" role="tab" data-schedule-day="2">
-            D2
-          </button>
-
-          <button type="button" role="tab" data-schedule-day="3">
-            D3
-          </button>
-
-          <button type="button" role="tab" data-schedule-day="4">
-            D4
-          </button>
-
-          <button type="button" role="tab" data-schedule-day="5">
-            D5
-          </button>
-
-          <button type="button" role="tab" data-schedule-day="6">
-            D6
-          </button>
-
-          <button type="button" role="tab" data-schedule-day="7">
-            D7
-          </button>
-
-          <button type="button" role="tab" data-schedule-day="8">
-            D8
-          </button>
-
-          <button type="button" role="tab" data-schedule-day="9">
-            D9
-          </button>
-
-          <button type="button" role="tab" data-schedule-day="10">
-            D10
-          </button>
-
+      <section class="app-view" id="view-plan" data-view="plan" aria-labelledby="plan-title" hidden>
+        <header class="view-header"><div><p class="eyebrow">Sprint planner</p><h1 id="plan-title">Plan</h1><p class="view-description">Empty your head, see the training structure, and shape the 14-day food plan.</p></div></header>
+        <div class="plan-section-tabs" id="plan-section-tabs" role="tablist" aria-label="Plan sections">
+          <button type="button" data-plan-section="brain-dump" class="is-active" role="tab">Brain Dump</button>
+          <button type="button" data-plan-section="training" role="tab">Training</button>
+          <button type="button" data-plan-section="food-plan" role="tab">Food Plan</button>
         </div>
 
-
-        <section
-          class="schedule-editor"
-          id="schedule-editor"
-        >
-
-          <header class="schedule-editor__header">
-
-            <div>
-              <p class="eyebrow">
-                Editing
-              </p>
-
-              <h2>
-                Day
-                <span id="schedule-editor-day-number">
-                  1
-                </span>
-              </h2>
-            </div>
-
-
-            <button
-              class="primary-button"
-              type="button"
-              id="add-schedule-item-button"
-            >
-              Add activity
-            </button>
-
-          </header>
-
-
-          <div
-            class="schedule-add-panel"
-            id="schedule-add-panel"
-            hidden
-          >
-            <div class="schedule-add-panel__grid">
-
-              <label class="schedule-add-field">
-                <span>Group</span>
-                <select id="schedule-activity-category">
-                  <option value="movement">Training</option>
-                  <option value="glow">Self care</option>
-                  <option value="custom">Other</option>
-                </select>
-              </label>
-
-              <label
-                class="schedule-add-field"
-                id="schedule-training-field"
-              >
-                <span>Training</span>
-                <select id="schedule-training-type"></select>
-              </label>
-
-              <label
-                class="schedule-add-field"
-                id="schedule-self-care-field"
-                hidden
-              >
-                <span>Self care</span>
-                <select id="schedule-self-care-type">
-                  <option value="morning-routine">Morning routine</option>
-                  <option value="evening-routine">Evening routine</option>
-                  <option value="other">Other</option>
-                </select>
-              </label>
-
-              <label
-                class="schedule-add-field"
-                id="schedule-custom-field"
-                hidden
-              >
-                <span>Activity</span>
-                <input
-                  type="text"
-                  id="schedule-custom-label"
-                  placeholder="Name this activity"
-                  autocomplete="off"
-                >
-              </label>
-
-              <label class="schedule-add-field">
-                <span>Time</span>
-                <select id="schedule-activity-period"></select>
-              </label>
-
-            </div>
-
-            <div class="schedule-add-panel__actions">
-              <button
-                class="secondary-button"
-                type="button"
-                id="cancel-schedule-activity-button"
-              >
-                Cancel
-              </button>
-
-              <button
-                class="primary-button"
-                type="button"
-                id="confirm-schedule-activity-button"
-              >
-                Add to Day <span id="schedule-add-day-number">1</span>
-              </button>
-            </div>
-          </div>
-
-
-          <div
-            class="schedule-editor__blocks"
-            id="schedule-editor-blocks"
-          >
-
-            <!-- Rendered by schedule-view.js -->
-
-          </div>
-
+        <section class="plan-panel" id="brain-dump-panel">
+          <header class="section-header"><div><p class="eyebrow">Get it out of your head</p><h2>Brain Dump</h2></div></header>
+          <div class="brain-capture"><textarea id="brain-dump-input" rows="2" placeholder="What’s in your head?"></textarea><button class="primary-button" type="button" id="brain-dump-add">Add</button></div>
+          <p class="plan-help">Add first. Then assign Self care, Adulting or Side projects &amp; quests and choose a sprint day or Repeat every day.</p>
+          <div class="brain-dump-list" id="brain-dump-list"></div>
         </section>
 
+        <section class="plan-panel" id="training-plan-panel" hidden>
+          <header class="section-header"><div><p class="eyebrow">Two-week cycle</p><h2>Training plan</h2></div></header>
+          <p class="plan-help">Days 8–14 repeat the first week. Optional walks and protect-sleep blocks never score.</p>
+          <div class="training-plan-list" id="training-plan-list"></div>
+        </section>
+
+        <section class="plan-panel" id="food-plan-panel" hidden>
+          <header class="section-header"><div><p class="eyebrow">14-day diet</p><h2>Food plan</h2></div></header>
+          <div class="diet-import-card">
+            <div><strong>Import CSV</strong><p>One row per ingredient: day, meal, meal_name, ingredient, quantity, unit, optional grams/kcal/protein/fibre/notes.</p></div>
+            <div class="diet-import-actions"><label class="secondary-button file-button">Choose CSV<input type="file" id="diet-csv-file" accept=".csv,text/csv"></label><button class="text-button" type="button" id="diet-template-download">Download template</button></div>
+            <p id="diet-import-status">No diet plan loaded yet.</p><ul id="diet-import-preview" class="diet-import-preview"></ul>
+            <button class="primary-button" type="button" id="diet-import-replace" hidden>Replace food plan</button>
+          </div>
+          <div class="day-tabs day-tabs--scroll" id="food-plan-day-tabs"></div>
+          <div id="food-plan-day-content" class="food-plan-day-content"></div>
+        </section>
       </section>
-
-
 
       <!-- =======================================================
         SETTINGS VIEW
@@ -1885,9 +1559,10 @@
               <input
                 type="number"
                 id="setting-calories-max"
-                value="1600"
+                value="1400"
                 min="0"
-              >
+
+                readonly>
             </label>
 
 
@@ -1896,9 +1571,10 @@
               <input
                 type="number"
                 id="setting-calories-grace-max"
-                value="1700"
+                value="1500"
                 min="0"
-              >
+
+                readonly>
             </label>
 
 
@@ -1936,6 +1612,17 @@
         </section>
 
 
+
+        <section class="settings-panel" aria-labelledby="meal-window-settings-title">
+          <header><p class="eyebrow">Food rhythm</p><h2 id="meal-window-settings-title">Meal windows</h2></header>
+          <p class="settings-help">Guidance only — windows never affect points or block logging.</p>
+          <div class="meal-window-settings">
+            <label>Breakfast <span><input type="time" id="setting-window-breakfast-start"><span>to</span><input type="time" id="setting-window-breakfast-end"></span></label>
+            <label>Lunch <span><input type="time" id="setting-window-lunch-start"><span>to</span><input type="time" id="setting-window-lunch-end"></span></label>
+            <label>Snack <span><input type="time" id="setting-window-snack-start"><span>to</span><input type="time" id="setting-window-snack-end"></span></label>
+            <label>Dinner <span><input type="time" id="setting-window-dinner-start"><span>to</span><input type="time" id="setting-window-dinner-end"></span></label>
+          </div>
+        </section>
 
         <!-- Water settings -->
 
@@ -2146,7 +1833,7 @@
     <footer class="app-footer">
 
       <span>
-        TEN DAY RUN // LOCAL BUILD
+        THE RUN // LOCAL BUILD
       </span>
 
       <span>
@@ -2230,7 +1917,7 @@
           </div>
 
           <small>
-            Search checks foods saved on this device first, then Open Food Facts.
+            Search checks foods saved on this device first, then generic foods and packaged products online.
           </small>
         </form>
 
@@ -2478,6 +2165,17 @@
     MODAL
   ============================================================ -->
 
+  <dialog class="workout-detail-dialog" id="workout-detail-dialog">
+    <div class="workout-detail-sheet"><header><div><p class="eyebrow">Training details</p><h2 id="workout-detail-title">Workout</h2></div><button class="icon-button" type="button" id="workout-detail-close" aria-label="Close workout">×</button></header><p id="workout-detail-style"></p><p class="workout-equipment"><strong>Equipment</strong> <span id="workout-detail-equipment"></span></p><div id="workout-detail-body" class="workout-detail-body"></div></div>
+  </dialog>
+
+  <dialog class="ingredient-editor-dialog" id="ingredient-editor-dialog">
+    <div class="ingredient-editor-sheet"><header><div><p class="eyebrow">Food plan</p><h2 id="ingredient-editor-title">Ingredient</h2></div><button class="icon-button" type="button" id="ingredient-editor-close" aria-label="Close">×</button></header>
+      <div class="ingredient-editor-grid"><label>Ingredient<input id="ingredient-name" type="text"></label><label>Quantity<input id="ingredient-quantity" type="number" step="0.1"></label><label>Unit<input id="ingredient-unit" type="text" placeholder="g, ml, piece"></label><label>Grams (optional)<input id="ingredient-grams" type="number" step="0.1"></label><label>Calories<input id="ingredient-kcal" type="number" step="0.1"></label><label>Protein g<input id="ingredient-protein" type="number" step="0.1"></label><label>Fibre g<input id="ingredient-fibre" type="number" step="0.1"></label><label class="field--full">Notes<textarea id="ingredient-notes" rows="3"></textarea></label></div>
+      <div class="dialog-actions"><button class="secondary-button" type="button" id="ingredient-editor-cancel">Cancel</button><button class="primary-button" type="button" id="ingredient-editor-save">Save ingredient</button></div>
+    </div>
+  </dialog>
+
   <dialog
     class="app-dialog"
     id="app-dialog"
@@ -2549,14 +2247,19 @@
 
   <script src="js/defaults.js"></script>
   <script src="js/storage.js"></script>
-  <script src="js/state.js"></script>
   <script src="js/scoring.js"></script>
+  <script src="js/state.js"></script>
   <script src="js/food-library.js"></script>
   <script src="js/food-log.js"></script>
+  <script src="js/diet-plan.js"></script>
+  <script src="js/brain-dump.js"></script>
+  <script src="js/training-plan.js"></script>
+  <script src="js/meal-windows.js"></script>
+  <script src="js/sprint-archive.js"></script>
   <script src="js/navigation.js"></script>
   <script src="js/day-view.js"></script>
   <script src="js/overview-view.js"></script>
-  <script src="js/schedule-view.js"></script>
+  <script src="js/plan-view.js"></script>
   <script src="js/settings-view.js"></script>
   <script src="js/recovery.js"></script>
   <script src="js/import-export.js"></script>

@@ -1,5 +1,5 @@
 /* =========================================================
-   GLOW CAMPAIGN — SETTINGS VIEW
+   THE RUN — SETTINGS VIEW
 ========================================================= */
 
 window.GlowApp = window.GlowApp || {};
@@ -21,6 +21,7 @@ GlowApp.SettingsView = {
     }
 
     this.bindNutritionSettings();
+    this.bindMealWindowSettings();
     this.bindWaterSettings();
     this.bindRewardSettings();
 
@@ -69,6 +70,11 @@ GlowApp.SettingsView = {
       settings.water.targetGlasses
     );
 
+    ["breakfast","lunch","snack","dinner"].forEach(meal => {
+      this.setInputValue(`setting-window-${meal}-start`, settings.mealWindows?.[meal]?.start || GlowApp.DEFAULT_SETTINGS.mealWindows[meal].start);
+      this.setInputValue(`setting-window-${meal}-end`, settings.mealWindows?.[meal]?.end || GlowApp.DEFAULT_SETTINGS.mealWindows[meal].end);
+    });
+
 
     this.renderRewardSettings(
       settings.rewards
@@ -84,27 +90,8 @@ GlowApp.SettingsView = {
   bindNutritionSettings() {
 
     const fields = [
-
-      {
-        id: "setting-calories-max",
-        key: "caloriesMax"
-      },
-
-      {
-        id: "setting-calories-grace-max",
-        key: "caloriesGraceMax"
-      },
-
-      {
-        id: "setting-protein-min",
-        key: "proteinMin"
-      },
-
-      {
-        id: "setting-fibre-min",
-        key: "fibreMin"
-      }
-
+      { id: "setting-protein-min", key: "proteinMin" },
+      { id: "setting-fibre-min", key: "fibreMin" }
     ];
 
 
@@ -187,6 +174,28 @@ GlowApp.SettingsView = {
     this.showToast("Grace ceiling cannot be below the full-point ceiling.");
   },
 
+
+  /* =======================================================
+     MEAL WINDOWS — GUIDANCE ONLY
+  ======================================================== */
+
+  bindMealWindowSettings() {
+    ["breakfast","lunch","snack","dinner"].forEach(meal => {
+      ["start","end"].forEach(edge => {
+        document.getElementById(`setting-window-${meal}-${edge}`)?.addEventListener("change", event => {
+          const value = String(event.target.value || "");
+          if (!/^\d{2}:\d{2}$/.test(value)) { this.render(); return; }
+          GlowApp.State.updateSettings(settings => {
+            settings.mealWindows ||= JSON.parse(JSON.stringify(GlowApp.DEFAULT_SETTINGS.mealWindows));
+            settings.mealWindows[meal] ||= {};
+            settings.mealWindows[meal][edge] = value;
+          });
+          this.showToast("Meal window updated.");
+          GlowApp.DayView?.renderMealWindows?.(GlowApp.State.getSelectedDay());
+        });
+      });
+    });
+  },
 
   /* =======================================================
      WATER

@@ -222,7 +222,7 @@
   }
 
 
-  .nav-link[data-view-link="schedule"]::before {
+  .nav-link[data-view-link="plan"]::before {
     content: "≡";
   }
 
@@ -2381,5 +2381,66 @@
 
   .calorie-trend__legend {
     gap: 0.45rem 0.8rem;
+  }
+}
+
+/* =========================================================
+   THE RUN v3.0 — MOBILE REFINEMENTS
+========================================================= */
+@media (max-width: 820px) {
+  .meal-log__strip { align-items: stretch; }
+  .meal-collapse-toggle { min-height: 62px; padding-left: 0.7rem; }
+  .meal-log__identity { grid-template-columns: 1fr; gap: 0.12rem; }
+  .meal-log__identity > strong { white-space: normal; }
+  .meal-window-state { grid-column: auto; }
+  .meal-log__actions { gap: 0.25rem; padding-right: 0.35rem; }
+  .meal-confirm-button { max-width: 90px; min-height: 38px; padding-inline: 0.5rem; line-height: 1.1; }
+  .meal-add-food { width: 40px; height: 40px; }
+  .meal-food-swipe,
+  .brain-task-swipe,
+  .plan-ingredient-swipe { --swipe-action-width: 156px; }
+
+  .today-task-row { grid-template-columns: minmax(0,1fr); }
+  .task-tomorrow { justify-self: start; margin-left: 2.15rem; }
+  .grocery-add { grid-template-columns: 1fr; }
+
+  .plan-panel { padding: 0.9rem; border-radius: 20px; }
+  .brain-capture { grid-template-columns: 1fr; }
+  .brain-capture .primary-button { width: 100%; }
+  .brain-task__edit-grid { grid-template-columns: 1fr; }
+  .brain-task__edit-actions { display: grid; grid-template-columns: 0.8fr 1fr; }
+  .training-plan-list { grid-template-columns: 1fr; }
+  .training-day-card li { grid-template-columns: auto minmax(0,1fr); }
+  .training-day-card li .text-button,
+  .training-day-card li .training-change { grid-column: 2; justify-self: start; }
+  .training-change { max-width: 100%; }
+  .ingredient-editor-grid { grid-template-columns: 1fr; }
+  .ingredient-editor-grid .field--full { grid-column: auto; }
+
+  .progress-summary-grid { grid-template-columns: 1fr; }
+  .challenge-history-strip { grid-template-columns: repeat(14, 30px); }
+  .archive-comparison-card { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .sprint-end-actions { display: grid; grid-template-columns: 1fr; }
+
+  .workout-detail-dialog,
+  .ingredient-editor-dialog { width: calc(100% - 0.5rem); max-height: calc(100dvh - 0.5rem); }
+  .workout-detail-sheet,
+  .ingredient-editor-sheet { max-height: calc(100dvh - 0.5rem); border-radius: 20px; padding: 1rem; }
+}
+
+@media (max-width: 820px) {
+  #movement-card .movement-row {
+    flex-wrap: wrap;
+  }
+  #movement-card .movement-row__content {
+    flex: 1 1 calc(100% - 42px);
+  }
+  #movement-card .movement-row__actions {
+    width: 100%;
+    margin-left: 2.15rem;
+  }
+  #movement-card .movement-row__actions .text-button {
+    min-height: 36px;
+    padding-left: 0;
   }
 }

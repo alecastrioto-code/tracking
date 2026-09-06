@@ -32,7 +32,7 @@ GlowApp.App = {
     ) {
 
       console.error(
-        "Ten Day Run: required application files are missing."
+        "The Run: required application files are missing."
       );
 
       return;
@@ -50,7 +50,7 @@ GlowApp.App = {
     if (!state) {
 
       console.error(
-        "Ten Day Run: application state could not be initialised."
+        "The Run: application state could not be initialised."
       );
 
       return;
@@ -93,7 +93,7 @@ GlowApp.App = {
 
 
     console.info(
-      "Ten Day Run operational.",
+      "The Run operational.",
       {
         campaign:
           GlowApp.State
@@ -123,7 +123,7 @@ GlowApp.App = {
 
       GlowApp.OverviewView,
 
-      GlowApp.ScheduleView,
+      GlowApp.PlanView,
 
       GlowApp.SettingsView,
 

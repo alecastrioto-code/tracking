@@ -59,7 +59,7 @@ function loadCore() {
   return context;
 }
 
-await test('calorie scoring is 1 through 1600, 0.9 through 1700, then 0', () => {
+await test('calorie scoring is 1 through 1400, 0.9 through 1500, then 0', () => {
   const { GlowApp } = loadCore();
   const settings = GlowApp.DEFAULT_SETTINGS;
   const makeDay = calories => ({
@@ -67,10 +67,10 @@ await test('calorie scoring is 1 through 1600, 0.9 through 1700, then 0', () => 
     nutrition: { calories, protein: 100, fibre: 30 }
   });
 
-  const atTarget = GlowApp.Scoring.getNutritionScore(makeDay(1600), settings);
-  const grace = GlowApp.Scoring.getNutritionScore(makeDay(1650), settings);
-  const edge = GlowApp.Scoring.getNutritionScore(makeDay(1700), settings);
-  const above = GlowApp.Scoring.getNutritionScore(makeDay(1701), settings);
+  const atTarget = GlowApp.Scoring.getNutritionScore(makeDay(1400), settings);
+  const grace = GlowApp.Scoring.getNutritionScore(makeDay(1450), settings);
+  const edge = GlowApp.Scoring.getNutritionScore(makeDay(1500), settings);
+  const above = GlowApp.Scoring.getNutritionScore(makeDay(1501), settings);
   const low = GlowApp.Scoring.getNutritionScore(makeDay(900), settings);
 
   assert.equal(atTarget.goals.calories.earned, 1);
@@ -102,37 +102,23 @@ await test('binge forces Food Rhythm and calorie score to zero without double pe
   assert.equal(nutrition.earned, 2);
 });
 
-await test('new default movement schedule is 4 points on training days and 2 on rest days', () => {
+await test('new default movement follows the 7-day cycle and repeats through day 14', () => {
   const { GlowApp } = loadCore();
   const days = GlowApp.createDefaultDays();
-
-  const expectedStrength = {
-    1: 'Glutes strength',
-    2: 'Abs',
-    3: 'Total body conditioning',
-    5: 'Glutes strength',
-    6: 'Abs',
-    7: 'Upper back / arms',
-    9: 'Glutes strength',
-    10: 'Abs'
-  };
-
-  for (const day of days) {
-    const score = GlowApp.Scoring.getMovementScore(day);
-    if ([4, 8].includes(day.dayNumber)) {
-      assert.equal(score.possible, 2, `day ${day.dayNumber}`);
-      assert.deepEqual(JSON.parse(JSON.stringify(day.movement.map(item => item.label))), ['Evening walk']);
-    } else {
-      assert.equal(score.possible, 4, `day ${day.dayNumber}`);
-      assert.equal(day.movement[0].label, 'Morning walk / jog');
-      assert.equal(day.movement[1].label, expectedStrength[day.dayNumber]);
-      assert.equal(day.movement[2].label, 'Evening walk');
-      assert.equal(day.movement[2].points, 2);
-    }
-  }
+  assert.equal(days.length, 14);
+  const expectedPossible = [1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1];
+  days.forEach((day, index) => {
+    assert.equal(GlowApp.Scoring.getMovementScore(day).possible, expectedPossible[index], `day ${day.dayNumber}`);
+  });
+  assert.equal(days[0].movement.some(item => item.optional && item.scored === false), true);
+  assert.equal(days[2].movement.some(item => item.recovery && item.scored === false), true);
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(days.slice(7).map(day => day.movement.map(item => item.type)))),
+    JSON.parse(JSON.stringify(days.slice(0, 7).map(day => day.movement.map(item => item.type))))
+  );
 });
 
-await test('self care seeds Evening routine daily and Morning routine on days 1, 4, 8', () => {
+await test('self care seeds Evening routine daily and Morning routine on days 1, 4, 8, 12', () => {
   const { GlowApp } = loadCore();
   const days = GlowApp.createDefaultDays();
 
@@ -141,10 +127,10 @@ await test('self care seeds Evening routine daily and Morning routine on days 1,
     assert.equal(selfCare.some(item => item.label === 'Evening routine'), true);
     assert.equal(
       selfCare.some(item => item.label === 'Morning routine'),
-      [1, 4, 8].includes(day.dayNumber),
+      [1, 4, 8, 12].includes(day.dayNumber),
       `day ${day.dayNumber}`
     );
-    assert.equal(GlowApp.Scoring.getGlowScore(day).possible, [1, 4, 8].includes(day.dayNumber) ? 2 : 1);
+    assert.equal(GlowApp.Scoring.getGlowScore(day).possible, [1, 4, 8, 12].includes(day.dayNumber) ? 2 : 1);
   }
 });
 
@@ -231,7 +217,7 @@ await test('v3 upgrade resets old run exactly once while preserving separate foo
   context.localStorage.setItem('tenDayRunFoodLibraryV2', JSON.stringify([{ id: 'kiwi' }]));
 
   const fresh = GlowApp.State.init();
-  assert.equal(fresh.version, 3);
+  assert.equal(fresh.version, 4);
   assert.equal(fresh.campaigns.length, 1);
   assert.equal(fresh.campaigns[0].currentDay, 1);
   assert.equal(fresh.campaigns[0].days[0].food.breakfast, false);
@@ -258,7 +244,7 @@ await test('old dedicated dog-walk score card is removed from Today', () => {
 });
 
 await test('PWA cache is bumped for the v3 behavior model', () => {
-  assert.match(read('service-worker.js'), /ten-day-run-shell-v4/);
+  assert.match(read('service-worker.js'), /the-run-shell-v5/);
 });
 
 const failed = results.filter(result => !result.ok);

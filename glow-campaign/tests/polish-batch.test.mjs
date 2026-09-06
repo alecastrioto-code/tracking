@@ -54,10 +54,12 @@ await test('Progress no longer renders the current reward tier card', () => {
   assert.doesNotMatch(read('index.html'), /class="reward-panel"/);
 });
 
-await test('Schedule has one top-level Add activity CTA', () => {
+await test('Plan replaces the old Schedule capture with one Brain Dump CTA', () => {
   const html = read('index.html');
-  assert.match(html, /id="add-schedule-item-button"[^>]*>[\s\S]*?Add activity/);
-  assert.doesNotMatch(read('js/schedule-view.js'), /\+ Add workout|\+ Custom item/);
+  assert.match(html, /data-view-link="plan"/);
+  assert.match(html, /id="brain-dump-input"/);
+  assert.match(html, /id="brain-dump-add"[^>]*>Add<\/button>/);
+  assert.doesNotMatch(html, /id="add-schedule-item-button"/);
 });
 
 await test('Food meal controls use a compact plus-only button with accessible label', () => {
@@ -137,39 +139,27 @@ await test('Meal totals expose calories beside each meal heading', () => {
   assert.equal(context.GlowApp.FoodLog.getMealCalories(day, 'breakfast'), 225);
 });
 
-await test('Schedule hides OR-group controls while preserving movement data', () => {
-  const context = loadScript('js/schedule-view.js');
-  const view = context.GlowApp.ScheduleView;
-  const day = {
-    dayNumber: 1,
-    movement: [{ id: 'm1', type: 'jog', label: 'Jog', period: 'morning', alternativeGroup: 'day-1-alt' }],
-    schedule: []
-  };
-  const item = {
-    id: 's1', label: 'Jog', period: 'morning', category: 'movement', linkedMovementId: 'm1'
-  };
-  const html = view.renderItem(day, item);
-  assert.doesNotMatch(html, /OR group|data-schedule-action="alternative"/);
+await test('Training choice is explicit without exposing legacy OR-group controls', () => {
+  const html = read('index.html');
+  const source = read('js/plan-view.js');
+  assert.match(html, /id="training-plan-panel"/);
+  assert.match(source, /Choose session/);
+  assert.match(source, /data-training-choice-day/);
+  assert.doesNotMatch(html, /OR group/);
 });
 
-await test('Food schedule goals are fixed, not editable or removable', () => {
-  const context = loadScript('js/schedule-view.js');
-  const html = context.GlowApp.ScheduleView.renderItem(
-    { movement: [], schedule: [] },
-    { id: 'food-1', label: 'Breakfast', period: 'morning', category: 'food' }
-  );
-  assert.doesNotMatch(html, /data-schedule-action="label"/);
-  assert.doesNotMatch(html, /data-schedule-action="period"/);
-  assert.doesNotMatch(html, /data-schedule-action="delete"/);
-  assert.match(html, /schedule-item--fixed/);
+await test('Eaten planned ingredients are protected from Plan edit/remove actions', () => {
+  const source = read('js/plan-view.js');
+  assert.match(source, /plan-ingredient--eaten/);
+  assert.match(source, /Eaten · edit actual in Today/);
+  assert.match(source, /item\.eaten === true/);
 });
 
-await test('Schedule category skins distinguish self care and other', () => {
-  const context = loadScript('js/schedule-view.js');
-  const view = context.GlowApp.ScheduleView;
-  const day = { movement: [], schedule: [] };
-  assert.match(view.renderItem(day, { id: 'g1', label: 'Somatoline', period: 'evening', category: 'glow' }), /schedule-item--self-care/);
-  assert.match(view.renderItem(day, { id: 'c1', label: 'Read', period: 'evening', category: 'custom' }), /schedule-item--other/);
+await test('Brain Dump offers the approved categories', () => {
+  const source = read('js/plan-view.js');
+  assert.match(source, /Self care/);
+  assert.match(source, /Adulting/);
+  assert.match(source, /Side projects & quests/);
 });
 
 const failed = results.filter((result) => !result.ok);

@@ -1,5 +1,5 @@
 /* =========================================================
-   GLOW CAMPAIGN — STORAGE
+   THE RUN — STORAGE
 ========================================================= */
 
 window.GlowApp = window.GlowApp || {};
@@ -34,7 +34,7 @@ GlowApp.Storage = {
     } catch (error) {
 
       console.error(
-        "Ten Day Run: failed to save state.",
+        "The Run: failed to save state.",
         error
       );
 
@@ -68,7 +68,7 @@ GlowApp.Storage = {
       if (!GlowApp.Storage.isValidState(parsedState)) {
 
         console.warn(
-          "Ten Day Run: stored data was invalid."
+          "The Run: stored data was invalid."
         );
 
         return null;
@@ -80,7 +80,7 @@ GlowApp.Storage = {
     } catch (error) {
 
       console.error(
-        "Ten Day Run: failed to load saved state.",
+        "The Run: failed to load saved state.",
         error
       );
 
@@ -109,7 +109,7 @@ GlowApp.Storage = {
     } catch (error) {
 
       console.error(
-        "Ten Day Run: failed to clear storage.",
+        "The Run: failed to clear storage.",
         error
       );
 

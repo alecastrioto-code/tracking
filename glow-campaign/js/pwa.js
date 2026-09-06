@@ -1,5 +1,5 @@
 /* =========================================================
-   TEN DAY RUN — PWA BOOTSTRAP
+   THE RUN — PWA BOOTSTRAP
 ========================================================= */
 
 window.GlowApp = window.GlowApp || {};
@@ -44,7 +44,7 @@ GlowApp.PWA = {
           .catch((error) => {
 
             console.warn(
-              "Ten Day Run: service worker could not be registered.",
+              "The Run: service worker could not be registered.",
               error
             );
 

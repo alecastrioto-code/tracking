@@ -1,5 +1,5 @@
 /* =========================================================
-   TEN DAY RUN — FOOD LOGGING
+   THE RUN — FOOD LOGGING
 
    Phase 2A / 2B:
    - meal-level food records
@@ -51,6 +51,7 @@ GlowApp.FoodLog = {
   barcodeSessionId: 0,
   describedAmountG: null,
   swipeState: null,
+  expandedMeals: new Set(),
 
 
   init() {
@@ -75,59 +76,34 @@ GlowApp.FoodLog = {
 
   ensureDayModel(day) {
 
-    if (!day) {
-      return;
-    }
+    if (!day) return;
 
-
-    if (!day.foodLog || typeof day.foodLog !== "object") {
-
-      day.foodLog = {
-        breakfast: [],
-        lunch: [],
-        snack: [],
-        dinner: []
-      };
-    }
-
+    day.foodLog ||= { breakfast: [], lunch: [], snack: [], dinner: [] };
+    day.mealMeta ||= {};
 
     this.meals.forEach((meal) => {
-
-      if (!Array.isArray(day.foodLog[meal.id])) {
-        day.foodLog[meal.id] = [];
-      }
-
+      if (!Array.isArray(day.foodLog[meal.id])) day.foodLog[meal.id] = [];
+      day.mealMeta[meal.id] ||= { mealName: "", confirmedAt: null };
+      day.foodLog[meal.id].forEach(item => {
+        if (item.planned === undefined) item.planned = false;
+        if (item.eaten === undefined) item.eaten = true;
+        item.origin ||= item.source === "diet" ? "diet" : "manual";
+        if (item.quantity === undefined) item.quantity = item.amountG ?? item.grams ?? 0;
+        if (!item.unit) item.unit = item.amountG != null ? "g" : "portion";
+        if (item.grams === undefined) item.grams = item.amountG ?? null;
+        item.nutritionStatus ||= "resolved";
+        if (item.eaten && !item.eatenAt) item.eatenAt = item.addedAt || null;
+      });
     });
 
-
-    if (!day.nutrition || typeof day.nutrition !== "object") {
-
-      day.nutrition = {
-        calories: null,
-        protein: null,
-        fibre: null
-      };
-    }
-
-
-    if (!day.nutrition.source) {
-      day.nutrition.source = "manual";
-    }
-
-
-    if (!day.nutrition.manualValues) {
-
-      day.nutrition.manualValues = {
-        calories:
-          day.nutrition.calories ?? null,
-        protein:
-          day.nutrition.protein ?? null,
-        fibre:
-          day.nutrition.fibre ?? null
-      };
-    }
+    day.nutrition ||= { calories: null, protein: null, fibre: null };
+    day.nutrition.source ||= "manual";
+    day.nutrition.manualValues ||= {
+      calories: day.nutrition.calories ?? null,
+      protein: day.nutrition.protein ?? null,
+      fibre: day.nutrition.fibre ?? null
+    };
   },
-
 
   hasItems(day) {
 
@@ -140,316 +116,223 @@ GlowApp.FoodLog = {
   },
 
 
-  getAllItems(day) {
-
+  getAllItems(day, options = {}) {
     this.ensureDayModel(day);
-
-
-    return this.meals.flatMap(
-      meal => day.foodLog[meal.id]
-    );
+    const items = this.meals.flatMap(meal => day.foodLog[meal.id]);
+    if (options.plannedOnly) return items.filter(item => item.planned === true);
+    if (options.includeUneaten) return items;
+    return items.filter(item => item.eaten === true);
   },
 
-
-  getTotals(day) {
-
-    const items = this.getAllItems(day);
-
-
-    const totals = items.reduce(
-      (sum, item) => {
-
-        sum.calories += Number(item.calories || 0);
-        sum.protein += Number(item.protein || 0);
-        sum.fibre += Number(item.fibre || 0);
-
-        return sum;
-
-      },
-      {
-        calories: 0,
-        protein: 0,
-        fibre: 0
-      }
-    );
-
-
+  sumItems(items) {
+    const totals = (items || []).reduce((sum, item) => {
+      sum.calories += Number(item.calories || 0);
+      sum.protein += Number(item.protein || 0);
+      sum.fibre += Number(item.fibre || 0);
+      return sum;
+    }, { calories: 0, protein: 0, fibre: 0 });
     return {
       calories: Math.round(totals.calories),
       protein: this.round(totals.protein, 1),
       fibre: this.round(totals.fibre, 1),
-      itemCount: items.length
+      itemCount: (items || []).length
     };
   },
 
-
-  getMealCalories(day, mealId) {
-
-    this.ensureDayModel(day);
-
-    const items =
-      day.foodLog?.[mealId] ||
-      [];
-
-    const total = items.reduce(
-      (sum, item) =>
-        sum + Number(item.calories || 0),
-      0
-    );
-
-    return Math.round(total);
+  getTotals(day) {
+    return this.sumItems(this.getAllItems(day));
   },
 
+  getPlannedTotals(day) {
+    return this.sumItems(this.getAllItems(day, { plannedOnly: true }));
+  },
+
+  getMealCalories(day, mealId, options = {}) {
+    this.ensureDayModel(day);
+    let items = day.foodLog?.[mealId] || [];
+    if (options.planned) items = items.filter(item => item.planned === true);
+    else if (!options.includeUneaten) items = items.filter(item => item.eaten === true);
+    return Math.round(items.reduce((sum, item) => sum + Number(item.calories || 0), 0));
+  },
 
   syncNutrition(day) {
-
     this.ensureDayModel(day);
-
-
-    const hasItems = this.hasItems(day);
-
-
-    if (hasItems) {
-
+    const eatenItems = this.getAllItems(day);
+    if (eatenItems.length) {
       if (day.nutrition.source !== "foodLog") {
-
         day.nutrition.manualValues = {
-          calories:
-            day.nutrition.calories ?? null,
-          protein:
-            day.nutrition.protein ?? null,
-          fibre:
-            day.nutrition.fibre ?? null
+          calories: day.nutrition.calories ?? null,
+          protein: day.nutrition.protein ?? null,
+          fibre: day.nutrition.fibre ?? null
         };
       }
-
-
       const totals = this.getTotals(day);
-
-
       day.nutrition.calories = totals.calories;
       day.nutrition.protein = totals.protein;
       day.nutrition.fibre = totals.fibre;
       day.nutrition.source = "foodLog";
-
       return;
     }
-
-
+    /* Planned-but-uneaten food must never populate actual nutrition. */
     if (day.nutrition.source === "foodLog") {
-
-      const backup =
-        day.nutrition.manualValues || {};
-
-
-      day.nutrition.calories =
-        backup.calories ?? null;
-
-      day.nutrition.protein =
-        backup.protein ?? null;
-
-      day.nutrition.fibre =
-        backup.fibre ?? null;
-
+      const backup = day.nutrition.manualValues || {};
+      day.nutrition.calories = backup.calories ?? null;
+      day.nutrition.protein = backup.protein ?? null;
+      day.nutrition.fibre = backup.fibre ?? null;
       day.nutrition.source = "manual";
     }
   },
 
+  confirmMealOnDay(day, mealId, when = new Date()) {
+    this.ensureDayModel(day);
+    const items = day.foodLog?.[mealId] || [];
+    const iso = when instanceof Date ? when.toISOString() : new Date(when).toISOString();
+    items.filter(item => item.planned === true).forEach(item => {
+      item.eaten = true;
+      item.eatenAt = iso;
+    });
+    day.food[mealId] = true;
+    day.mealMeta[mealId].confirmedAt = iso;
+    this.syncNutrition(day);
+    return true;
+  },
+
+  toggleItemEatenOnDay(day, mealId, itemId, eaten) {
+    this.ensureDayModel(day);
+    const item = (day.foodLog?.[mealId] || []).find(entry => entry.id === itemId);
+    if (!item) return false;
+    item.eaten = eaten === true;
+    item.eatenAt = item.eaten ? new Date().toISOString() : null;
+    const mealItems = day.foodLog[mealId];
+    day.food[mealId] = mealItems.some(entry => entry.eaten === true);
+    if (item.eaten && !day.mealMeta[mealId].confirmedAt) {
+      day.mealMeta[mealId].confirmedAt = item.eatenAt;
+    }
+    if (!item.eaten && mealItems.every(entry => entry.eaten !== true)) day.mealMeta[mealId].confirmedAt = null;
+    this.syncNutrition(day);
+    return true;
+  },
 
   /* ======================================================
      TODAY RENDERING
   ======================================================= */
 
   render(day) {
-
-    if (!day) {
-      return;
-    }
-
-
+    if (!day) return;
     this.ensureDayModel(day);
     this.syncNutrition(day);
 
+    this.meals.forEach(meal => {
+      const container = document.querySelector(`[data-meal-items="${meal.id}"]`);
+      const section = document.querySelector(`[data-meal-log="${meal.id}"]`);
+      const title = document.querySelector(`[data-meal-title="${meal.id}"]`);
+      const summary = document.querySelector(`[data-meal-summary="${meal.id}"]`);
+      const toggle = document.querySelector(`[data-toggle-meal="${meal.id}"]`);
+      const confirm = document.querySelector(`[data-confirm-meal="${meal.id}"]`);
+      if (!container) return;
 
-    this.meals.forEach((meal) => {
+      const items = day.foodLog[meal.id] || [];
+      const planned = items.filter(item => item.planned === true);
+      const plannedCalories = this.getMealCalories(day, meal.id, { planned: true, includeUneaten: true });
+      const mealName = day.mealMeta?.[meal.id]?.mealName || "";
+      const allPlannedEaten = planned.length > 0 && planned.every(item => item.eaten === true);
+      const key = `${day.dayNumber}:${meal.id}`;
+      const expanded = this.expandedMeals.has(key);
 
-      const container = document.querySelector(
-        `[data-meal-items="${meal.id}"]`
-      );
-
-
-      if (!container) {
-        return;
+      if (title) title.textContent = mealName ? `${meal.label} · ${mealName}` : meal.label;
+      if (summary) summary.textContent = planned.length
+        ? `${plannedCalories} kcal planned · ${planned.length} ingredient${planned.length === 1 ? "" : "s"}`
+        : items.length
+          ? `${this.getMealCalories(day, meal.id, { includeUneaten: true })} kcal · ${items.length} item${items.length === 1 ? "" : "s"}`
+          : "No food planned";
+      if (toggle) toggle.setAttribute("aria-expanded", String(expanded));
+      if (section) section.classList.toggle("is-expanded", expanded);
+      if (confirm) {
+        confirm.hidden = planned.length === 0;
+        confirm.disabled = allPlannedEaten;
+        confirm.textContent = allPlannedEaten ? "Eaten ✓" : "Mark meal eaten";
       }
 
-
-      const items = day.foodLog[meal.id];
-
-      const calorieTotal =
-        document.querySelector(
-          `[data-meal-calories="${meal.id}"]`
-        );
-
-      if (calorieTotal) {
-
-        const calories =
-          this.getMealCalories(
-            day,
-            meal.id
-          );
-
-        calorieTotal.textContent =
-          items.length
-            ? `${calories} kcal`
-            : "";
-
-        calorieTotal.hidden =
-          !items.length;
-      }
-
-
+      container.hidden = !expanded;
       if (!items.length) {
-
-        container.innerHTML = "";
-        container.hidden = true;
+        container.innerHTML = `<p class="meal-empty-state">Nothing in this meal yet.</p>`;
         return;
       }
 
-
-      container.hidden = false;
-
-      container.innerHTML = items
-        .map((item) => {
-
-          const brand = item.brand
-            ? `<span>${this.escapeHTML(item.brand)}</span>`
-            : "";
-
-
-          return `
-            <div
-              class="swipe-row meal-food-swipe"
-              data-swipe-row
-            >
-              <article class="meal-food-item swipe-row__content">
-
-                <div class="meal-food-item__main">
-                  <strong>${this.escapeHTML(item.name)}</strong>
-
-                  <small>
-                    ${brand}
-                    <span>${this.formatAmount(item.amountG)}</span>
-                    <span>${this.formatNumber(item.calories, 0)} kcal</span>
-                    <span>${this.formatNumber(item.protein, 1)}g protein</span>
-                  </small>
-                </div>
-
-              </article>
-
-              <div class="swipe-row__action">
-                <button
-                  class="swipe-delete-button meal-food-item__remove"
-                  type="button"
-                  data-remove-food-item="${this.escapeAttribute(item.id)}"
-                  data-remove-food-meal="${meal.id}"
-                  aria-label="Remove ${this.escapeAttribute(item.name)} from ${meal.label}"
-                  title="Remove"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path d="M4 7h16"></path>
-                    <path d="M9 7V4h6v3"></path>
-                    <path d="M7 7l1 13h8l1-13"></path>
-                    <path d="M10 11v5"></path>
-                    <path d="M14 11v5"></path>
-                  </svg>
-                  <span>Remove</span>
-                </button>
+      container.innerHTML = items.map(item => {
+        const quantity = this.formatQuantity(item);
+        const state = item.eaten === true ? "Eaten" : item.planned === true ? "Planned" : "Not eaten";
+        const unresolved = item.nutritionStatus === "needs-review" ? `<span class="food-review-chip">Needs review</span>` : "";
+        return `
+          <div class="swipe-row meal-food-swipe" data-swipe-row>
+            <article class="meal-food-item swipe-row__content">
+              <label class="meal-food-item__eaten" title="Mark ingredient eaten">
+                <input type="checkbox" data-food-item-eaten="${this.escapeAttribute(item.id)}" data-food-item-meal="${meal.id}" ${item.eaten === true ? "checked" : ""}>
+                <span class="custom-checkbox"></span>
+              </label>
+              <div class="meal-food-item__main">
+                <strong>${this.escapeHTML(item.name)}</strong>
+                <small><span>${this.escapeHTML(quantity)}</span><span>${this.formatNumber(item.calories, 0)} kcal</span><span>${this.formatNumber(item.protein, 1)}g protein</span><span>${this.escapeHTML(state)}</span>${unresolved}</small>
               </div>
+            </article>
+            <div class="swipe-row__action swipe-row__action--dual">
+              <button class="swipe-edit-button" type="button" data-edit-food-item="${this.escapeAttribute(item.id)}" data-edit-food-meal="${meal.id}">Edit</button>
+              <button class="swipe-delete-button meal-food-item__remove" type="button" data-remove-food-item="${this.escapeAttribute(item.id)}" data-remove-food-meal="${meal.id}" aria-label="Remove ${this.escapeAttribute(item.name)} from ${meal.label}">Remove</button>
             </div>
-          `;
-
-        })
-        .join("");
-
+          </div>`;
+      }).join("");
     });
-
   },
-
 
   bindMealCard() {
-
-    const card = document.getElementById(
-      "food-card"
-    );
-
-
-    if (!card) {
-      return;
-    }
-
-
+    const card = document.getElementById("food-card");
+    if (!card) return;
     this.bindSwipeReveal(card);
 
-
-    card.addEventListener(
-      "click",
-      (event) => {
-
-        if (event.target.closest(
-          '[data-swipe-row][data-swipe-handled="true"]'
-        )) {
-          event.preventDefault();
-          return;
-        }
-
-        const addButton = event.target.closest(
-          "[data-add-food]"
-        );
-
-
-        if (addButton) {
-
-          this.closeSwipeRows(card);
-          this.openDialog(
-            addButton.dataset.addFood
-          );
-
-          return;
-        }
-
-
-        const removeButton = event.target.closest(
-          "[data-remove-food-item]"
-        );
-
-
-        if (removeButton) {
-
-          this.removeItem(
-            removeButton.dataset.removeFoodMeal,
-            removeButton.dataset.removeFoodItem
-          );
-
-          return;
-        }
-
-
-        const revealed = event.target.closest(
-          "[data-swipe-row].is-revealed"
-        );
-
-        if (!revealed) {
-          this.closeSwipeRows(card);
-        }
-
+    card.addEventListener("click", event => {
+      if (event.target.closest('[data-swipe-row][data-swipe-handled="true"]')) {
+        event.preventDefault(); return;
       }
-    );
-  },
+      const toggle = event.target.closest("[data-toggle-meal]");
+      if (toggle) {
+        const day = GlowApp.State.getSelectedDay();
+        const key = `${day?.dayNumber || 1}:${toggle.dataset.toggleMeal}`;
+        if (this.expandedMeals.has(key)) this.expandedMeals.delete(key); else this.expandedMeals.add(key);
+        this.render(day); GlowApp.DayView?.renderMealWindows?.(day); return;
+      }
+      const confirm = event.target.closest("[data-confirm-meal]");
+      if (confirm) {
+        GlowApp.State.updateSelectedDay(day => this.confirmMealOnDay(day, confirm.dataset.confirmMeal));
+        this.refreshToday(); return;
+      }
+      const addButton = event.target.closest("[data-add-food]");
+      if (addButton) { this.closeSwipeRows(card); this.openDialog(addButton.dataset.addFood); return; }
+      const editButton = event.target.closest("[data-edit-food-item]");
+      if (editButton) {
+        this.closeSwipeRows(card);
+        const day = GlowApp.State.getSelectedDay();
+        const item = day?.foodLog?.[editButton.dataset.editFoodMeal]?.find(entry => entry.id === editButton.dataset.editFoodItem);
+        GlowApp.PlanView?.openIngredientEditor?.(
+          GlowApp.State.getSelectedDayNumber(),
+          editButton.dataset.editFoodMeal,
+          editButton.dataset.editFoodItem,
+          { planned: item?.planned === true }
+        );
+        return;
+      }
+      const removeButton = event.target.closest("[data-remove-food-item]");
+      if (removeButton) { this.removeItem(removeButton.dataset.removeFoodMeal, removeButton.dataset.removeFoodItem); return; }
+      const revealed = event.target.closest("[data-swipe-row].is-revealed");
+      if (!revealed) this.closeSwipeRows(card);
+    });
 
+    card.addEventListener("change", event => {
+      const checkbox = event.target.closest("[data-food-item-eaten]");
+      if (!checkbox) return;
+      GlowApp.State.updateSelectedDay(day => this.toggleItemEatenOnDay(day, checkbox.dataset.foodItemMeal, checkbox.dataset.foodItemEaten, checkbox.checked));
+      this.refreshToday();
+    });
+  },
 
   bindSwipeReveal(container) {
 
@@ -521,7 +404,7 @@ GlowApp.FoodLog = {
           return;
         }
 
-        state.deltaX = Math.max(-92, Math.min(0, deltaX));
+        state.deltaX = Math.max(-168, Math.min(0, deltaX));
         state.row.style.setProperty(
           "--swipe-offset",
           `${state.deltaX}px`
@@ -545,7 +428,7 @@ GlowApp.FoodLog = {
 
       const reveal =
         state.horizontal &&
-        state.deltaX <= -42;
+        state.deltaX <= -54;
 
       state.row.classList.toggle(
         "is-revealed",
@@ -1520,7 +1403,7 @@ GlowApp.FoodLog = {
     } catch (error) {
 
       console.warn(
-        "Ten Day Run: barcode camera could not start.",
+        "The Run: barcode camera could not start.",
         error
       );
 
@@ -1893,7 +1776,7 @@ GlowApp.FoodLog = {
     } catch (error) {
 
       console.warn(
-        "Ten Day Run: barcode lookup failed.",
+        "The Run: barcode lookup failed.",
         error
       );
 
@@ -2214,6 +2097,14 @@ GlowApp.FoodLog = {
           1
         ),
 
+      origin: "manual",
+      planned: false,
+      eaten: true,
+      quantity: this.round(amountG, 1),
+      unit: "g",
+      grams: this.round(amountG, 1),
+      nutritionStatus: "resolved",
+      eatenAt: new Date().toISOString(),
       addedAt:
         new Date().toISOString()
     };
@@ -2233,6 +2124,7 @@ GlowApp.FoodLog = {
           but Food Rhythm remains a separate, overridable behaviour.
         */
         day.food[this.activeMeal] = true;
+        day.mealMeta[this.activeMeal].confirmedAt ||= mealItem.eatenAt;
 
         this.syncNutrition(day);
 
@@ -2250,7 +2142,7 @@ GlowApp.FoodLog = {
     } catch (libraryError) {
 
       console.warn(
-        "Ten Day Run: food was logged but could not be added to the local food library.",
+        "The Run: food was logged but could not be added to the local food library.",
         libraryError
       );
     }
@@ -2527,6 +2419,14 @@ GlowApp.FoodLog = {
     );
   },
 
+
+  formatQuantity(item) {
+    if (!item) return "";
+    const quantity = item.quantity ?? item.amountG ?? item.grams;
+    const unit = item.unit || (item.amountG != null ? "g" : "");
+    if (quantity === null || quantity === undefined || quantity === "") return unit;
+    return `${this.formatNumber(quantity, Number(quantity) % 1 ? 1 : 0)} ${unit}`.trim();
+  },
 
   formatAmount(amount) {
 

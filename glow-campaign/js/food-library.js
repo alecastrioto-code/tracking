@@ -1,5 +1,5 @@
 /* =========================================================
-   TEN DAY RUN — LOCAL FOOD LIBRARY
+   THE RUN — LOCAL FOOD LIBRARY
 
    MVP reliability pass:
    - localStorage is the canonical store
@@ -36,7 +36,7 @@ GlowApp.FoodLibrary = {
       .catch((error) => {
 
         console.warn(
-          "Ten Day Run: legacy food migration was skipped.",
+          "The Run: legacy food migration was skipped.",
           error
         );
 
@@ -309,7 +309,7 @@ GlowApp.FoodLibrary = {
     } catch (error) {
 
       console.warn(
-        "Ten Day Run: food library could not be exported.",
+        "The Run: food library could not be exported.",
         error
       );
 
@@ -346,7 +346,7 @@ GlowApp.FoodLibrary = {
     } catch (error) {
 
       console.warn(
-        "Ten Day Run: saved foods could not be read.",
+        "The Run: saved foods could not be read.",
         error
       );
 
@@ -367,7 +367,7 @@ GlowApp.FoodLibrary = {
     } catch (error) {
 
       console.error(
-        "Ten Day Run: saved foods could not be written.",
+        "The Run: saved foods could not be written.",
         error
       );
 

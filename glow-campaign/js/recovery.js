@@ -7,7 +7,7 @@
    - Bind daily recovery sliders
    - Persist recovery values
    - Reload values when switching days
-   - Build 10-day recovery series
+   - Build 14-day recovery series
    - Render lightweight SVG trend strips
 ========================================================= */
 
@@ -448,7 +448,7 @@ GlowApp.Recovery = {
     const usableWidth = width - paddingX * 2;
     const usableHeight = height - paddingY * 2;
     const loggedValues = values.filter(point => point.value !== null).map(point => point.value);
-    const maxValue = Math.max(1800, ...loggedValues);
+    const maxValue = Math.max(1600, ...loggedValues);
     const xFor = index => paddingX + (index / Math.max(values.length - 1, 1)) * usableWidth;
     const yFor = value => paddingY + (1 - Math.min(Math.max(value / maxValue, 0), 1)) * usableHeight;
 
@@ -486,14 +486,14 @@ GlowApp.Recovery = {
 
     return `
       <div class="calorie-trend__legend">
-        <span><i class="calorie-trend__key calorie-trend__key--target"></i>1600 target</span>
-        <span><i class="calorie-trend__key calorie-trend__key--grace"></i>1700 grace</span>
+        <span><i class="calorie-trend__key calorie-trend__key--target"></i>1400 target</span>
+        <span><i class="calorie-trend__key calorie-trend__key--grace"></i>1500 grace</span>
         <span><i class="calorie-trend__key calorie-trend__key--binge"></i>Binge · untracked</span>
       </div>
       <div class="calorie-trend__chart">
-        <svg class="calorie-trend__svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="10-day calorie trend with binge days marked as untracked">
-          <line class="calorie-trend__guide calorie-trend__guide--target" x1="${paddingX}" x2="${width - paddingX}" y1="${yFor(1600)}" y2="${yFor(1600)}"></line>
-          <line class="calorie-trend__guide calorie-trend__guide--grace" x1="${paddingX}" x2="${width - paddingX}" y1="${yFor(1700)}" y2="${yFor(1700)}"></line>
+        <svg class="calorie-trend__svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="14-day calorie trend with binge days marked as untracked">
+          <line class="calorie-trend__guide calorie-trend__guide--target" x1="${paddingX}" x2="${width - paddingX}" y1="${yFor(1400)}" y2="${yFor(1400)}"></line>
+          <line class="calorie-trend__guide calorie-trend__guide--grace" x1="${paddingX}" x2="${width - paddingX}" y1="${yFor(1500)}" y2="${yFor(1500)}"></line>
           <path class="calorie-trend__line" d="${path.trim()}"></path>
           <g>${circles}</g>
           <g>${bingeMarkers}</g>
@@ -959,7 +959,7 @@ GlowApp.Recovery = {
         viewBox="0 0 ${width} ${height}"
         preserveAspectRatio="none"
         role="img"
-        aria-label="10-day recovery trend"
+        aria-label="14-day recovery trend"
       >
 
         <line

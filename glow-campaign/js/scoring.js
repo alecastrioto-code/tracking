@@ -82,8 +82,8 @@ GlowApp.Scoring = {
     const protein = this.toValidNumber(nutrition.protein);
     const fibre = this.toValidNumber(nutrition.fibre);
 
-    const calorieMax = Number(targets.caloriesMax ?? 1600);
-    const calorieGraceMax = Number(targets.caloriesGraceMax ?? (calorieMax + 100));
+    const calorieMax = Number(targets.caloriesMax ?? 1400);
+    const calorieGraceMax = Number(targets.caloriesGraceMax ?? 1500);
     const binge = day?.food?.binge === true;
 
     let calorieEarned = 0;
@@ -292,14 +292,16 @@ GlowApp.Scoring = {
   getMovementScore(day) {
 
     const movement = Array.isArray(day?.movement) ? day.movement : [];
-    if (movement.length === 0) {
+    const scoredMovement = movement.filter(item => item?.scored !== false);
+
+    if (scoredMovement.length === 0) {
       return { earned: 0, possible: 0, percentage: 0, groups: [] };
     }
 
     const independentItems = [];
     const alternativeGroups = {};
 
-    movement.forEach(item => {
+    scoredMovement.forEach(item => {
       if (item.alternativeGroup) {
         alternativeGroups[item.alternativeGroup] ||= [];
         alternativeGroups[item.alternativeGroup].push(item);
@@ -308,7 +310,10 @@ GlowApp.Scoring = {
       }
     });
 
-    const pointsFor = item => Number(item?.points) > 0 ? Number(item.points) : 1;
+    const pointsFor = item => {
+      const value = Number(item?.points);
+      return Number.isFinite(value) && value >= 0 ? value : 1;
+    };
 
     const independentPossible = independentItems.reduce((total, item) => total + pointsFor(item), 0);
     const independentEarned = independentItems.reduce(
@@ -317,7 +322,7 @@ GlowApp.Scoring = {
     );
 
     const groupResults = Object.entries(alternativeGroups).map(([groupId, items]) => {
-      const possible = Math.max(...items.map(pointsFor));
+      const possible = Math.max(0, ...items.map(pointsFor));
       const complete = items.some(item => item.completed === true);
       return {
         id: groupId,
@@ -340,7 +345,6 @@ GlowApp.Scoring = {
 
     return { earned, possible, percentage: this.toPercentage(earned, possible), groups: groupResults };
   },
-
 
 
   /* =======================================================
@@ -470,11 +474,16 @@ GlowApp.Scoring = {
     settings
   ) {
 
-    const days =
+    const allDays =
       Array.isArray(campaign?.days)
         ? campaign.days
         : [];
 
+    const reachedDay = campaign?.status === "complete"
+      ? allDays.length
+      : Math.max(1, Math.min(Number(campaign?.currentDay || 1), allDays.length));
+
+    const days = allDays.filter(day => Number(day.dayNumber) <= reachedDay);
 
     const dailyScores =
       days.map(
