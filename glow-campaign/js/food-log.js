@@ -239,27 +239,33 @@ GlowApp.FoodLog = {
       const key = `${day.dayNumber}:${meal.id}`;
       const expanded = this.expandedMeals.has(key);
 
-      if (title) title.textContent = mealName ? `${meal.label} · ${mealName}` : meal.label;
+      if (title) title.textContent = meal.label;
       if (summary) summary.textContent = planned.length
-        ? `${plannedCalories} kcal planned · ${planned.length} ingredient${planned.length === 1 ? "" : "s"}`
+        ? `${plannedCalories} kcal`
         : items.length
-          ? `${this.getMealCalories(day, meal.id, { includeUneaten: true })} kcal · ${items.length} item${items.length === 1 ? "" : "s"}`
-          : "No food planned";
+          ? `${this.getMealCalories(day, meal.id, { includeUneaten: true })} kcal`
+          : "0 kcal";
       if (toggle) toggle.setAttribute("aria-expanded", String(expanded));
       if (section) section.classList.toggle("is-expanded", expanded);
       if (confirm) {
         confirm.hidden = planned.length === 0;
         confirm.disabled = allPlannedEaten;
-        confirm.textContent = allPlannedEaten ? "Eaten ✓" : "Mark meal eaten";
+        confirm.textContent = allPlannedEaten ? "✓" : "✓";
+        confirm.setAttribute("aria-label", allPlannedEaten ? `${meal.label} eaten` : `Mark ${meal.label.toLowerCase()} eaten`);
+        confirm.setAttribute("title", allPlannedEaten ? `${meal.label} eaten` : `Mark ${meal.label.toLowerCase()} eaten`);
+        confirm.classList.toggle("is-complete", allPlannedEaten);
       }
 
       container.hidden = !expanded;
+      const expandedName = mealName
+        ? `<div class="meal-expanded-name"><span>Planned meal</span><strong>${this.escapeHTML(mealName)}</strong></div>`
+        : "";
       if (!items.length) {
-        container.innerHTML = `<p class="meal-empty-state">Nothing in this meal yet.</p>`;
+        container.innerHTML = `${expandedName}<p class="meal-empty-state">Nothing in this meal yet.</p>`;
         return;
       }
 
-      container.innerHTML = items.map(item => {
+      container.innerHTML = `${expandedName}${items.map(item => {
         const quantity = this.formatQuantity(item);
         const state = item.eaten === true ? "Eaten" : item.planned === true ? "Planned" : "Not eaten";
         const unresolved = item.nutritionStatus === "needs-review" ? `<span class="food-review-chip">Needs review</span>` : "";
@@ -280,7 +286,7 @@ GlowApp.FoodLog = {
               <button class="swipe-delete-button meal-food-item__remove" type="button" data-remove-food-item="${this.escapeAttribute(item.id)}" data-remove-food-meal="${meal.id}" aria-label="Remove ${this.escapeAttribute(item.name)} from ${meal.label}">Remove</button>
             </div>
           </div>`;
-      }).join("");
+      }).join("")}`;
     });
   },
 

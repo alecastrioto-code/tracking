@@ -23,7 +23,7 @@ GlowApp.PlanView = {
 
   render() {
     const state = GlowApp.State.get();
-    const section = state.ui.planSection || "brain-dump";
+    const section = state?.ui?.planSection || "brain-dump";
     document.querySelectorAll("[data-plan-section]").forEach(button => {
       button.classList.toggle("is-active", button.dataset.planSection === section);
       button.setAttribute("aria-selected", String(button.dataset.planSection === section));
@@ -202,10 +202,23 @@ GlowApp.PlanView = {
       const file = event.target.files?.[0];
       if (!file) return;
       const status = document.getElementById("diet-import-status");
+      const preview = document.getElementById("diet-import-preview");
+      const replace = document.getElementById("diet-import-replace");
       if (status) status.textContent = "Reading and checking your plan…";
-      const text = await file.text();
-      this.preparedDiet = await GlowApp.DietPlan.prepareImport(text, file.name, { resolveNutrition: true });
-      this.renderDietPreview();
+      if (preview) preview.innerHTML = "";
+      if (replace) replace.hidden = true;
+
+      try {
+        const text = await file.text();
+        this.preparedDiet = await GlowApp.DietPlan.prepareImport(text, file.name, { resolveNutrition: true });
+        this.renderDietPreview();
+      } catch (error) {
+        console.error("The Run: diet import failed.", error);
+        this.preparedDiet = null;
+        if (status) status.textContent = "This CSV could not be read. Check the file and try again.";
+        if (preview) preview.innerHTML = `<li class="is-error">${this.escape(error?.message || "Import failed.")}</li>`;
+        if (replace) replace.hidden = true;
+      }
     });
     document.getElementById("diet-import-replace")?.addEventListener("click", () => {
       const campaign = GlowApp.State.getActiveCampaign();
@@ -278,6 +291,10 @@ GlowApp.PlanView = {
     const container = document.getElementById("food-plan-day-content");
     const campaign = GlowApp.State.getActiveCampaign();
     if (!tabs || !container || !campaign) return;
+    if (!GlowApp.FoodLog || !GlowApp.DietPlan) {
+      container.innerHTML = `<div class="plan-empty"><strong>Food Plan unavailable.</strong><span>Reload the app to restore the planning tools.</span></div>`;
+      return;
+    }
     const selected = GlowApp.State.getPlanDayNumber();
     tabs.innerHTML = campaign.days.map(day => `<button type="button" class="${day.dayNumber === selected ? "is-active" : ""}" data-plan-day="${day.dayNumber}">D${day.dayNumber}</button>`).join("");
     const day = GlowApp.State.getDay(selected);

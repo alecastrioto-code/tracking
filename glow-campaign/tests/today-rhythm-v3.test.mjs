@@ -244,7 +244,7 @@ await test('old dedicated dog-walk score card is removed from Today', () => {
 });
 
 await test('PWA cache is bumped for the v3 behavior model', () => {
-  assert.match(read('service-worker.js'), /the-run-shell-v5/);
+  assert.match(read('service-worker.js'), /the-run-shell-v6/);
 });
 
 const failed = results.filter(result => !result.ok);

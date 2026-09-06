@@ -4041,3 +4041,190 @@ body,
 .custom-checkbox--disabled {
   opacity: 0.45;
 }
+
+
+/* =========================================================
+   THE RUN v3.0 — INTERACTION BUGFIX PASS
+========================================================= */
+
+/* Custom checkbox hit targets: keep exactly one visible checkbox. */
+.movement-check {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  margin: -8px 0 -8px -8px;
+  cursor: pointer;
+}
+.movement-check--disabled { cursor: default; }
+
+.meal-food-item__eaten input[type="checkbox"],
+.today-task-row > label input[type="checkbox"],
+.grocery-row input[type="checkbox"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.meal-food-item__eaten input[type="checkbox"]:checked + .custom-checkbox,
+.today-task-row > label input[type="checkbox"]:checked + .custom-checkbox,
+.grocery-row input[type="checkbox"]:checked + .custom-checkbox {
+  background: var(--accent);
+  transform: scale(1.04);
+}
+.meal-food-item__eaten input[type="checkbox"]:checked + .custom-checkbox::after,
+.today-task-row > label input[type="checkbox"]:checked + .custom-checkbox::after,
+.grocery-row input[type="checkbox"]:checked + .custom-checkbox::after {
+  opacity: 1;
+  transform: rotate(45deg) scale(1);
+}
+.meal-food-item__eaten input[type="checkbox"]:focus-visible + .custom-checkbox,
+.today-task-row > label input[type="checkbox"]:focus-visible + .custom-checkbox,
+.grocery-row input[type="checkbox"]:focus-visible + .custom-checkbox {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.meal-food-item__eaten,
+.today-task-row > label,
+.grocery-row { position: relative; cursor: pointer; }
+
+/* Ingredient rows must remain opaque while the swipe action sits underneath. */
+.meal-food-swipe .meal-food-item {
+  margin: 0;
+  background: #fff;
+}
+
+/* Collapsed meal header: phase + calories + eating window, with two equal icon actions. */
+.meal-confirm-button,
+.meal-add-food {
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  padding: 0;
+  border: 1px solid rgba(23,24,27,0.08);
+  border-radius: 11px;
+  background: rgba(255,255,255,0.78);
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1;
+}
+.meal-confirm-button:not(:disabled):hover,
+.meal-add-food:hover { background: #fff; }
+.meal-confirm-button.is-complete,
+.meal-confirm-button:disabled {
+  background: var(--success-soft);
+  color: var(--success);
+  opacity: 1;
+}
+.meal-expanded-name {
+  display: grid;
+  gap: 0.12rem;
+  padding: 0.25rem 0.2rem 0.45rem;
+}
+.meal-expanded-name span {
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+.meal-expanded-name strong { font-size: 0.9rem; }
+
+/* Grocery completion is deliberate: strike first, then disappear from the active list. */
+.grocery-row {
+  transition: opacity 220ms ease, transform 220ms ease, background 220ms ease;
+}
+.grocery-row.is-completing {
+  opacity: 0.42;
+  transform: translateX(8px);
+  background: rgba(255,255,255,0.48);
+}
+.grocery-row.is-completing .grocery-row__copy {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+/* Food Plan: prevent native file controls / long content from blowing up the panel. */
+.file-button input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.plan-panel,
+.food-plan-day-content,
+.plan-meal,
+.plan-meal summary,
+.plan-meal summary > div {
+  min-width: 0;
+  max-width: 100%;
+}
+.plan-meal summary strong {
+  overflow-wrap: anywhere;
+}
+.day-tabs--scroll button {
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  max-width: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+
+/* Meal-window settings: explicitly style time inputs; generic form CSS omits type=time. */
+.meal-window-settings {
+  display: grid;
+  gap: 0.62rem;
+  margin-top: 0.75rem;
+}
+.meal-window-settings > label {
+  display: grid;
+  grid-template-columns: minmax(88px, 0.65fr) minmax(0, 1.35fr);
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+.meal-window-settings > label > span {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+.meal-window-settings > label > span > span {
+  color: var(--ink-muted);
+  font-size: 0.72rem;
+  font-weight: var(--weight-medium);
+}
+.meal-window-settings input[type="time"] {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0.58rem 0.62rem;
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--ink);
+  font: inherit;
+}
+.meal-window-settings input[type="time"]:focus {
+  border-color: var(--focus);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(40,94,231,0.12);
+}
+.meal-confirm-button[hidden] { display: none; }

@@ -1322,8 +1322,12 @@ GlowApp.DayView = {
       }
       const unresolved = item.type === "training-choice" || item.type === "branch-session";
       const badge = item.optional ? "OPTIONAL" : `${Number(item.points || 1)} PT`;
+      const checkboxId = `movement-check-${item.id}`;
+      const checkControl = unresolved
+        ? `<span class="movement-check movement-check--disabled" aria-hidden="true"><span class="custom-checkbox custom-checkbox--disabled"></span></span>`
+        : `<label class="movement-check" for="${this.escapeHTML(checkboxId)}"><input id="${this.escapeHTML(checkboxId)}" type="checkbox" data-movement-id="${this.escapeHTML(item.id)}" ${item.completed ? "checked" : ""}><span class="custom-checkbox" aria-hidden="true"></span></label>`;
       return `<div class="movement-row ${item.optional ? "movement-row--optional" : ""}">
-        ${unresolved ? `<span class="custom-checkbox custom-checkbox--disabled"></span>` : `<input type="checkbox" data-movement-id="${this.escapeHTML(item.id)}" ${item.completed ? "checked" : ""}><span class="custom-checkbox"></span>`}
+        ${checkControl}
         <span class="movement-row__content"><span class="movement-badge">${badge}</span><strong>${this.escapeHTML(item.label)}</strong><small>${this.escapeHTML(period)}</small></span>
         <span class="movement-row__actions">${item.workoutId ? `<button class="text-button" type="button" data-day-workout="${this.escapeHTML(item.workoutId)}">View workout</button>` : ""}${unresolved ? `<button class="text-button" type="button" data-movement-choose>Choose in Plan</button>` : ""}</span>
       </div>`;
@@ -1513,6 +1517,13 @@ GlowApp.DayView = {
       campaign.grocery.checkedByTargetDay[targetDay] ||= {};
       campaign.grocery.checkedByTargetDay[targetDay][checkbox.dataset.groceryId] = checkbox.checked;
       GlowApp.State.save();
+
+      if (checkbox.checked) {
+        const row = checkbox.closest(".grocery-row");
+        row?.classList.add("is-completing");
+        checkbox.disabled = true;
+        setTimeout(() => this.renderGrocery(GlowApp.State.getSelectedDay()), 260);
+      }
     });
   },
 
@@ -1546,10 +1557,17 @@ GlowApp.DayView = {
         : `<p class="task-empty">No food plan for tomorrow yet. Add it in Plan → Food Plan.</p>`;
       return;
     }
-    list.innerHTML = rows.map(item => {
+
+    const visibleRows = rows.filter(item => !checked[item.id]);
+    if (!visibleRows.length) {
+      list.innerHTML = `<p class="task-empty">All sorted for tomorrow.</p>`;
+      return;
+    }
+
+    list.innerHTML = visibleRows.map(item => {
       const quantity = item.quantity != null ? `${item.quantity} ${item.unit}`.trim() : "";
       const source = item.generated && item.mealCount ? `${item.mealCount} meal${item.mealCount === 1 ? "" : "s"}` : item.manual ? "Manual" : "";
-      return `<label class="grocery-row"><input type="checkbox" data-grocery-id="${this.escapeHTML(item.id)}" data-grocery-target-day="${targetDay}" ${checked[item.id] ? "checked" : ""}><span class="custom-checkbox"></span><span><strong>${this.escapeHTML(item.name)}</strong><small>${this.escapeHTML([quantity,source].filter(Boolean).join(" · "))}</small></span></label>`;
+      return `<label class="grocery-row"><input type="checkbox" data-grocery-id="${this.escapeHTML(item.id)}" data-grocery-target-day="${targetDay}"><span class="custom-checkbox" aria-hidden="true"></span><span class="grocery-row__copy"><strong>${this.escapeHTML(item.name)}</strong><small>${this.escapeHTML([quantity,source].filter(Boolean).join(" · "))}</small></span></label>`;
     }).join("");
   },
 

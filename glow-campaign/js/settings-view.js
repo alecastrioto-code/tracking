@@ -183,18 +183,44 @@ GlowApp.SettingsView = {
     ["breakfast","lunch","snack","dinner"].forEach(meal => {
       ["start","end"].forEach(edge => {
         document.getElementById(`setting-window-${meal}-${edge}`)?.addEventListener("change", event => {
-          const value = String(event.target.value || "");
-          if (!/^\d{2}:\d{2}$/.test(value)) { this.render(); return; }
-          GlowApp.State.updateSettings(settings => {
-            settings.mealWindows ||= JSON.parse(JSON.stringify(GlowApp.DEFAULT_SETTINGS.mealWindows));
-            settings.mealWindows[meal] ||= {};
-            settings.mealWindows[meal][edge] = value;
-          });
+          if (!this.saveMealWindow(meal, edge, event.target.value)) {
+            this.render();
+            return;
+          }
           this.showToast("Meal window updated.");
           GlowApp.DayView?.renderMealWindows?.(GlowApp.State.getSelectedDay());
         });
       });
     });
+  },
+
+  saveMealWindow(meal, edge, value) {
+    const normalized = String(value || "");
+    if (!["breakfast","lunch","snack","dinner"].includes(meal) || !["start","end"].includes(edge) || !/^\d{2}:\d{2}$/.test(normalized)) {
+      return false;
+    }
+
+    const state = GlowApp.State.get();
+    const current = state?.settings?.mealWindows?.[meal] || GlowApp.DEFAULT_SETTINGS.mealWindows[meal];
+    const next = { ...current, [edge]: normalized };
+    const toMinutes = time => {
+      const [hours, minutes] = String(time || "").split(":").map(Number);
+      return Number.isFinite(hours) && Number.isFinite(minutes) ? hours * 60 + minutes : null;
+    };
+    const start = toMinutes(next.start);
+    const end = toMinutes(next.end);
+    if (start === null || end === null || start >= end) {
+      this.showToast("Meal window end must be later than its start.");
+      return false;
+    }
+
+    GlowApp.State.updateSettings(settings => {
+      settings.mealWindows ||= JSON.parse(JSON.stringify(GlowApp.DEFAULT_SETTINGS.mealWindows));
+      settings.mealWindows[meal] ||= {};
+      settings.mealWindows[meal].start = next.start;
+      settings.mealWindows[meal].end = next.end;
+    });
+    return true;
   },
 
   /* =======================================================

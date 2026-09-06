@@ -1,5 +1,5 @@
 /* THE RUN — OFFLINE APP SHELL */
-const CACHE_NAME = "the-run-shell-v5";
+const CACHE_NAME = "the-run-shell-v6";
 const INDEX_URL = new URL("./index.html", self.registration.scope).href;
 const APP_SHELL = [
   "./", "./index.html", "./manifest.webmanifest",

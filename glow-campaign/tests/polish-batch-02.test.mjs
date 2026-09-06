@@ -95,7 +95,7 @@ await test('Brain Dump task edit exposes category, assignment and save/cancel co
 
 await test('PWA shell uses the v3.0 cache and new state modules', () => {
   const sw=read('service-worker.js');
-  assert.match(sw,/the-run-shell-v5/); assert.match(sw,/\.\/js\/diet-plan\.js/); assert.match(sw,/\.\/js\/brain-dump\.js/); assert.doesNotMatch(sw,/schedule-view\.js/);
+  assert.match(sw,/the-run-shell-v6/); assert.match(sw,/\.\/js\/diet-plan\.js/); assert.match(sw,/\.\/js\/brain-dump\.js/); assert.doesNotMatch(sw,/schedule-view\.js/);
 });
 
 await test('Progress hero uses a dedicated campaign layout hook', () => {
