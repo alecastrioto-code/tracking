@@ -230,14 +230,14 @@ GlowApp.Navigation = {
         break;
 
 
-      case "plan":
+      case "schedule":
 
         if (
-          GlowApp.PlanView &&
-          typeof GlowApp.PlanView.render === "function"
+          GlowApp.ScheduleView &&
+          typeof GlowApp.ScheduleView.render === "function"
         ) {
 
-          GlowApp.PlanView.render();
+          GlowApp.ScheduleView.render();
 
         }
 
@@ -327,19 +327,19 @@ GlowApp.Navigation = {
 
 
     /* -----------------------------------------------------
-       Show Day 14 measurement panel only on Day 14
+       Show Day 10 measurement panel only on Day 10
     ------------------------------------------------------ */
 
     const measurements =
       document.getElementById(
-        "day-14-measurements"
+        "day-10-measurements"
       );
 
 
     if (measurements) {
 
       measurements.hidden =
-        dayNumber !== 14;
+        dayNumber !== 10;
 
     }
 

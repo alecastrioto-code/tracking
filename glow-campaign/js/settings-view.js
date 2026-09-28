@@ -1,5 +1,5 @@
 /* =========================================================
-   THE RUN — SETTINGS VIEW
+   GLOW CAMPAIGN — SETTINGS VIEW
 ========================================================= */
 
 window.GlowApp = window.GlowApp || {};
@@ -20,9 +20,10 @@ GlowApp.SettingsView = {
       return;
     }
 
+    this.bindRunSettings();
     this.bindNutritionSettings();
-    this.bindMealWindowSettings();
     this.bindWaterSettings();
+    this.bindGlowSettings();
     this.bindRewardSettings();
 
     this.initialized = true;
@@ -45,14 +46,26 @@ GlowApp.SettingsView = {
     }
 
 
+    const campaign =
+      GlowApp.State.getActiveCampaign();
+
+
+    if (campaign) {
+      this.setInputValue(
+        "setting-run-start-date",
+        campaign.startDate
+      );
+    }
+
+
     this.setInputValue(
-      "setting-calories-max",
-      settings.nutrition.caloriesMax
+      "setting-calories-min",
+      settings.nutrition.caloriesMin
     );
 
     this.setInputValue(
-      "setting-calories-grace-max",
-      settings.nutrition.caloriesGraceMax
+      "setting-calories-max",
+      settings.nutrition.caloriesMax
     );
 
     this.setInputValue(
@@ -70,16 +83,67 @@ GlowApp.SettingsView = {
       settings.water.targetGlasses
     );
 
-    ["breakfast","lunch","snack","dinner"].forEach(meal => {
-      this.setInputValue(`setting-window-${meal}-start`, settings.mealWindows?.[meal]?.start || GlowApp.DEFAULT_SETTINGS.mealWindows[meal].start);
-      this.setInputValue(`setting-window-${meal}-end`, settings.mealWindows?.[meal]?.end || GlowApp.DEFAULT_SETTINGS.mealWindows[meal].end);
-    });
+    this.setInputValue(
+      "setting-skincare-label",
+      settings.glow.skincareLabel
+    );
 
 
     this.renderRewardSettings(
       settings.rewards
     );
 
+
+    if (
+      GlowApp.Cycle &&
+      typeof GlowApp.Cycle.renderSettings === "function"
+    ) {
+      GlowApp.Cycle.renderSettings();
+    }
+
+  },
+
+
+  /* =======================================================
+     RUN TIMING
+  ======================================================== */
+
+  bindRunSettings() {
+
+    const input =
+      document.getElementById(
+        "setting-run-start-date"
+      );
+
+
+    if (!input) {
+      return;
+    }
+
+
+    input.addEventListener(
+      "change",
+      () => {
+
+        const success =
+          GlowApp.State
+            .updateActiveCampaignStartDate(
+              input.value
+            );
+
+
+        if (!success) {
+          this.render();
+          return;
+        }
+
+
+        this.showToast(
+          "Run dates updated."
+        );
+
+      }
+    );
   },
 
 
@@ -90,8 +154,27 @@ GlowApp.SettingsView = {
   bindNutritionSettings() {
 
     const fields = [
-      { id: "setting-protein-min", key: "proteinMin" },
-      { id: "setting-fibre-min", key: "fibreMin" }
+
+      {
+        id: "setting-calories-min",
+        key: "caloriesMin"
+      },
+
+      {
+        id: "setting-calories-max",
+        key: "caloriesMax"
+      },
+
+      {
+        id: "setting-protein-min",
+        key: "proteinMin"
+      },
+
+      {
+        id: "setting-fibre-min",
+        key: "fibreMin"
+      }
+
     ];
 
 
@@ -156,72 +239,55 @@ GlowApp.SettingsView = {
 
   validateCalorieRange() {
 
-    const settings = GlowApp.State.get().settings;
-    const max = Number(settings.nutrition.caloriesMax);
-    const graceMax = Number(settings.nutrition.caloriesGraceMax);
+    const settings =
+      GlowApp.State.get().settings;
 
-    if (graceMax >= max) {
+
+    const min =
+      Number(
+        settings.nutrition
+          .caloriesMin
+      );
+
+    const max =
+      Number(
+        settings.nutrition
+          .caloriesMax
+      );
+
+
+    if (min <= max) {
       return;
     }
 
+
+    /*
+      If the values cross, swap them rather than leaving
+      impossible scoring rules.
+    */
+
     GlowApp.State.updateSettings(
       current => {
-        current.nutrition.caloriesGraceMax = max;
+
+        current.nutrition
+          .caloriesMin = max;
+
+        current.nutrition
+          .caloriesMax = min;
+
       }
     );
 
+
     this.render();
-    this.showToast("Grace ceiling cannot be below the full-point ceiling.");
+
+
+    this.showToast(
+      "Calorie bounds reordered."
+    );
+
   },
 
-
-  /* =======================================================
-     MEAL WINDOWS — GUIDANCE ONLY
-  ======================================================== */
-
-  bindMealWindowSettings() {
-    ["breakfast","lunch","snack","dinner"].forEach(meal => {
-      ["start","end"].forEach(edge => {
-        document.getElementById(`setting-window-${meal}-${edge}`)?.addEventListener("change", event => {
-          if (!this.saveMealWindow(meal, edge, event.target.value)) {
-            this.render();
-            return;
-          }
-          this.showToast("Meal window updated.");
-          GlowApp.DayView?.renderMealWindows?.(GlowApp.State.getSelectedDay());
-        });
-      });
-    });
-  },
-
-  saveMealWindow(meal, edge, value) {
-    const normalized = String(value || "");
-    if (!["breakfast","lunch","snack","dinner"].includes(meal) || !["start","end"].includes(edge) || !/^\d{2}:\d{2}$/.test(normalized)) {
-      return false;
-    }
-
-    const state = GlowApp.State.get();
-    const current = state?.settings?.mealWindows?.[meal] || GlowApp.DEFAULT_SETTINGS.mealWindows[meal];
-    const next = { ...current, [edge]: normalized };
-    const toMinutes = time => {
-      const [hours, minutes] = String(time || "").split(":").map(Number);
-      return Number.isFinite(hours) && Number.isFinite(minutes) ? hours * 60 + minutes : null;
-    };
-    const start = toMinutes(next.start);
-    const end = toMinutes(next.end);
-    if (start === null || end === null || start >= end) {
-      this.showToast("Meal window end must be later than its start.");
-      return false;
-    }
-
-    GlowApp.State.updateSettings(settings => {
-      settings.mealWindows ||= JSON.parse(JSON.stringify(GlowApp.DEFAULT_SETTINGS.mealWindows));
-      settings.mealWindows[meal] ||= {};
-      settings.mealWindows[meal].start = next.start;
-      settings.mealWindows[meal].end = next.end;
-    });
-    return true;
-  },
 
   /* =======================================================
      WATER
@@ -279,6 +345,142 @@ GlowApp.SettingsView = {
 
       }
     );
+
+  },
+
+
+  /* =======================================================
+     GLOW LABEL
+  ======================================================== */
+
+  bindGlowSettings() {
+
+    const input =
+      document.getElementById(
+        "setting-skincare-label"
+      );
+
+
+    if (!input) {
+      return;
+    }
+
+
+    input.addEventListener(
+      "change",
+      () => {
+
+        const label =
+          input.value.trim();
+
+
+        if (!label) {
+
+          this.render();
+          return;
+
+        }
+
+
+        this.updateSkincareLabel(
+          label
+        );
+
+
+        this.showToast(
+          "Self-care label updated."
+        );
+
+      }
+    );
+
+  },
+
+
+  updateSkincareLabel(newLabel) {
+
+    const state =
+      GlowApp.State.get();
+
+
+    const oldLabel =
+      state.settings.glow
+        .skincareLabel;
+
+
+    /*
+      Update global default.
+    */
+
+    state.settings.glow
+      .skincareLabel =
+      newLabel;
+
+
+    /*
+      Existing days that still use the old default follow
+      the new label.
+
+      If you later customise an individual day manually,
+      that custom wording is preserved.
+    */
+
+    state.campaigns.forEach(
+      campaign => {
+
+        campaign.days.forEach(
+          day => {
+
+            if (
+              !day.glow
+                .skincareLabel ||
+              day.glow
+                .skincareLabel ===
+                oldLabel
+            ) {
+
+              day.glow
+                .skincareLabel =
+                newLabel;
+
+            }
+
+
+            /*
+              Keep the timeline copy aligned as well.
+            */
+
+            day.schedule
+              ?.forEach(
+                item => {
+
+                  if (
+                    item.category ===
+                      "glow" &&
+                    (
+                      item.label ===
+                        oldLabel ||
+                      item.label ===
+                        "PM skincare"
+                    )
+                  ) {
+
+                    item.label =
+                      newLabel;
+
+                  }
+
+                }
+              );
+
+          }
+        );
+
+      }
+    );
+
+
+    GlowApp.State.save();
 
   },
 

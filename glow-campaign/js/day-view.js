@@ -1,5 +1,5 @@
 /* =========================================================
-   THE RUN — DAY VIEW
+   GLOW CAMPAIGN — DAY VIEW
 
    Responsibilities:
    - Render the selected day
@@ -7,8 +7,8 @@
    - Save changes
    - Calculate live scores
    - Render movement dynamically
-   - Render today tasks and grocery list
-   - Handle Day 14 informational tracking
+   - Render today's timeline
+   - Handle Day 10 informational tracking
 
    Recovery controls are deliberately left to recovery.js.
 ========================================================= */
@@ -36,9 +36,7 @@ GlowApp.DayView = {
     this.bindWater();
     this.bindMovement();
     this.bindGlow();
-    this.bindTasks();
-    this.bindChallenge();
-    this.bindGrocery();
+    this.bindDogWalk();
     this.bindMeasurements();
 
     this.initialized = true;
@@ -51,10 +49,6 @@ GlowApp.DayView = {
   ======================================================== */
 
   render() {
-
-    GlowApp.State.ensureChallengeForDay?.(
-      GlowApp.State.getSelectedDayNumber()
-    );
 
     const day =
       GlowApp.State.getSelectedDay();
@@ -79,6 +73,16 @@ GlowApp.DayView = {
       campaign,
       settings
     );
+
+    if (
+      GlowApp.Cycle &&
+      typeof GlowApp.Cycle.render === "function"
+    ) {
+      GlowApp.Cycle.render(
+        day,
+        campaign
+      );
+    }
 
     this.renderGlowDay(day);
 
@@ -105,13 +109,9 @@ GlowApp.DayView = {
 
     this.renderGlow(day);
 
-    this.renderTasks(day);
+    this.renderDogWalk(day);
 
-    this.renderChallenge(day);
-
-    this.renderMealWindows(day);
-
-    this.renderGrocery(day);
+    this.renderTimeline(day);
 
     this.renderMeasurements(day);
 
@@ -153,6 +153,38 @@ GlowApp.DayView = {
 
       dayNumberElement.textContent =
         day.dayNumber;
+
+    }
+
+
+    const dayDateElement =
+      document.getElementById(
+        "current-day-date"
+      );
+
+
+    if (dayDateElement) {
+
+      const dayDate =
+        GlowApp.State.getDateForDay(
+          day.dayNumber
+        );
+
+
+      dayDateElement.textContent =
+        dayDate
+          ? new Intl.DateTimeFormat(
+              undefined,
+              {
+                weekday: "short",
+                day: "numeric",
+                month: "short",
+                timeZone: "UTC"
+              }
+            ).format(
+              new Date(`${dayDate}T00:00:00Z`)
+            )
+          : "";
 
     }
 
@@ -366,148 +398,139 @@ GlowApp.DayView = {
         "[data-food-meal]"
       );
 
+
     mealCheckboxes.forEach(
-      checkbox => {
+      (checkbox) => {
+
         checkbox.addEventListener(
           "change",
           () => {
-            const meal = checkbox.dataset.foodMeal;
-            if (!meal) return;
+
+            const meal =
+              checkbox.dataset.foodMeal;
+
+
+            if (!meal) {
+              return;
+            }
+
 
             GlowApp.State.updateSelectedDay(
-              day => {
-                if (day.food && meal in day.food) {
-                  day.food[meal] = checkbox.checked;
+              (day) => {
+
+                if (
+                  day.food &&
+                  meal in day.food
+                ) {
+
+                  day.food[meal] =
+                    checkbox.checked;
+
                 }
+
               }
             );
 
+
             this.renderScoringOnly();
+
           }
         );
+
       }
     );
 
+
     const grazingToggle =
-      document.getElementById("continuous-grazing");
+      document.getElementById(
+        "continuous-grazing"
+      );
+
 
     if (grazingToggle) {
+
       grazingToggle.addEventListener(
         "change",
         () => {
-          GlowApp.State.updateSelectedDay(
-            day => {
-              day.food.continuousGrazing = grazingToggle.checked;
-            }
-          );
-          this.renderFood(GlowApp.State.getSelectedDay());
-          this.renderScoringOnly();
-        }
-      );
-    }
 
-    const bingeToggle =
-      document.getElementById("binge-toggle");
-
-    if (bingeToggle) {
-      bingeToggle.addEventListener(
-        "change",
-        () => {
           GlowApp.State.updateSelectedDay(
-            day => {
-              day.food.binge = bingeToggle.checked;
-              if (!bingeToggle.checked) {
-                day.food.bingeReflection = day.food.bingeReflection || "";
-              }
+            (day) => {
+
+              day.food.continuousGrazing =
+                grazingToggle.checked;
+
             }
           );
 
-          const day = GlowApp.State.getSelectedDay();
-          const settings = GlowApp.State.get().settings;
-          this.renderFood(day);
-          this.renderNutritionStatus(day, settings);
-          this.renderScoring(day, settings);
-        }
-      );
-    }
 
-    const reflection =
-      document.getElementById("binge-reflection");
-
-    if (reflection) {
-      reflection.addEventListener(
-        "input",
-        () => {
-          GlowApp.State.updateSelectedDay(
-            day => {
-              day.food.bingeReflection = reflection.value;
-            }
-          );
-          this.renderBingeReflectionStatus(
+          this.renderFood(
             GlowApp.State.getSelectedDay()
           );
+
+          this.renderScoringOnly();
+
         }
       );
+
     }
+
   },
 
 
   renderFood(day) {
 
-    if (!day?.food) return;
-
-    document.querySelectorAll("[data-food-meal]")
-      .forEach(checkbox => {
-        checkbox.checked = day.food[checkbox.dataset.foodMeal] === true;
-      });
-
-    const grazingToggle = document.getElementById("continuous-grazing");
-    if (grazingToggle) {
-      grazingToggle.checked = day.food.continuousGrazing === true;
-    }
-
-    const grazingAlert = document.getElementById("grazing-alert");
-    if (grazingAlert) {
-      grazingAlert.hidden = day.food.continuousGrazing !== true;
-    }
-
-    const bingeToggle = document.getElementById("binge-toggle");
-    if (bingeToggle) {
-      bingeToggle.checked = day.food.binge === true;
-    }
-
-    const reflectionWrap = document.getElementById("binge-reflection-wrap");
-    if (reflectionWrap) {
-      reflectionWrap.hidden = day.food.binge !== true;
-    }
-
-    const reflection = document.getElementById("binge-reflection");
-    if (reflection) {
-      reflection.value = day.food.bingeReflection || "";
-      reflection.required = day.food.binge === true;
-    }
-
-    this.renderBingeReflectionStatus(day);
-  },
-
-
-  renderBingeReflectionStatus(day) {
-
-    const status = document.getElementById("binge-reflection-status");
-    if (!status) return;
-
-    if (day?.food?.binge !== true) {
-      status.textContent = "Required when binge is marked.";
-      status.classList.remove("is-complete", "is-missed");
+    if (!day?.food) {
       return;
     }
 
-    const complete = Boolean(day.food.bingeReflection?.trim());
-    status.textContent = complete
-      ? "Reflection saved."
-      : "Add a short reflection to close the day.";
-    status.classList.toggle("is-complete", complete);
-    status.classList.toggle("is-missed", !complete);
+
+    const mealCheckboxes =
+      document.querySelectorAll(
+        "[data-food-meal]"
+      );
+
+
+    mealCheckboxes.forEach(
+      (checkbox) => {
+
+        const meal =
+          checkbox.dataset.foodMeal;
+
+
+        checkbox.checked =
+          day.food[meal] === true;
+
+      }
+    );
+
+
+    const grazingToggle =
+      document.getElementById(
+        "continuous-grazing"
+      );
+
+
+    if (grazingToggle) {
+
+      grazingToggle.checked =
+        day.food.continuousGrazing === true;
+
+    }
+
+
+    const grazingAlert =
+      document.getElementById(
+        "grazing-alert"
+      );
+
+
+    if (grazingAlert) {
+
+      grazingAlert.hidden =
+        day.food.continuousGrazing !== true;
+
+    }
+
   },
 
 
@@ -670,7 +693,7 @@ GlowApp.DayView = {
 
     const nutritionIsAutomatic =
       day.nutrition?.source === "foodLog" &&
-      (GlowApp.FoodLog?.getAllItems?.(day)?.length || 0) > 0;
+      GlowApp.FoodLog?.hasItems(day);
 
 
     [
@@ -700,16 +723,11 @@ GlowApp.DayView = {
       Boolean(nutritionIsAutomatic)
     );
 
-    const planned = GlowApp.FoodLog?.getPlannedTotals?.(day);
-    const actual = GlowApp.FoodLog?.getTotals?.(day);
-    const planSummary = document.getElementById("nutrition-plan-summary");
-    if (planSummary) {
-      if (planned?.itemCount) {
-        planSummary.textContent = `${actual?.calories || 0} kcal eaten · ${planned.calories} kcal planned`;
-      } else {
-        planSummary.textContent = "No food plan loaded for this day.";
-      }
+
+    if (GlowApp.FoodLog) {
+      GlowApp.FoodLog.renderNutritionSource(day);
     }
+
 
     this.renderNutritionStatus(
       day,
@@ -737,7 +755,7 @@ GlowApp.DayView = {
 
     this.setText(
       "calories-target-copy",
-      `Full point ≤${score.goals.calories.max} kcal · 0.9 through ${score.goals.calories.graceMax}`
+      `Target ${score.goals.calories.min}–${score.goals.calories.max} kcal`
     );
 
     this.setText(
@@ -781,7 +799,7 @@ GlowApp.DayView = {
     const caloriesPercent =
       GlowApp.Scoring
         .getCaloriesBarPercent(
-          score.goals.calories.value,
+          day.nutrition?.calories,
           settings
         );
 
@@ -874,30 +892,10 @@ GlowApp.DayView = {
     }
 
 
-    if (status === "grace") {
-
-      label =
-        "Grace · 0.9";
-
-    }
-
-
-    if (status === "binge-untracked") {
-
-      label =
-        "Binge · untracked";
-
-      element.classList.add(
-        "is-missed"
-      );
-
-    }
-
-
     if (status === "above") {
 
       label =
-        "Above target";
+        "Above range";
 
       element.classList.add(
         "is-missed"
@@ -1209,12 +1207,6 @@ GlowApp.DayView = {
     }
 
 
-    container.addEventListener("click", event => {
-      const workout = event.target.closest("[data-day-workout]");
-      if (workout) { GlowApp.PlanView?.openWorkout?.(workout.dataset.dayWorkout); return; }
-      if (event.target.closest("[data-movement-choose]")) { GlowApp.Navigation?.goToView?.("plan"); GlowApp.State.setPlanSection?.("training"); GlowApp.PlanView?.render?.(); }
-    });
-
     container.addEventListener(
       "change",
       (event) => {
@@ -1311,27 +1303,81 @@ GlowApp.DayView = {
 
 
   renderMovement(day) {
-    const container = document.getElementById("movement-list");
-    if (!container) return;
-    const movement = Array.isArray(day?.movement) ? day.movement : [];
-    if (!movement.length) { container.innerHTML = `<p class="card-intro">No movement planned today.</p>`; return; }
-    container.innerHTML = movement.map(item => {
-      const period = this.formatPeriod(item.period);
-      if (item.recovery) {
-        return `<div class="movement-row movement-row--rest"><span class="movement-badge">REST</span><span class="movement-row__content"><strong>${this.escapeHTML(item.label)}</strong><small>${this.escapeHTML(period)} · protect the sleep window</small></span></div>`;
-      }
-      const unresolved = item.type === "training-choice" || item.type === "branch-session";
-      const badge = item.optional ? "OPTIONAL" : `${Number(item.points || 1)} PT`;
-      const checkboxId = `movement-check-${item.id}`;
-      const checkControl = unresolved
-        ? `<span class="movement-check movement-check--disabled" aria-hidden="true"><span class="custom-checkbox custom-checkbox--disabled"></span></span>`
-        : `<label class="movement-check" for="${this.escapeHTML(checkboxId)}"><input id="${this.escapeHTML(checkboxId)}" type="checkbox" data-movement-id="${this.escapeHTML(item.id)}" ${item.completed ? "checked" : ""}><span class="custom-checkbox" aria-hidden="true"></span></label>`;
-      return `<div class="movement-row ${item.optional ? "movement-row--optional" : ""}">
-        ${checkControl}
-        <span class="movement-row__content"><span class="movement-badge">${badge}</span><strong>${this.escapeHTML(item.label)}</strong><small>${this.escapeHTML(period)}</small></span>
-        <span class="movement-row__actions">${item.workoutId ? `<button class="text-button" type="button" data-day-workout="${this.escapeHTML(item.workoutId)}">View workout</button>` : ""}${unresolved ? `<button class="text-button" type="button" data-movement-choose>Choose in Plan</button>` : ""}</span>
-      </div>`;
-    }).join("");
+
+    const container =
+      document.getElementById(
+        "movement-list"
+      );
+
+
+    if (!container) {
+      return;
+    }
+
+
+    const movement =
+      Array.isArray(day.movement)
+        ? day.movement
+        : [];
+
+
+    if (movement.length === 0) {
+
+      container.innerHTML = `
+        <p class="card-intro">
+          No scored movement assigned today.
+        </p>
+      `;
+
+      return;
+    }
+
+
+    container.innerHTML =
+      movement
+        .map(
+          item => {
+
+            const period =
+              this.formatPeriod(
+                item.period
+              );
+
+
+            const detail =
+              item.alternativeGroup
+                ? `${period} · choose one`
+                : period;
+
+
+            return `
+              <label class="movement-row">
+
+                <input
+                  type="checkbox"
+                  data-movement-id="${this.escapeHTML(item.id)}"
+                  ${item.completed ? "checked" : ""}
+                >
+
+                <span class="custom-checkbox"></span>
+
+                <span class="movement-row__content">
+                  <strong>
+                    ${this.escapeHTML(item.label)}
+                  </strong>
+
+                  <small>
+                    ${this.escapeHTML(detail)}
+                  </small>
+                </span>
+
+              </label>
+            `;
+
+          }
+        )
+        .join("");
+
   },
 
 
@@ -1341,308 +1387,276 @@ GlowApp.DayView = {
 
   bindGlow() {
 
-    const container =
-      document.getElementById("self-care-list");
+    const somatoline =
+      document.getElementById(
+        "somatoline-checkbox"
+      );
 
-    if (!container) return;
+    const skincare =
+      document.getElementById(
+        "skincare-checkbox"
+      );
 
-    container.addEventListener(
-      "change",
-      event => {
-        const checkbox = event.target.closest("[data-self-care-id]");
-        if (!checkbox) return;
 
-        const id = checkbox.dataset.selfCareId;
-        GlowApp.State.updateSelectedDay(
-          day => {
-            if (!day.selfCare) day.selfCare = { completions: {} };
-            if (!day.selfCare.completions) day.selfCare.completions = {};
-            day.selfCare.completions[id] = checkbox.checked;
-          }
-        );
+    if (somatoline) {
 
-        this.renderScoringOnly();
-      }
-    );
+      somatoline.addEventListener(
+        "change",
+        () => {
+
+          GlowApp.State.updateSelectedDay(
+            (day) => {
+
+              day.glow.somatoline =
+                somatoline.checked;
+
+            }
+          );
+
+
+          this.renderScoringOnly();
+
+        }
+      );
+
+    }
+
+
+    if (skincare) {
+
+      skincare.addEventListener(
+        "change",
+        () => {
+
+          GlowApp.State.updateSelectedDay(
+            (day) => {
+
+              day.glow.skincare =
+                skincare.checked;
+
+            }
+          );
+
+
+          this.renderScoringOnly();
+
+        }
+      );
+
+    }
+
   },
 
 
   renderGlow(day) {
 
-    const container =
-      document.getElementById("self-care-list");
+    const somatoline =
+      document.getElementById(
+        "somatoline-checkbox"
+      );
 
-    if (!container) return;
+    const skincare =
+      document.getElementById(
+        "skincare-checkbox"
+      );
 
-    const goals = (day.schedule || [])
-      .filter(item => item.category === "glow" && item.scored !== false);
+    const label =
+      document.getElementById(
+        "skincare-goal-label"
+      );
 
-    if (!goals.length) {
-      container.innerHTML = `<p class="card-intro">No self-care routine scheduled today.</p>`;
-      return;
+
+    if (somatoline) {
+
+      somatoline.checked =
+        day.glow?.somatoline === true;
+
     }
 
-    const completions = day.selfCare?.completions || {};
-    container.innerHTML = goals.map(item => `
-      <label class="check-row self-care-row">
-        <input
-          type="checkbox"
-          data-self-care-id="${this.escapeHTML(item.id)}"
-          ${completions[item.id] === true ? "checked" : ""}
-        >
-        <span class="custom-checkbox"></span>
-        <span class="check-row__copy">
-          <strong>${this.escapeHTML(item.label)}</strong>
-          <small>${this.escapeHTML(this.formatPeriod(item.period))} · ${Number(item.points || 1)} pt</small>
-        </span>
-      </label>
-    `).join("");
+
+    if (skincare) {
+
+      skincare.checked =
+        day.glow?.skincare === true;
+
+    }
+
+
+    if (label) {
+
+      label.textContent =
+        day.glow?.skincareLabel ||
+        GlowApp.State
+          .get()
+          .settings
+          ?.glow
+          ?.skincareLabel ||
+        "PM skincare";
+
+    }
+
   },
 
 
   /* =======================================================
-     BRAIN DUMP TASKS — NON-SCORING
+     DOG WALK
   ======================================================== */
 
-  bindTasks() {
-    const handler = (event) => {
-      const checkbox = event.target.closest("[data-today-task-id]");
-      if (!checkbox) return;
-      const campaign = GlowApp.State.getActiveCampaign();
-      if (!campaign) return;
-      GlowApp.BrainDump?.completeTask?.(campaign, checkbox.dataset.todayTaskId, GlowApp.State.getSelectedDayNumber(), checkbox.checked);
-      GlowApp.State.save();
-      this.renderTasks(GlowApp.State.getSelectedDay());
-      GlowApp.PlanView?.renderBrainDump?.();
-    };
-    document.getElementById("extra-self-care-list")?.addEventListener("change", handler);
-    document.getElementById("adulting-quests-list")?.addEventListener("change", handler);
-
-    const clickHandler = (event) => {
-      const move = event.target.closest("[data-task-move-tomorrow]");
-      if (!move) return;
-      const campaign = GlowApp.State.getActiveCampaign();
-      if (!campaign) return;
-      GlowApp.BrainDump?.moveToTomorrow?.(campaign, move.dataset.taskMoveTomorrow, GlowApp.State.getSelectedDayNumber());
-      GlowApp.State.save();
-      this.renderTasks(GlowApp.State.getSelectedDay());
-      GlowApp.PlanView?.renderBrainDump?.();
-    };
-    document.getElementById("extra-self-care-list")?.addEventListener("click", clickHandler);
-    document.getElementById("adulting-quests-list")?.addEventListener("click", clickHandler);
-  },
-
-  renderTasks(day = GlowApp.State.getSelectedDay()) {
-    const campaign = GlowApp.State.getActiveCampaign();
-    if (!campaign || !day || !GlowApp.BrainDump) return;
-    const tasks = GlowApp.BrainDump.getTasksForDay(campaign, day.dayNumber);
-    const selfCare = tasks.filter(task => task.category === "self-care");
-    const others = tasks.filter(task => task.category === "adulting" || task.category === "quests");
-    this.renderTaskList("extra-self-care-list", selfCare);
-    this.renderTaskList("adulting-quests-list", others, true);
-  },
-
-  renderTaskList(elementId, tasks, showCategory = false) {
-    const container = document.getElementById(elementId);
-    if (!container) return;
-    if (!tasks.length) {
-      container.innerHTML = `<p class="task-empty">Nothing assigned here today.</p>`;
-      return;
-    }
-    const dayNumber = GlowApp.State.getSelectedDayNumber();
-    container.innerHTML = tasks.map(task => `
-      <div class="today-task-row">
-        <label>
-          <input type="checkbox" data-today-task-id="${this.escapeHTML(task.id)}" ${task.completedToday ? "checked" : ""}>
-          <span class="custom-checkbox"></span>
-          <span class="today-task-row__copy">
-            ${showCategory ? `<small class="task-category task-category--${this.escapeHTML(task.category)}">${this.escapeHTML(GlowApp.BrainDump.categoryLabel(task.category))}</small>` : ""}
-            <strong>${this.escapeHTML(task.text)}</strong>
-            ${task.assignment?.type === "daily" ? `<small>Repeat every day</small>` : ""}
-          </span>
-        </label>
-        ${task.assignment?.type !== "daily" ? `<button class="text-button task-tomorrow" type="button" data-task-move-tomorrow="${this.escapeHTML(task.id)}">${dayNumber >= 14 ? "Carry over" : "Tomorrow →"}</button>` : ""}
-      </div>`).join("");
-  },
-
-  /* =======================================================
-     MEAL WINDOW GUIDANCE — NON-SCORING
-  ======================================================== */
-
-  renderMealWindows(day) {
-    if (!day || !GlowApp.MealWindows) return;
-    const campaign = GlowApp.State.getActiveCampaign();
-    const settings = GlowApp.State.get().settings;
-    ["breakfast","lunch","snack","dinner"].forEach(meal => {
-      const element = document.querySelector(`[data-meal-window="${meal}"]`);
-      if (!element) return;
-      const confirmedAt = day.mealMeta?.[meal]?.confirmedAt || null;
-      if (day.dayNumber === Number(campaign?.currentDay || 1)) {
-        const state = GlowApp.MealWindows.getState(meal, confirmedAt, settings);
-        element.textContent = state.label;
-        element.dataset.windowState = state.status;
-      } else if (confirmedAt) {
-        const state = GlowApp.MealWindows.getState(meal, confirmedAt, settings, "00:00");
-        element.textContent = state.label;
-        element.dataset.windowState = state.status;
-      } else {
-        const window = settings.mealWindows?.[meal];
-        element.textContent = window ? `${window.start}–${window.end}` : "";
-        element.dataset.windowState = "static";
-      }
-    });
-  },
-
-  /* =======================================================
-     TOMORROW GROCERY — NON-SCORING
-  ======================================================== */
-
-  bindGrocery() {
-    document.getElementById("grocery-manual-add")?.addEventListener("click", () => {
-      const input = document.getElementById("grocery-manual-input");
-      const campaign = GlowApp.State.getActiveCampaign();
-      const targetDay = GlowApp.State.getSelectedDayNumber() + 1;
-      if (!input || !campaign || targetDay > 14 || !input.value.trim()) return;
-      campaign.grocery ||= { manualByTargetDay:{}, checkedByTargetDay:{} };
-      campaign.grocery.manualByTargetDay[targetDay] ||= [];
-      campaign.grocery.manualByTargetDay[targetDay].push({ id:GlowApp.createId("grocery"), name:input.value.trim(), manual:true });
-      input.value = ""; GlowApp.State.save(); this.renderGrocery(GlowApp.State.getSelectedDay());
-    });
-    document.getElementById("tomorrow-grocery-list")?.addEventListener("change", event => {
-      const checkbox = event.target.closest("[data-grocery-id]");
-      if (!checkbox) return;
-      const campaign = GlowApp.State.getActiveCampaign();
-      const targetDay = Number(checkbox.dataset.groceryTargetDay);
-      campaign.grocery ||= { manualByTargetDay:{}, checkedByTargetDay:{} };
-      campaign.grocery.checkedByTargetDay[targetDay] ||= {};
-      campaign.grocery.checkedByTargetDay[targetDay][checkbox.dataset.groceryId] = checkbox.checked;
-      GlowApp.State.save();
-
-      if (checkbox.checked) {
-        const row = checkbox.closest(".grocery-row");
-        row?.classList.add("is-completing");
-        checkbox.disabled = true;
-        setTimeout(() => this.renderGrocery(GlowApp.State.getSelectedDay()), 260);
-      }
-    });
-  },
-
-  renderGrocery(day) {
-    const card = document.getElementById("tomorrow-grocery-card");
-    const list = document.getElementById("tomorrow-grocery-list");
-    const targetLabel = document.getElementById("grocery-target-day");
-    if (!card || !list || !day) return;
-    const campaign = GlowApp.State.getActiveCampaign();
-    const targetDay = day.dayNumber + 1;
-    if (targetDay > 14) {
-      if (targetLabel) targetLabel.textContent = "Sprint complete";
-      list.innerHTML = `<p class="task-empty">No Day 15 list — this sprint ends here.</p>`;
-      document.querySelector(".grocery-add")?.setAttribute("hidden", "");
-      return;
-    }
-    document.querySelector(".grocery-add")?.removeAttribute("hidden");
-    if (targetLabel) targetLabel.textContent = `Day ${targetDay}`;
-    const nextDay = campaign?.days?.find(item => item.dayNumber === targetDay);
-    const generated = GlowApp.DietPlan?.deriveGrocery?.(nextDay) || [];
-    campaign.grocery ||= { manualByTargetDay:{}, checkedByTargetDay:{} };
-    const manual = campaign.grocery.manualByTargetDay?.[targetDay] || [];
-    const checked = campaign.grocery.checkedByTargetDay?.[targetDay] || {};
-    const rows = [
-      ...generated.map(item => ({ ...item, id:item.id || `generated-${item.name}-${item.unit}` })),
-      ...manual.map(item => ({ ...item, unit:"", quantity:null, mealCount:0 }))
-    ];
-    if (!rows.length) {
-      list.innerHTML = nextDay && GlowApp.FoodLog?.getPlannedTotals?.(nextDay)?.itemCount
-        ? `<p class="task-empty">No grocery quantities could be derived.</p>`
-        : `<p class="task-empty">No food plan for tomorrow yet. Add it in Plan → Food Plan.</p>`;
-      return;
-    }
-
-    const visibleRows = rows.filter(item => !checked[item.id]);
-    if (!visibleRows.length) {
-      list.innerHTML = `<p class="task-empty">All sorted for tomorrow.</p>`;
-      return;
-    }
-
-    list.innerHTML = visibleRows.map(item => {
-      const quantity = item.quantity != null ? `${item.quantity} ${item.unit}`.trim() : "";
-      const source = item.generated && item.mealCount ? `${item.mealCount} meal${item.mealCount === 1 ? "" : "s"}` : item.manual ? "Manual" : "";
-      return `<label class="grocery-row"><input type="checkbox" data-grocery-id="${this.escapeHTML(item.id)}" data-grocery-target-day="${targetDay}"><span class="custom-checkbox" aria-hidden="true"></span><span class="grocery-row__copy"><strong>${this.escapeHTML(item.name)}</strong><small>${this.escapeHTML([quantity,source].filter(Boolean).join(" · "))}</small></span></label>`;
-    }).join("");
-  },
-
-  /* =======================================================
-     DAILY CHALLENGE — EXTRA TO SCORE
-  ======================================================== */
-
-  bindChallenge() {
+  bindDogWalk() {
 
     const checkbox =
-      document.getElementById("challenge-done");
+      document.getElementById(
+        "dog-walk-checkbox"
+      );
 
-    if (!checkbox) return;
+
+    if (!checkbox) {
+      return;
+    }
+
 
     checkbox.addEventListener(
       "change",
       () => {
+
         GlowApp.State.updateSelectedDay(
-          day => {
-            if (!day.challenge) return;
-            day.challenge.done = checkbox.checked;
+          (day) => {
+
+            day.dogWalk.completed =
+              checkbox.checked;
+
           }
         );
+
+
         this.renderScoringOnly();
+
       }
     );
+
   },
 
 
-  renderChallenge(day) {
+  renderDogWalk(day) {
 
-    if (!day?.challenge) return;
-
-    this.setText(
-      "daily-challenge-type",
-      day.challenge.type === "disconnection"
-        ? "Reset challenge"
-        : "Flexibility challenge"
-    );
-
-    this.setText(
-      "daily-challenge-copy",
-      day.challenge.label || "Challenge loading…"
-    );
-
-    const checkbox = document.getElementById("challenge-done");
-    if (checkbox) checkbox.checked = day.challenge.done === true;
-
-    const settings = GlowApp.State.get().settings;
-    const score = GlowApp.Scoring.getDayScore(day, settings);
-    this.renderChallengeStatus(day, score);
-  },
+    const checkbox =
+      document.getElementById(
+        "dog-walk-checkbox"
+      );
 
 
-  renderChallengeStatus(day, score) {
-
-    const element = document.getElementById("daily-challenge-status");
-    if (!element || !day?.challenge) return;
-
-    const status = GlowApp.Scoring.getChallengeStatus(day, score);
-    element.classList.toggle("is-complete", status.passed);
-    element.classList.toggle("is-pending", day.challenge.done === true && !status.passed);
-
-    if (status.passed) {
-      element.textContent = "Passed";
-    } else if (day.challenge.done === true) {
-      element.textContent = `${score.percentage}% · needs 90%`;
-    } else {
-      element.textContent = "Not done";
+    if (!checkbox) {
+      return;
     }
+
+
+    checkbox.checked =
+      day.dogWalk?.completed === true;
+
   },
 
 
   /* =======================================================
-     DAY 14 MEASUREMENTS
+     TIMELINE
+  ======================================================== */
+
+  renderTimeline(day) {
+
+    const container =
+      document.getElementById(
+        "today-timeline"
+      );
+
+
+    if (!container) {
+      return;
+    }
+
+
+    const schedule =
+      Array.isArray(day.schedule)
+        ? day.schedule
+        : [];
+
+
+    const periods = [
+      {
+        id: "morning",
+        label: "Morning"
+      },
+      {
+        id: "midday",
+        label: "Midday"
+      },
+      {
+        id: "afternoon",
+        label: "Afternoon"
+      },
+      {
+        id: "evening",
+        label: "Evening"
+      }
+    ];
+
+
+    container.innerHTML =
+      periods
+        .map(
+          period => {
+
+            const items =
+              schedule.filter(
+                item =>
+                  item.period ===
+                  period.id
+              );
+
+
+            const itemMarkup =
+              items.length
+                ? items
+                    .map(
+                      item => `
+                        <li>
+                          ${this.escapeHTML(item.label)}
+                        </li>
+                      `
+                    )
+                    .join("")
+                : `
+                    <li class="muted">
+                      —
+                    </li>
+                  `;
+
+
+            return `
+              <section class="timeline-block">
+
+                <header>
+                  <span class="timeline-block__marker"></span>
+
+                  <h3>
+                    ${period.label}
+                  </h3>
+                </header>
+
+                <ul>
+                  ${itemMarkup}
+                </ul>
+
+              </section>
+            `;
+
+          }
+        )
+        .join("");
+
+  },
+
+
+  /* =======================================================
+     DAY 10 MEASUREMENTS
 
      INFORMATION ONLY — NEVER INCLUDED IN SCORING.
   ======================================================== */
@@ -1707,12 +1721,12 @@ GlowApp.DayView = {
 
                 /*
                   Measurements should only exist meaningfully
-                  on Day 14, but this defensive guard prevents
+                  on Day 10, but this defensive guard prevents
                   accidental writes from another day.
                 */
 
                 if (
-                  day.dayNumber !== 14
+                  day.dayNumber !== 10
                 ) {
                   return;
                 }
@@ -1761,7 +1775,7 @@ GlowApp.DayView = {
             (day) => {
 
               if (
-                day.dayNumber !== 14
+                day.dayNumber !== 10
               ) {
                 return;
               }
@@ -1786,7 +1800,7 @@ GlowApp.DayView = {
 
     const panel =
       document.getElementById(
-        "day-14-measurements"
+        "day-10-measurements"
       );
 
 
@@ -1795,15 +1809,15 @@ GlowApp.DayView = {
     }
 
 
-    const isDay14 =
-      day.dayNumber === 14;
+    const isDay10 =
+      day.dayNumber === 10;
 
 
     panel.hidden =
-      !isDay14;
+      !isDay10;
 
 
-    if (!isDay14) {
+    if (!isDay10) {
       return;
     }
 
@@ -1966,12 +1980,15 @@ GlowApp.DayView = {
       score.categories.glow.earned
     );
 
-    this.setText(
-      "glow-possible",
-      score.categories.glow.possible
-    );
 
-    this.renderChallengeStatus(day, score);
+    /* -----------------------------------------------------
+       Dog walk
+    ------------------------------------------------------ */
+
+    this.setText(
+      "dog-walk-score",
+      score.categories.dogWalk.earned
+    );
 
   },
 

@@ -2,16 +2,16 @@
    GLOW CAMPAIGN — SCHEDULE VIEW
 
    Editable:
-   - One activity-add flow for Training / Self care / Other
-   - Workout selection, timing and labels
+   - Workout selection
+   - Workout timing
+   - Workout labels
+   - Movement OR-groups
    - Custom unscored schedule items
    - Timeline labels / timing
-   - Remove non-food items
+   - Remove items
 
-   Fixed food goals stay visible but are not editable.
-   Movement edits affect movement scoring. Existing alternative-group
-   data remains intact, but the implementation detail is no longer
-   exposed in the UI.
+   Movement edits affect movement scoring.
+   Ordinary schedule edits do not alter fixed campaign rules.
 ========================================================= */
 
 window.GlowApp = window.GlowApp || {};
@@ -20,8 +20,6 @@ window.GlowApp = window.GlowApp || {};
 GlowApp.ScheduleView = {
 
   initialized: false,
-  editingItemId: null,
-  swipeState: null,
 
   periods: [
     { id: "morning", label: "Morning" },
@@ -41,10 +39,11 @@ GlowApp.ScheduleView = {
       return;
     }
 
-    this.setupAddActivityControls();
+    this.injectWorkoutControls();
 
     this.bindDayTabs();
-    this.bindAddActivity();
+    this.bindAddWorkout();
+    this.bindAddCustomItem();
     this.bindEditor();
 
     this.initialized = true;
@@ -53,53 +52,137 @@ GlowApp.ScheduleView = {
 
 
   /* =======================================================
-     ADD ACTIVITY CONTROLS
+     WORKOUT ADD CONTROLS
+
+     Inject these so you don't need another index.html edit.
   ======================================================== */
 
-  setupAddActivityControls() {
+  injectWorkoutControls() {
 
-    const trainingSelect =
+    const existing =
       document.getElementById(
-        "schedule-training-type"
+        "schedule-workout-controls"
       );
 
-    const periodSelect =
-      document.getElementById(
-        "schedule-activity-period"
-      );
-
-
-    if (trainingSelect) {
-
-      trainingSelect.innerHTML =
-        GlowApp.WORKOUT_TYPES
-          .map(
-            workout => `
-              <option value="${this.escapeHTML(workout.id)}">
-                ${this.escapeHTML(workout.label)}
-              </option>
-            `
-          )
-          .join("");
+    if (existing) {
+      return;
     }
 
 
-    if (periodSelect) {
+    const addItemButton =
+      document.getElementById(
+        "add-schedule-item-button"
+      );
 
-      periodSelect.innerHTML =
-        this.periods
-          .map(
-            period => `
-              <option value="${period.id}">
-                ${period.label}
-              </option>
-            `
-          )
-          .join("");
+
+    if (!addItemButton) {
+      return;
     }
 
 
-    this.updateAddActivityFields();
+    addItemButton.textContent =
+      "+ Custom item";
+
+    addItemButton.classList.remove(
+      "primary-button"
+    );
+
+    addItemButton.classList.add(
+      "secondary-button"
+    );
+
+
+    const wrapper =
+      document.createElement("div");
+
+
+    wrapper.id =
+      "schedule-workout-controls";
+
+    wrapper.className =
+      "schedule-editor__actions";
+
+
+    const workoutOptions =
+      GlowApp.WORKOUT_TYPES
+        .map(
+          workout => `
+            <option value="${this.escapeHTML(workout.id)}">
+              ${this.escapeHTML(workout.label)}
+            </option>
+          `
+        )
+        .join("");
+
+
+    const periodOptions =
+      this.periods
+        .map(
+          period => `
+            <option value="${period.id}">
+              ${period.label}
+            </option>
+          `
+        )
+        .join("");
+
+
+    wrapper.innerHTML = `
+      <div class="schedule-add-control">
+
+        <select
+          id="schedule-workout-type"
+          aria-label="Workout type"
+        >
+          ${workoutOptions}
+        </select>
+
+
+        <select
+          id="schedule-workout-period"
+          aria-label="Workout time"
+        >
+          ${periodOptions}
+        </select>
+
+
+        <button
+          class="primary-button"
+          type="button"
+          id="add-workout-button"
+        >
+          + Add workout
+        </button>
+
+
+        <span
+          id="custom-item-button-slot"
+        ></span>
+
+      </div>
+    `;
+
+
+    addItemButton.parentNode.insertBefore(
+      wrapper,
+      addItemButton
+    );
+
+
+    const slot =
+      document.getElementById(
+        "custom-item-button-slot"
+      );
+
+
+    if (slot) {
+
+      slot.appendChild(
+        addItemButton
+      );
+
+    }
+
   },
 
 
@@ -134,14 +217,9 @@ GlowApp.ScheduleView = {
       dayNumber
     );
 
-    this.setText(
-      "schedule-add-day-number",
-      dayNumber
-    );
-
     this.renderBlocks(day);
 
-    this.updateAddActivityFields();
+    this.updateWorkoutPeriodControl();
 
   },
 
@@ -237,338 +315,264 @@ GlowApp.ScheduleView = {
 
 
   /* =======================================================
-     ADD ACTIVITY
+     ADD WORKOUT
   ======================================================== */
 
-  bindAddActivity() {
+  bindAddWorkout() {
 
-    const openButton =
-      document.getElementById(
-        "add-schedule-item-button"
-      );
-
-    const panel =
-      document.getElementById(
-        "schedule-add-panel"
-      );
-
-    const cancelButton =
-      document.getElementById(
-        "cancel-schedule-activity-button"
-      );
-
-    const confirmButton =
-      document.getElementById(
-        "confirm-schedule-activity-button"
-      );
-
-    const categorySelect =
-      document.getElementById(
-        "schedule-activity-category"
-      );
-
-    const trainingSelect =
-      document.getElementById(
-        "schedule-training-type"
-      );
-
-    const selfCareSelect =
-      document.getElementById(
-        "schedule-self-care-type"
-      );
-
-
-    openButton?.addEventListener(
+    document.addEventListener(
       "click",
-      () => {
+      event => {
 
-        if (!panel) {
+        const button =
+          event.target.closest(
+            "#add-workout-button"
+          );
+
+
+        if (!button) {
           return;
         }
 
-        panel.hidden = !panel.hidden;
 
-        if (!panel.hidden) {
-          this.updateAddActivityFields();
-          categorySelect?.focus();
+        const typeSelect =
+          document.getElementById(
+            "schedule-workout-type"
+          );
+
+        const periodSelect =
+          document.getElementById(
+            "schedule-workout-period"
+          );
+
+
+        if (
+          !typeSelect ||
+          !periodSelect
+        ) {
+          return;
         }
-      }
-    );
 
 
-    cancelButton?.addEventListener(
-      "click",
-      () => {
-        if (panel) {
-          panel.hidden = true;
+        const workout =
+          GlowApp.WORKOUT_TYPES.find(
+            item =>
+              item.id ===
+              typeSelect.value
+          );
+
+
+        if (!workout) {
+          return;
         }
-      }
-    );
 
 
-    categorySelect?.addEventListener(
-      "change",
-      () => this.updateAddActivityFields()
-    );
-
-    trainingSelect?.addEventListener(
-      "change",
-      () => this.updateAddActivityFields()
-    );
-
-    selfCareSelect?.addEventListener(
-      "change",
-      () => this.updateAddActivityFields()
-    );
+        let period =
+          periodSelect.value;
 
 
-    confirmButton?.addEventListener(
-      "click",
-      () => {
+        /*
+          Explicit campaign rule:
+          glute pump = afternoon only.
+        */
 
-        const category =
-          categorySelect?.value ||
-          "movement";
+        if (
+          workout.id ===
+          "glute-pump"
+        ) {
+
+          period =
+            "afternoon";
+
+        }
+
 
         const dayNumber =
           GlowApp.State
             .getScheduleDayNumber();
 
-        const periodSelect =
-          document.getElementById(
-            "schedule-activity-period"
-          );
 
-        const customInput =
-          document.getElementById(
-            "schedule-custom-label"
-          );
+        GlowApp.State.updateDay(
+          dayNumber,
+          day => {
 
-        let period =
-          periodSelect?.value ||
-          "afternoon";
-
-        let label = "";
-
-
-        if (category === "movement") {
-
-          const workout =
-            GlowApp.WORKOUT_TYPES.find(
-              item =>
-                item.id ===
-                trainingSelect?.value
-            );
-
-          if (!workout) {
-            return;
-          }
-
-          label = workout.label;
-
-          if (workout.id === "glute-pump") {
-            period = "afternoon";
-          }
-
-
-          GlowApp.State.updateDay(
-            dayNumber,
-            day => {
-
-              const movement =
-                GlowApp.createMovementItem({
-                  type: workout.id,
-                  label: workout.label,
-                  period,
-                  points: workout.defaultPoints || 1
-                });
-
-              day.movement.push(
-                movement
-              );
-
-              const scheduleItem =
-                GlowApp.createScheduleItem({
-                  label: workout.label,
-                  period,
-                  category: "movement",
-                  scored: true,
-                  linkedMovementType:
-                    workout.id,
-                  linkedMovementId:
-                    movement.id,
-                  points:
-                    movement.points
-                });
-
-              day.schedule.push(
-                scheduleItem
-              );
-            }
-          );
-
-        } else {
-
-          if (category === "glow") {
-
-            const selfCareType =
-              selfCareSelect?.value ||
-              "morning-routine";
-
-            if (selfCareType === "morning-routine") {
-              label = "Morning routine";
-              period = "morning";
-            } else if (selfCareType === "evening-routine") {
-              label = "Evening routine";
-              period = "evening";
-            } else {
-              label = String(
-                customInput?.value ||
-                ""
-              ).trim();
-            }
-
-          } else {
-
-            label = String(
-              customInput?.value ||
-              ""
-            ).trim();
-          }
-
-
-          if (!label) {
-
-            customInput?.focus();
-            this.showToast(
-              "Name the activity first."
-            );
-            return;
-          }
-
-
-          GlowApp.State.updateDay(
-            dayNumber,
-            day => {
-
-              const scheduleItem = GlowApp.createScheduleItem({
-                label,
-                period,
-                category: category === "glow" ? "glow" : "custom",
-                scored: category === "glow",
-                points: category === "glow" ? 1 : 0
+            const movement =
+              GlowApp.createMovementItem({
+                type: workout.id,
+                label: workout.label,
+                period
               });
 
-              day.schedule.push(scheduleItem);
 
-              if (category === "glow") {
-                day.selfCare ||= { completions: {} };
-                day.selfCare.completions ||= {};
-                day.selfCare.completions[scheduleItem.id] = false;
-              }
-            }
-          );
-        }
+            day.movement.push(
+              movement
+            );
 
 
-        if (customInput) {
-          customInput.value = "";
-        }
+            const scheduleItem =
+              GlowApp.createScheduleItem({
+                label: workout.label,
+                period,
+                category: "movement",
+                scored: true,
+                linkedMovementType:
+                  workout.id
+              });
 
-        if (panel) {
-          panel.hidden = true;
-        }
+
+            /*
+              New field for reliable syncing.
+
+              Existing campaign data is upgraded automatically
+              by ensureMovementLinks().
+            */
+
+            scheduleItem.linkedMovementId =
+              movement.id;
+
+
+            day.schedule.push(
+              scheduleItem
+            );
+
+          }
+        );
+
 
         this.render();
+
         this.showToast(
-          `${label} added.`
+          `${workout.label} added.`
         );
+
       }
     );
+
   },
 
 
-  updateAddActivityFields() {
+  /* =======================================================
+     KEEP GLUTE PUMP AFTERNOON
+  ======================================================== */
 
-    const category =
-      document.getElementById(
-        "schedule-activity-category"
-      )?.value ||
-      "movement";
+  updateWorkoutPeriodControl() {
 
-    const trainingField =
+    const workoutSelect =
       document.getElementById(
-        "schedule-training-field"
+        "schedule-workout-type"
       );
-
-    const selfCareField =
-      document.getElementById(
-        "schedule-self-care-field"
-      );
-
-    const customField =
-      document.getElementById(
-        "schedule-custom-field"
-      );
-
-    const selfCareType =
-      document.getElementById(
-        "schedule-self-care-type"
-      )?.value ||
-      "morning-routine";
-
-    const trainingType =
-      document.getElementById(
-        "schedule-training-type"
-      )?.value ||
-      "";
 
     const periodSelect =
       document.getElementById(
-        "schedule-activity-period"
+        "schedule-workout-period"
       );
 
 
-    if (trainingField) {
-      trainingField.hidden =
-        category !== "movement";
-    }
-
-    if (selfCareField) {
-      selfCareField.hidden =
-        category !== "glow";
-    }
-
-    if (customField) {
-      customField.hidden =
-        !(
-          category === "custom" ||
-          (
-            category === "glow" &&
-            selfCareType === "other"
-          )
-        );
+    if (
+      !workoutSelect ||
+      !periodSelect
+    ) {
+      return;
     }
 
 
-    if (periodSelect) {
+    const update = () => {
 
-      const workout = category === "movement"
-        ? GlowApp.WORKOUT_TYPES.find(item => item.id === trainingType)
-        : null;
+      const isGlutePump =
+        workoutSelect.value ===
+        "glute-pump";
 
-      const selfCarePreset = category === "glow" && selfCareType !== "other";
 
-      if (workout?.defaultPeriod) {
-        periodSelect.value = workout.defaultPeriod;
-      } else if (selfCareType === "morning-routine") {
-        periodSelect.value = "morning";
-      } else if (selfCareType === "evening-routine") {
-        periodSelect.value = "evening";
+      if (isGlutePump) {
+
+        periodSelect.value =
+          "afternoon";
+
+        periodSelect.disabled =
+          true;
+
+      } else {
+
+        periodSelect.disabled =
+          false;
+
       }
 
-      periodSelect.disabled = workout?.id === "glute-pump" || selfCarePreset;
+    };
+
+
+    if (
+      workoutSelect.dataset.bound !==
+      "true"
+    ) {
+
+      workoutSelect.addEventListener(
+        "change",
+        update
+      );
+
+
+      workoutSelect.dataset.bound =
+        "true";
+
     }
+
+
+    update();
+
+  },
+
+
+  /* =======================================================
+     ADD CUSTOM TIMELINE ITEM
+
+     This is deliberately unscored.
+  ======================================================== */
+
+  bindAddCustomItem() {
+
+    const button =
+      document.getElementById(
+        "add-schedule-item-button"
+      );
+
+
+    if (!button) {
+      return;
+    }
+
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        const dayNumber =
+          GlowApp.State
+            .getScheduleDayNumber();
+
+
+        GlowApp.State.updateDay(
+          dayNumber,
+          day => {
+
+            day.schedule.push(
+              GlowApp.createScheduleItem({
+                label: "New item",
+                period: "afternoon",
+                category: "custom",
+                scored: false
+              })
+            );
+
+          }
+        );
+
+
+        this.render();
+
+      }
+    );
+
   },
 
 
@@ -589,19 +593,13 @@ GlowApp.ScheduleView = {
     }
 
 
-    this.bindSwipeReveal(editor);
-
+    /* -----------------------------------------------------
+       Text / select changes
+    ------------------------------------------------------ */
 
     editor.addEventListener(
-      "click",
+      "change",
       event => {
-
-        if (event.target.closest(
-          '[data-swipe-row][data-swipe-handled="true"]'
-        )) {
-          event.preventDefault();
-          return;
-        }
 
         const control =
           event.target.closest(
@@ -610,13 +608,6 @@ GlowApp.ScheduleView = {
 
 
         if (!control) {
-
-          if (!event.target.closest(
-            "[data-swipe-row].is-revealed"
-          )) {
-            this.closeSwipeRows(editor);
-          }
-
           return;
         }
 
@@ -633,345 +624,100 @@ GlowApp.ScheduleView = {
         }
 
 
-        if (action === "edit") {
+        if (
+          action === "label"
+        ) {
 
-          this.editingItemId =
-            scheduleId;
-
-          this.closeSwipeRows(editor);
-          this.render();
-          return;
-        }
-
-
-        if (action === "cancel") {
-
-          this.editingItemId = null;
-          this.render();
-          return;
-        }
-
-
-        if (action === "save") {
-
-          const editRow =
-            control.closest(
-              "[data-schedule-editor-item]"
-            );
-
-          const labelInput =
-            editRow?.querySelector(
-              "[data-schedule-edit-label]"
-            );
-
-          const periodSelect =
-            editRow?.querySelector(
-              "[data-schedule-edit-period]"
-            );
-
-
-          this.saveItem(
+          this.updateLabel(
             scheduleId,
-            labelInput?.value || "",
-            periodSelect?.value || ""
+            control.value
           );
 
-          return;
         }
 
 
-        if (action === "delete") {
+        if (
+          action === "period"
+        ) {
 
-          this.deleteItem(
-            scheduleId
+          this.updatePeriod(
+            scheduleId,
+            control.value
           );
+
+        }
+
+
+        if (
+          action === "alternative"
+        ) {
+
+          this.updateAlternativeGroup(
+            scheduleId,
+            control.checked
+          );
+
         }
 
       }
     );
-  },
 
 
-  bindSwipeReveal(container) {
+    /*
+      Label editing feels nicer live rather than only on blur.
+    */
 
-    container.addEventListener(
-      "pointerdown",
+    editor.addEventListener(
+      "input",
       event => {
 
+        const control =
+          event.target.closest(
+            '[data-schedule-action="label"]'
+          );
 
-        if (event.target.closest(
-          ".swipe-delete-button"
-        )) {
+
+        if (!control) {
           return;
         }
 
-        const row = event.target.closest(
-          "[data-swipe-row]"
+
+        this.updateLabel(
+          control.dataset.scheduleId,
+          control.value,
+          false
         );
 
-        if (!row) {
-          return;
-        }
-
-        this.closeSwipeRows(container, row);
-        row.classList.remove("is-revealed");
-        row.classList.add("is-swiping");
-
-        this.swipeState = {
-          row,
-          pointerId: event.pointerId,
-          startX: event.clientX,
-          startY: event.clientY,
-          deltaX: 0,
-          horizontal: false
-        };
-
-        row.setPointerCapture?.(
-          event.pointerId
-        );
       }
     );
 
 
-    container.addEventListener(
-      "pointermove",
+    /* -----------------------------------------------------
+       Delete
+    ------------------------------------------------------ */
+
+    editor.addEventListener(
+      "click",
       event => {
 
-        const state =
-          this.swipeState;
-
-        if (
-          !state ||
-          state.pointerId !== event.pointerId
-        ) {
-          return;
-        }
-
-        const deltaX =
-          event.clientX - state.startX;
-
-        const deltaY =
-          event.clientY - state.startY;
-
-
-        if (
-          !state.horizontal &&
-          Math.abs(deltaY) > Math.abs(deltaX)
-        ) {
-          return;
-        }
-
-
-        if (Math.abs(deltaX) > 8) {
-          state.horizontal = true;
-        }
-
-
-        if (!state.horizontal) {
-          return;
-        }
-
-
-        state.deltaX =
-          Math.max(
-            -92,
-            Math.min(0, deltaX)
+        const deleteButton =
+          event.target.closest(
+            '[data-schedule-action="delete"]'
           );
 
-        state.row.style.setProperty(
-          "--swipe-offset",
-          `${state.deltaX}px`
+
+        if (!deleteButton) {
+          return;
+        }
+
+
+        this.deleteItem(
+          deleteButton.dataset.scheduleId
         );
 
-        event.preventDefault();
       }
     );
 
-
-    const finishSwipe = event => {
-
-      const state =
-        this.swipeState;
-
-      if (
-        !state ||
-        state.pointerId !== event.pointerId
-      ) {
-        return;
-      }
-
-
-      const reveal =
-        state.horizontal &&
-        state.deltaX <= -42;
-
-      state.row.classList.toggle(
-        "is-revealed",
-        reveal
-      );
-
-      if (state.horizontal) {
-        state.row.dataset.swipeHandled =
-          "true";
-
-        setTimeout(
-          () => {
-            delete state.row.dataset.swipeHandled;
-          },
-          0
-        );
-      }
-
-      state.row.classList.remove(
-        "is-swiping"
-      );
-
-      state.row.style.removeProperty(
-        "--swipe-offset"
-      );
-
-      state.row.releasePointerCapture?.(
-        event.pointerId
-      );
-
-      this.swipeState = null;
-    };
-
-
-    container.addEventListener(
-      "pointerup",
-      finishSwipe
-    );
-
-    container.addEventListener(
-      "pointercancel",
-      finishSwipe
-    );
-  },
-
-
-  closeSwipeRows(container, except = null) {
-
-    container
-      .querySelectorAll(
-        "[data-swipe-row].is-revealed"
-      )
-      .forEach(row => {
-
-        if (row !== except) {
-          row.classList.remove(
-            "is-revealed"
-          );
-        }
-
-      });
-  },
-
-
-  saveItem(
-    scheduleId,
-    label,
-    period
-  ) {
-
-    const cleanLabel =
-      String(label || "").trim();
-
-    const validPeriod =
-      this.periods.some(
-        item => item.id === period
-      );
-
-
-    if (!cleanLabel) {
-      this.showToast(
-        "Give the activity a name."
-      );
-      return;
-    }
-
-
-    if (!validPeriod) {
-      return;
-    }
-
-
-    const dayNumber =
-      GlowApp.State
-        .getScheduleDayNumber();
-
-    let forcedAfternoon = false;
-
-
-    GlowApp.State.updateDay(
-      dayNumber,
-      day => {
-
-        const scheduleItem =
-          day.schedule.find(
-            item =>
-              item.id === scheduleId
-          );
-
-
-        if (
-          !scheduleItem ||
-          scheduleItem.category === "food"
-        ) {
-          return;
-        }
-
-
-        const movement =
-          this.getLinkedMovement(
-            day,
-            scheduleItem
-          );
-
-
-        scheduleItem.label =
-          cleanLabel;
-
-
-        if (movement) {
-          movement.label = cleanLabel;
-        }
-
-
-        if (movement?.type === "glute-pump") {
-
-          scheduleItem.period =
-            "afternoon";
-
-          movement.period =
-            "afternoon";
-
-          forcedAfternoon = true;
-          return;
-        }
-
-
-        scheduleItem.period =
-          period;
-
-
-        if (movement) {
-          movement.period = period;
-        }
-
-      }
-    );
-
-
-    this.editingItemId = null;
-    this.render();
-
-
-    if (forcedAfternoon) {
-      this.showToast(
-        "Glute pump stays in the afternoon."
-      );
-    }
   },
 
 
@@ -1002,10 +748,7 @@ GlowApp.ScheduleView = {
           );
 
 
-        if (
-          !scheduleItem ||
-          scheduleItem.category === "food"
-        ) {
+        if (!scheduleItem) {
           return;
         }
 
@@ -1085,10 +828,7 @@ GlowApp.ScheduleView = {
           );
 
 
-        if (
-          !scheduleItem ||
-          scheduleItem.category === "food"
-        ) {
+        if (!scheduleItem) {
           return;
         }
 
@@ -1154,6 +894,71 @@ GlowApp.ScheduleView = {
 
 
   /* =======================================================
+     OR / ALTERNATIVE MOVEMENT GROUP
+
+     MVP supports one OR-group per day.
+
+     Example Day 4:
+       Easy walk OR Easy jog
+
+     Both items share the same alternativeGroup,
+     so together they are worth one possible point.
+  ======================================================== */
+
+  updateAlternativeGroup(
+    scheduleId,
+    checked
+  ) {
+
+    const dayNumber =
+      GlowApp.State
+        .getScheduleDayNumber();
+
+
+    GlowApp.State.updateDay(
+      dayNumber,
+      day => {
+
+        const scheduleItem =
+          day.schedule.find(
+            item =>
+              item.id ===
+              scheduleId
+          );
+
+
+        if (!scheduleItem) {
+          return;
+        }
+
+
+        const movement =
+          this.getLinkedMovement(
+            day,
+            scheduleItem
+          );
+
+
+        if (!movement) {
+          return;
+        }
+
+
+        movement.alternativeGroup =
+          checked
+            ? `day-${day.dayNumber}-alternative`
+            : null;
+
+      }
+    );
+
+
+    this.render();
+
+  },
+
+
+  /* =======================================================
      DELETE ITEM
   ======================================================== */
 
@@ -1180,10 +985,7 @@ GlowApp.ScheduleView = {
           );
 
 
-        if (
-          !scheduleItem ||
-          scheduleItem.category === "food"
-        ) {
+        if (!scheduleItem) {
           return;
         }
 
@@ -1216,10 +1018,6 @@ GlowApp.ScheduleView = {
         }
 
 
-        if (scheduleItem.category === "glow" && day.selfCare?.completions) {
-          delete day.selfCare.completions[scheduleId];
-        }
-
         day.schedule =
           day.schedule.filter(
             item =>
@@ -1229,11 +1027,6 @@ GlowApp.ScheduleView = {
 
       }
     );
-
-
-    if (this.editingItemId === scheduleId) {
-      this.editingItemId = null;
-    }
 
 
     this.render();
@@ -1341,86 +1134,6 @@ GlowApp.ScheduleView = {
         item
       );
 
-    const isFood =
-      item.category === "food";
-
-    const isSelfCare =
-      item.category === "glow";
-
-    const isOther =
-      item.category === "custom";
-
-    const isEditing =
-      !isFood &&
-      this.editingItemId === item.id;
-
-
-    let badge = "Other";
-
-    if (movement) {
-      const movementPoints = Number(movement.points) > 0 ? Number(movement.points) : 1;
-      badge = `Training · ${movementPoints} pt${movementPoints === 1 ? "" : "s"}`;
-    } else if (isFood) {
-      badge = "Food goal";
-    } else if (item.category === "dog") {
-      badge = "Dog walk";
-    } else if (isSelfCare) {
-      badge = "Self care · 1 pt";
-    }
-
-
-    const classes = [
-      "schedule-item",
-      movement ? "schedule-item--movement" : "",
-      isFood ? "schedule-item--fixed" : "",
-      isSelfCare ? "schedule-item--self-care" : "",
-      isOther ? "schedule-item--other" : "",
-      isEditing ? "schedule-item--editing" : ""
-    ]
-      .filter(Boolean)
-      .join(" ");
-
-
-    const meta = `
-      <div class="schedule-item__meta">
-        <span class="schedule-item__badge">
-          ${badge}
-        </span>
-
-        ${
-          movement?.type === "glute-pump"
-            ? `
-              <span class="schedule-item__note">
-                afternoon only
-              </span>
-            `
-            : ""
-        }
-      </div>
-    `;
-
-
-    if (isFood) {
-
-      return `
-        <article class="${classes}">
-          ${meta}
-
-          <div class="schedule-item__static-label">
-            <strong>${this.escapeHTML(item.label)}</strong>
-          </div>
-        </article>
-      `;
-    }
-
-
-    const periodLabel =
-      this.periods.find(
-        period => period.id === item.period
-      )?.label ||
-      item.period ||
-      "Unscheduled";
-
 
     const periodOptions =
       this.periods
@@ -1429,7 +1142,8 @@ GlowApp.ScheduleView = {
             <option
               value="${period.id}"
               ${
-                item.period === period.id
+                item.period ===
+                period.id
                   ? "selected"
                   : ""
               }
@@ -1441,107 +1155,129 @@ GlowApp.ScheduleView = {
         .join("");
 
 
-    if (isEditing) {
+    let badge =
+      "Timeline";
 
-      return `
-        <article
-          class="${classes}"
-          data-schedule-editor-item="${this.escapeHTML(item.id)}"
-        >
-          ${meta}
 
-          <div class="schedule-item__edit-grid">
-            <label class="schedule-item__edit-field">
-              <span>Activity</span>
-              <input
-                class="schedule-item__label-input"
-                type="text"
-                value="${this.escapeAttribute(item.label)}"
-                data-schedule-edit-label="${this.escapeHTML(item.id)}"
-                aria-label="Activity name"
-              >
-            </label>
+    if (movement) {
 
-            <label class="schedule-item__edit-field">
-              <span>Time</span>
-              <select
-                class="schedule-item__period"
-                data-schedule-edit-period="${this.escapeHTML(item.id)}"
-                aria-label="Schedule period"
-                ${
-                  movement?.type === "glute-pump"
-                    ? "disabled"
-                    : ""
-                }
-              >
-                ${periodOptions}
-              </select>
-            </label>
-          </div>
+      badge =
+        "Scored workout";
 
-          <div class="schedule-item__edit-actions">
-            <button
-              class="secondary-button schedule-edit-cancel"
-              type="button"
-              data-schedule-action="cancel"
-              data-schedule-id="${this.escapeHTML(item.id)}"
-            >
-              Cancel
-            </button>
+    } else if (
+      item.category === "food"
+    ) {
 
-            <button
-              class="primary-button schedule-edit-save"
-              type="button"
-              data-schedule-action="save"
-              data-schedule-id="${this.escapeHTML(item.id)}"
-            >
-              Save
-            </button>
-          </div>
-        </article>
-      `;
+      badge =
+        "Food goal";
+
+    } else if (
+      item.category === "dog"
+    ) {
+
+      badge =
+        "Dog walk";
+
+    } else if (
+      item.category === "glow"
+    ) {
+
+      badge =
+        "Self care";
+
     }
 
 
-    return `
-      <div
-        class="swipe-row schedule-swipe-row"
-        data-swipe-row
-      >
-        <article class="${classes} swipe-row__content">
+    const alternativeControl =
+      movement
+        ? `
+          <label class="or-toggle">
 
-          ${meta}
-
-          <div class="schedule-item__display">
-            <div class="schedule-item__display-copy">
-              <strong>${this.escapeHTML(item.label)}</strong>
-              <span>${this.escapeHTML(periodLabel)}</span>
-            </div>
-
-            <button
-              class="schedule-edit-button"
-              type="button"
-              data-schedule-action="edit"
+            <input
+              type="checkbox"
+              data-schedule-action="alternative"
               data-schedule-id="${this.escapeHTML(item.id)}"
-              aria-label="Edit ${this.escapeAttribute(item.label)}"
-              title="Edit"
+              ${
+                movement.alternativeGroup
+                  ? "checked"
+                  : ""
+              }
             >
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M4 20h4l11-11-4-4L4 16v4Z"></path>
-                <path d="m13.5 6.5 4 4"></path>
-              </svg>
-            </button>
+
+            <span>
+              OR group
+            </span>
+
+          </label>
+        `
+        : "";
+
+
+    return `
+      <article
+        class="
+          schedule-item
+          ${movement ? "schedule-item--movement" : ""}
+        "
+      >
+
+        <div class="schedule-item__main">
+
+          <input
+            class="schedule-item__label-input"
+            type="text"
+            value="${this.escapeAttribute(item.label)}"
+            data-schedule-action="label"
+            data-schedule-id="${this.escapeHTML(item.id)}"
+            aria-label="Schedule item label"
+          >
+
+
+          <div class="schedule-item__meta">
+
+            <span class="schedule-item__badge">
+              ${badge}
+            </span>
+
+            ${
+              movement?.type ===
+              "glute-pump"
+                ? `
+                  <span class="schedule-item__note">
+                    afternoon only
+                  </span>
+                `
+                : ""
+            }
+
           </div>
 
-        </article>
+        </div>
 
-        <div class="swipe-row__action">
+
+        <div class="schedule-item__controls">
+
+          <select
+            class="schedule-item__period"
+            data-schedule-action="period"
+            data-schedule-id="${this.escapeHTML(item.id)}"
+            aria-label="Schedule period"
+            ${
+              movement?.type ===
+              "glute-pump"
+                ? "disabled"
+                : ""
+            }
+          >
+            ${periodOptions}
+          </select>
+
+
+          ${alternativeControl}
+
+
           <button
-            class="swipe-delete-button schedule-delete-button"
+            class="schedule-delete-button"
             type="button"
             data-schedule-action="delete"
             data-schedule-id="${this.escapeHTML(item.id)}"
@@ -1559,11 +1295,13 @@ GlowApp.ScheduleView = {
               <path d="M10 11v5"></path>
               <path d="M14 11v5"></path>
             </svg>
-            <span>Remove</span>
           </button>
+
         </div>
-      </div>
+
+      </article>
     `;
+
   },
 
 

@@ -26,32 +26,58 @@ GlowApp.Scoring = {
   getFoodScore(day) {
 
     const possible = 4;
-    const food = day?.food || {};
-    const grazingOverride = food.continuousGrazing === true;
-    const bingeOverride = food.binge === true;
 
-    if (grazingOverride || bingeOverride) {
+
+    if (!day?.food) {
+
       return {
         earned: 0,
         possible,
         percentage: 0,
-        grazingOverride,
-        bingeOverride
+        grazingOverride: false
       };
+
     }
 
-    const mealKeys = ["breakfast", "lunch", "snack", "dinner"];
-    const earned = mealKeys.filter(key => food[key] === true).length;
+
+    if (day.food.continuousGrazing) {
+
+      return {
+        earned: 0,
+        possible,
+        percentage: 0,
+        grazingOverride: true
+      };
+
+    }
+
+
+    const mealKeys = [
+      "breakfast",
+      "lunch",
+      "snack",
+      "dinner"
+    ];
+
+
+    const earned =
+      mealKeys.filter(
+        key => day.food[key] === true
+      ).length;
+
 
     return {
       earned,
       possible,
-      percentage: this.toPercentage(earned, possible),
-      grazingOverride: false,
-      bingeOverride: false
+      percentage:
+        this.toPercentage(
+          earned,
+          possible
+        ),
+      grazingOverride: false
     };
-  },
 
+  },
 
 
   /* =======================================================
@@ -72,63 +98,123 @@ GlowApp.Scoring = {
      calories under the lower boundary do NOT score.
   ======================================================== */
 
-  getNutritionScore(day, settings) {
+  getNutritionScore(
+    day,
+    settings
+  ) {
 
     const possible = 3;
-    const targets = settings?.nutrition || GlowApp.DEFAULT_SETTINGS.nutrition;
-    const nutrition = day?.nutrition || {};
 
-    const calories = this.toValidNumber(nutrition.calories);
-    const protein = this.toValidNumber(nutrition.protein);
-    const fibre = this.toValidNumber(nutrition.fibre);
 
-    const calorieMax = Number(targets.caloriesMax ?? 1400);
-    const calorieGraceMax = Number(targets.caloriesGraceMax ?? 1500);
-    const binge = day?.food?.binge === true;
+    const targets =
+      settings?.nutrition ||
+      GlowApp.DEFAULT_SETTINGS.nutrition;
 
-    let calorieEarned = 0;
-    if (!binge && calories !== null) {
-      if (calories <= calorieMax) {
-        calorieEarned = 1;
-      } else if (calories <= calorieGraceMax) {
-        calorieEarned = 0.9;
-      }
-    }
 
-    const proteinComplete = protein !== null && protein >= targets.proteinMin;
-    const fibreComplete = fibre !== null && fibre >= targets.fibreMin;
-    const earned = calorieEarned + (proteinComplete ? 1 : 0) + (fibreComplete ? 1 : 0);
+    const nutrition =
+      day?.nutrition || {};
+
+
+    const calories =
+      this.toValidNumber(
+        nutrition.calories
+      );
+
+    const protein =
+      this.toValidNumber(
+        nutrition.protein
+      );
+
+    const fibre =
+      this.toValidNumber(
+        nutrition.fibre
+      );
+
+
+    const caloriesComplete =
+      calories !== null &&
+      calories >= targets.caloriesMin &&
+      calories <= targets.caloriesMax;
+
+
+    const proteinComplete =
+      protein !== null &&
+      protein >= targets.proteinMin;
+
+
+    const fibreComplete =
+      fibre !== null &&
+      fibre >= targets.fibreMin;
+
+
+    const earned = [
+      caloriesComplete,
+      proteinComplete,
+      fibreComplete
+    ].filter(Boolean).length;
+
 
     return {
+
       earned,
       possible,
-      percentage: this.toPercentage(earned, possible),
+
+      percentage:
+        this.toPercentage(
+          earned,
+          possible
+        ),
+
       goals: {
+
         calories: {
-          value: binge ? null : calories,
-          loggedValue: calories,
-          earned: calorieEarned,
-          complete: calorieEarned === 1,
-          max: calorieMax,
-          graceMax: calorieGraceMax,
-          status: this.getCaloriesStatus(calories, calorieMax, calorieGraceMax, binge)
+          value: calories,
+          complete: caloriesComplete,
+
+          min: targets.caloriesMin,
+          max: targets.caloriesMax,
+
+          status:
+            this.getCaloriesStatus(
+              calories,
+              targets.caloriesMin,
+              targets.caloriesMax
+            )
         },
+
+
         protein: {
           value: protein,
           complete: proteinComplete,
+
           min: targets.proteinMin,
-          status: this.getMinimumTargetStatus(protein, targets.proteinMin)
+
+          status:
+            this.getMinimumTargetStatus(
+              protein,
+              targets.proteinMin
+            )
         },
+
+
         fibre: {
           value: fibre,
           complete: fibreComplete,
-          min: targets.fibreMin,
-          status: this.getMinimumTargetStatus(fibre, targets.fibreMin)
-        }
-      }
-    };
-  },
 
+          min: targets.fibreMin,
+
+          status:
+            this.getMinimumTargetStatus(
+              fibre,
+              targets.fibreMin
+            )
+        }
+
+      }
+
+    };
+
+  },
 
 
   /* =======================================================
@@ -216,40 +302,41 @@ GlowApp.Scoring = {
 
   getGlowScore(day) {
 
-    const selfCareSchedule = Array.isArray(day?.schedule)
-      ? day.schedule.filter(item => item.category === "glow" && item.scored !== false)
-      : [];
+    const possible = 2;
 
-    if (day?.selfCare && typeof day.selfCare === "object") {
-      const completions = day.selfCare.completions || {};
-      const possible = selfCareSchedule.reduce(
-        (total, item) => total + (Number(item.points) > 0 ? Number(item.points) : 1),
-        0
-      );
-      const earned = selfCareSchedule.reduce(
-        (total, item) => total + (completions[item.id] === true ? (Number(item.points) > 0 ? Number(item.points) : 1) : 0),
-        0
-      );
 
-      return {
-        earned,
-        possible,
-        percentage: this.toPercentage(earned, possible),
-        goals: selfCareSchedule.map(item => ({
-          id: item.id,
-          label: item.label,
-          complete: completions[item.id] === true
-        }))
-      };
-    }
+    const somatoline =
+      day?.glow?.somatoline === true;
 
-    /* Backward-compatible fallback for old imported data. */
-    const somatoline = day?.glow?.somatoline === true;
-    const skincare = day?.glow?.skincare === true;
-    const earned = [somatoline, skincare].filter(Boolean).length;
-    return { earned, possible: 2, percentage: this.toPercentage(earned, 2), goals: { somatoline, skincare } };
+    const skincare =
+      day?.glow?.skincare === true;
+
+
+    const earned = [
+      somatoline,
+      skincare
+    ].filter(Boolean).length;
+
+
+    return {
+
+      earned,
+      possible,
+
+      percentage:
+        this.toPercentage(
+          earned,
+          possible
+        ),
+
+      goals: {
+        somatoline,
+        skincare
+      }
+
+    };
+
   },
-
 
 
   /* =======================================================
@@ -257,15 +344,32 @@ GlowApp.Scoring = {
   ======================================================== */
 
   getDogWalkScore(day) {
-    const scheduled = Array.isArray(day?.schedule) && day.schedule.some(
-      item => item.category === "dog" && item.scored !== false
-    );
-    const possible = scheduled ? 1 : 0;
-    const complete = scheduled && day?.dogWalk?.completed === true;
-    const earned = complete ? 1 : 0;
-    return { earned, possible, percentage: this.toPercentage(earned, possible), complete };
-  },
 
+    const possible = 1;
+
+
+    const complete =
+      day?.dogWalk?.completed === true;
+
+
+    const earned =
+      complete ? 1 : 0;
+
+
+    return {
+      earned,
+      possible,
+
+      percentage:
+        this.toPercentage(
+          earned,
+          possible
+        ),
+
+      complete
+    };
+
+  },
 
 
   /* =======================================================
@@ -291,59 +395,155 @@ GlowApp.Scoring = {
 
   getMovementScore(day) {
 
-    const movement = Array.isArray(day?.movement) ? day.movement : [];
-    const scoredMovement = movement.filter(item => item?.scored !== false);
+    const movement =
+      Array.isArray(day?.movement)
+        ? day.movement
+        : [];
 
-    if (scoredMovement.length === 0) {
-      return { earned: 0, possible: 0, percentage: 0, groups: [] };
+
+    if (movement.length === 0) {
+
+      return {
+        earned: 0,
+        possible: 0,
+        percentage: 0,
+        groups: []
+      };
+
     }
 
+
     const independentItems = [];
+
     const alternativeGroups = {};
 
-    scoredMovement.forEach(item => {
+
+    movement.forEach((item) => {
+
       if (item.alternativeGroup) {
-        alternativeGroups[item.alternativeGroup] ||= [];
-        alternativeGroups[item.alternativeGroup].push(item);
+
+        if (
+          !alternativeGroups[
+            item.alternativeGroup
+          ]
+        ) {
+
+          alternativeGroups[
+            item.alternativeGroup
+          ] = [];
+
+        }
+
+
+        alternativeGroups[
+          item.alternativeGroup
+        ].push(item);
+
       } else {
+
         independentItems.push(item);
+
       }
+
     });
 
-    const pointsFor = item => {
-      const value = Number(item?.points);
-      return Number.isFinite(value) && value >= 0 ? value : 1;
+
+    /* -----------------------------------------------------
+       Normal movement items
+    ------------------------------------------------------ */
+
+    const independentEarned =
+      independentItems.filter(
+        item => item.completed === true
+      ).length;
+
+
+    const independentPossible =
+      independentItems.length;
+
+
+    /* -----------------------------------------------------
+       Alternative movement groups
+
+       Each group = maximum 1 point.
+    ------------------------------------------------------ */
+
+    const groupResults =
+      Object.entries(
+        alternativeGroups
+      ).map(
+        ([groupId, items]) => {
+
+          const complete =
+            items.some(
+              item =>
+                item.completed === true
+            );
+
+
+          return {
+
+            id: groupId,
+
+            complete,
+
+            earned:
+              complete ? 1 : 0,
+
+            possible: 1,
+
+            items: items.map(
+              item => ({
+                id: item.id,
+                label: item.label,
+                completed:
+                  item.completed === true
+              })
+            )
+
+          };
+
+        }
+      );
+
+
+    const alternativeEarned =
+      groupResults.reduce(
+        (total, group) =>
+          total + group.earned,
+        0
+      );
+
+
+    const alternativePossible =
+      groupResults.length;
+
+
+    const earned =
+      independentEarned +
+      alternativeEarned;
+
+
+    const possible =
+      independentPossible +
+      alternativePossible;
+
+
+    return {
+
+      earned,
+      possible,
+
+      percentage:
+        this.toPercentage(
+          earned,
+          possible
+        ),
+
+      groups: groupResults
+
     };
 
-    const independentPossible = independentItems.reduce((total, item) => total + pointsFor(item), 0);
-    const independentEarned = independentItems.reduce(
-      (total, item) => total + (item.completed === true ? pointsFor(item) : 0),
-      0
-    );
-
-    const groupResults = Object.entries(alternativeGroups).map(([groupId, items]) => {
-      const possible = Math.max(0, ...items.map(pointsFor));
-      const complete = items.some(item => item.completed === true);
-      return {
-        id: groupId,
-        complete,
-        earned: complete ? possible : 0,
-        possible,
-        items: items.map(item => ({
-          id: item.id,
-          label: item.label,
-          completed: item.completed === true,
-          points: pointsFor(item)
-        }))
-      };
-    });
-
-    const alternativeEarned = groupResults.reduce((total, group) => total + group.earned, 0);
-    const alternativePossible = groupResults.reduce((total, group) => total + group.possible, 0);
-    const earned = independentEarned + alternativeEarned;
-    const possible = independentPossible + alternativePossible;
-
-    return { earned, possible, percentage: this.toPercentage(earned, possible), groups: groupResults };
   },
 
 
@@ -439,25 +639,6 @@ GlowApp.Scoring = {
 
 
   /* =======================================================
-     DAILY CHALLENGE — EXTRA, NEVER PART OF DAY SCORE
-  ======================================================== */
-
-  getChallengeStatus(day, dayScore = null) {
-    const challenge = day?.challenge || {};
-    const percentage = Number(dayScore?.percentage ?? 0);
-    const done = challenge.done === true;
-    const passed = done && percentage >= 90;
-
-    return {
-      done,
-      passed,
-      percentage,
-      threshold: 90
-    };
-  },
-
-
-  /* =======================================================
      CAMPAIGN SCORE
 
      IMPORTANT:
@@ -474,16 +655,11 @@ GlowApp.Scoring = {
     settings
   ) {
 
-    const allDays =
+    const days =
       Array.isArray(campaign?.days)
         ? campaign.days
         : [];
 
-    const reachedDay = campaign?.status === "complete"
-      ? allDays.length
-      : Math.max(1, Math.min(Number(campaign?.currentDay || 1), allDays.length));
-
-    const days = allDays.filter(day => Number(day.dayNumber) <= reachedDay);
 
     const dailyScores =
       days.map(
@@ -642,27 +818,30 @@ GlowApp.Scoring = {
      "below" is deliberately NOT framed as positive.
   ======================================================== */
 
-  getCaloriesStatus(value, max, graceMax, binge = false) {
-
-    if (binge) {
-      return "binge-untracked";
-    }
+  getCaloriesStatus(
+    value,
+    min,
+    max
+  ) {
 
     if (value === null) {
       return "not-logged";
     }
 
-    if (value <= max) {
-      return "complete";
+
+    if (value < min) {
+      return "below";
     }
 
-    if (value <= graceMax) {
-      return "grace";
+
+    if (value > max) {
+      return "above";
     }
 
-    return "above";
+
+    return "complete";
+
   },
-
 
 
   /* =======================================================
@@ -718,7 +897,6 @@ GlowApp.Scoring = {
 
     const max =
       Number(
-        nutritionSettings.caloriesGraceMax ??
         nutritionSettings.caloriesMax
       );
 
