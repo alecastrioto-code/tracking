@@ -1,0 +1,642 @@
+/* =========================================================
+   GLOW CAMPAIGN — RESPONSIVE
+========================================================= */
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 980px) {
+
+  :root {
+    --page-gutter: 1.5rem;
+  }
+
+
+  /* Header */
+
+  .app-header {
+    gap: var(--space-4);
+  }
+
+
+  /* Dashboard */
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-card--wide {
+    grid-column: auto;
+  }
+
+
+  /* Timeline */
+
+  .timeline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .timeline-block:nth-child(3) {
+    border-left: 0;
+    border-top: var(--border-width) solid var(--border);
+  }
+
+  .timeline-block:nth-child(4) {
+    border-top: var(--border-width) solid var(--border);
+  }
+
+
+  /* Movement */
+
+  .movement-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+
+  /* Recovery */
+
+  .recovery-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  /* Measurements */
+
+  .measurement-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+
+  /* Schedule editor */
+
+  .schedule-editor__blocks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+
+  /* Settings */
+
+  .settings-panel {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 720px) {
+
+  .reward-setting__range {
+  grid-template-columns: 1fr;
+}
+
+  :root {
+    --page-gutter: 1rem;
+    --header-height: 66px;
+
+    --text-3xl: 2.8rem;
+  }
+
+  .schedule-editor__actions {
+  width: 100%;
+}
+
+
+.schedule-add-control {
+  width: 100%;
+}
+
+
+.schedule-add-control select,
+.schedule-add-control
+#schedule-workout-type,
+.schedule-add-control button,
+.schedule-add-control
+#custom-item-button-slot {
+  width: 100%;
+}
+
+
+.schedule-add-control
+#custom-item-button-slot
+button {
+  width: 100%;
+}
+
+
+.schedule-item__controls {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+
+.schedule-item__period {
+  width: 100%;
+}
+
+
+.or-toggle {
+  min-height: 36px;
+}
+
+
+.schedule-delete-button {
+  width: 100%;
+}
+
+
+  /* =======================================================
+     GLOBAL APP
+  ======================================================== */
+
+  .app-main {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-10);
+  }
+
+
+  /* =======================================================
+     HEADER / MOBILE NAV
+  ======================================================== */
+
+  .app-header {
+    min-height: var(--header-height);
+
+    padding-inline: var(--page-gutter);
+  }
+
+
+  .app-brand__text small {
+    display: none;
+  }
+
+
+  .mobile-menu-button {
+    display: block;
+  }
+
+
+  .main-navigation {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-1);
+
+    padding:
+      var(--space-3)
+      var(--page-gutter)
+      var(--space-4);
+
+    background: var(--bg);
+
+    border-bottom: var(--border-width) solid var(--border);
+
+    box-shadow: var(--shadow-sm);
+  }
+
+
+  .main-navigation.is-open {
+    display: flex;
+  }
+
+
+  .nav-link {
+    width: 100%;
+    min-height: 48px;
+
+    justify-content: flex-start;
+
+    padding-inline: var(--space-4);
+
+    text-align: left;
+  }
+
+
+  /* =======================================================
+     GENERIC VIEW HEADERS
+  ======================================================== */
+
+  .view-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+
+  .view-header h1 {
+    font-size: clamp(2.6rem, 14vw, 4.4rem);
+  }
+
+
+  .campaign-score-summary {
+    align-items: flex-start;
+  }
+
+
+  /* =======================================================
+     TODAY HERO
+  ======================================================== */
+
+  .day-hero {
+    padding-top: var(--space-3);
+  }
+
+
+  .day-hero__topline {
+    align-items: flex-start;
+  }
+
+
+  .day-hero h1 {
+    font-size: clamp(3.6rem, 18vw, 6rem);
+  }
+
+
+  .day-selector {
+    gap: var(--space-1);
+  }
+
+
+  .day-selector .icon-button {
+    width: 40px;
+    height: 40px;
+  }
+
+
+  .day-score {
+    align-items: flex-start;
+    flex-direction: column;
+
+    margin-top: var(--space-7);
+  }
+
+
+  .day-score__percentage {
+    align-items: flex-start;
+
+    padding-bottom: 0;
+  }
+
+
+  .day-score__numbers strong {
+    font-size: clamp(3.2rem, 18vw, 5.5rem);
+  }
+
+
+  /* =======================================================
+     GLOW DAY
+  ======================================================== */
+
+  .glow-day-banner {
+    align-items: flex-start;
+
+    padding: var(--space-4);
+  }
+
+
+  .glow-day-banner__icon {
+    width: 40px;
+    height: 40px;
+  }
+
+
+  /* =======================================================
+     DASHBOARD CARDS
+  ======================================================== */
+
+  .dashboard-grid {
+    gap: var(--space-4);
+  }
+
+
+  .dashboard-card {
+    border-radius: var(--radius-md);
+  }
+
+
+  .card-header {
+    margin-bottom: var(--space-4);
+  }
+
+
+  /* =======================================================
+     MOVEMENT
+  ======================================================== */
+
+  .movement-list {
+    grid-template-columns: 1fr;
+  }
+
+
+  .movement-row {
+    min-height: 78px;
+  }
+
+
+  /* =======================================================
+     WATER
+  ======================================================== */
+
+  .water-glasses {
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: var(--space-4);
+  }
+
+
+  .water-glass {
+    padding: var(--space-1);
+  }
+
+
+  .water-glass__vessel {
+    width: 38px;
+    height: 58px;
+  }
+
+
+  /* =======================================================
+     TODAY TIMELINE
+  ======================================================== */
+
+  .schedule-preview {
+    margin-top: var(--space-10);
+  }
+
+
+  .section-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+
+  .timeline {
+    grid-template-columns: 1fr;
+  }
+
+
+  .timeline-block {
+    min-height: auto;
+
+    padding:
+      var(--space-5)
+      var(--space-4);
+  }
+
+
+  .timeline-block + .timeline-block,
+  .timeline-block:nth-child(3),
+  .timeline-block:nth-child(4) {
+    border-left: 0;
+    border-top: var(--border-width) solid var(--border);
+  }
+
+
+  /* =======================================================
+     RECOVERY
+  ======================================================== */
+
+  .recovery-panel {
+    margin-top: var(--space-10);
+
+    padding: var(--space-5);
+  }
+
+
+  .recovery-control {
+    padding: var(--space-4);
+  }
+
+
+  /* =======================================================
+     MEASUREMENTS
+  ======================================================== */
+
+  .measurement-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  /* =======================================================
+     CAMPAIGN BOARD
+  ======================================================== */
+
+  .campaign-board-section {
+    margin-top: var(--space-8);
+  }
+
+
+  .campaign-board-wrapper {
+    /*
+      The first column stays sticky while the days scroll.
+    */
+    margin-inline: calc(var(--page-gutter) * -1);
+
+    width: calc(100% + (var(--page-gutter) * 2));
+
+    padding-left: var(--page-gutter);
+  }
+
+
+  .campaign-board {
+    min-width: 780px;
+  }
+
+
+  .campaign-board th:first-child,
+  .campaign-board td:first-child {
+    width: 130px;
+    min-width: 130px;
+
+    padding-inline: var(--space-3);
+  }
+
+
+  .reward-panel {
+    padding: var(--space-5);
+  }
+
+
+  /* Recovery charts */
+
+  .trend-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  /* =======================================================
+     SCHEDULE
+  ======================================================== */
+
+  .day-tabs {
+    grid-template-columns: repeat(10, 56px);
+
+    margin-inline: calc(var(--page-gutter) * -1);
+    padding-left: var(--page-gutter);
+
+    width: calc(100% + (var(--page-gutter) * 2));
+  }
+
+
+  .schedule-editor__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+
+  .schedule-editor__header .primary-button {
+    width: 100%;
+  }
+
+
+  .schedule-editor__blocks {
+    grid-template-columns: 1fr;
+  }
+
+
+  /* =======================================================
+     SETTINGS
+  ======================================================== */
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .settings-panel {
+    padding-block: var(--space-7);
+  }
+
+
+  .settings-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+
+  .settings-actions .secondary-button,
+  .settings-actions .danger-button,
+  .settings-actions .file-button {
+    width: 100%;
+  }
+
+
+  .reward-setting__heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+
+  /* =======================================================
+     DIALOG
+  ======================================================== */
+
+  .app-dialog__content {
+    padding: var(--space-5);
+  }
+
+
+  .app-dialog__actions {
+    flex-direction: column-reverse;
+  }
+
+
+  .app-dialog__actions button {
+    width: 100%;
+  }
+
+
+  /* =======================================================
+     FOOTER
+  ======================================================== */
+
+  .app-footer {
+    align-items: flex-start;
+    flex-direction: column;
+
+    padding-block: var(--space-5);
+  }
+
+
+  /* =======================================================
+     TOAST
+  ======================================================== */
+
+  .toast {
+    left: var(--space-4);
+    right: var(--space-4);
+    bottom: var(--space-4);
+
+    max-width: none;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 420px) {
+
+  .app-brand__mark {
+    width: 32px;
+    height: 32px;
+  }
+
+
+  .app-brand__text strong {
+    font-size: 0.76rem;
+  }
+
+
+  .day-hero__topline {
+    gap: var(--space-3);
+  }
+
+
+  .day-selector .icon-button {
+    width: 36px;
+    height: 36px;
+  }
+
+
+  .day-score__numbers {
+    flex-wrap: wrap;
+  }
+
+
+  .day-score__numbers small {
+    width: 100%;
+    margin-left: 0;
+  }
+
+
+  .water-glass__vessel {
+    width: 35px;
+    height: 54px;
+  }
+
+
+  .water-glass__label {
+    font-size: 0.57rem;
+  }
+
+
+  .card-score {
+    padding: 0.38rem 0.55rem;
+  }
+
+}
